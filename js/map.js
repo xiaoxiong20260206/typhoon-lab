@@ -76,7 +76,8 @@ export class PacificMap{
     ctx.font='10px "PingFang SC",sans-serif';ctx.fillStyle='#aeb8c19e';ctx.fillText('北部冷空气作用区',this.width*.58,p[1]-12);
   }
   draw(){
-    if(!this.width||!this.frame)return;
+    if(this.render3D){this.onDraw?.();return;}
+    if(!this.width||!this.height||!this.base.width||!this.base.height||!this.frame)return;
     const ctx=this.ctx;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,this.width,this.height);ctx.drawImage(this.base,0,0,this.width,this.height);
     ctx.save();this.clipRegion(ctx);
     if(this.run.env.cold>0)this.drawCold(ctx);
@@ -84,6 +85,7 @@ export class PacificMap{
     for(const s of this.frame.storms)this.weather.draw(ctx,this,s,this.time,this.layers,s.id===this.selected);
     for(const s of this.frame.storms)this.weather.marker(ctx,this,s,s.id===this.selected);
     ctx.restore();
+    this.onDraw?.();
   }
   drawTracks(ctx){
     for(const s of this.frame.storms){
