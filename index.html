@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#122329">
+  <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
+  <title>风暴实验室 · 西北太平洋台风模拟器</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/compact.css">
+  <link rel="stylesheet" href="styles/forge.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
+    <nav><a href="guide.html">模拟说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+  </header>
+
+  <main class="workspace">
+    <aside class="experiment-panel" aria-label="实验设置">
+      <div class="section-kicker">01 / CREATE A STORM</div>
+      <h2>一场风暴的诞生</h2>
+      <p class="intro">改变海洋与大气，看看它会走向哪里。</p>
+      <section class="control-section">
+        <div class="section-heading"><h3>演化情景</h3><span>SCENARIO</span></div>
+        <div id="scenarios" class="scenarios">
+          <button data-scenario="recurve" class="scenario active" aria-pressed="true"><span class="route-icon">⤴</span><span><b>北上变性</b><small>向北探索，与冷空气相遇</small></span><span class="choice-dot"></span></button>
+          <button data-scenario="landfall" class="scenario" aria-pressed="false"><span class="route-icon">↖</span><span><b>西行登陆</b><small>穿过暖海，走向陆地</small></span><span class="choice-dot"></span></button>
+          <button data-scenario="ocean" class="scenario" aria-pressed="false"><span class="route-icon">∿</span><span><b>海上生命周期</b><small>从远海生成，到逐渐消散</small></span><span class="choice-dot"></span></button>
+        </div>
+      </section>
+      <section class="control-section environment">
+        <div class="section-heading"><h3>环境实验</h3><span>ENVIRONMENT</span></div>
+        <label class="range-label" for="sst">海面温度 <output id="sstValue">29.5 <em>°C</em></output></label>
+        <input id="sst" type="range" min="24" max="32" step="0.5" value="29.5">
+        <div class="range-ends"><span>24°C · 冷海</span><span>32°C · 暖海</span></div>
+        <label class="range-label" for="shear">垂直风切变 <output id="shearValue">9 <em>m/s</em></output></label>
+        <input id="shear" type="range" min="0" max="30" value="9">
+        <div class="range-ends"><span>弱 · 利于组织</span><span>强 · 抑制发展</span></div>
+        <label class="range-label" for="size">环流规模 <output id="sizeValue">1.2 <em>倍</em></output></label>
+        <input id="size" type="range" min="0.6" max="2" step="0.1" value="1.2">
+        <div class="range-ends"><span>紧凑</span><span>宽广 · 不等于更强</span></div>
+        <label class="range-label" for="cold">北部冷空气 <output id="coldValue">65 <em>%</em></output></label>
+        <input id="cold" type="range" min="0" max="100" value="65">
+        <div class="range-ends"><span>弱</span><span>强 · 利于变性</span></div>
+        <p class="fineprint">调整参数会重新计算本次实验，保留回放时刻。</p>
+      </section>
+      <section class="system-section">
+        <div class="section-heading"><h3>实验中的系统</h3><span id="systemCount">1 个</span></div>
+        <div id="systemList"></div>
+        <small id="systemListHint" class="system-list-hint" hidden>↕ 滚动列表查看所有系统，地图不隐藏系统</small>
+        <p id="nextName" class="next-name">下一名：达维 · 第 1 轮</p>
+        <button id="forgeButton" class="create-button forge-button">＋ 台风工坊 · 自己创造</button>
+        <button id="createButton" class="create-button">＋ 在海面生成扰动</button>
+        <button id="undoButton" class="text-button undo" hidden>撤销上一个系统</button>
+      </section>
+      <div class="lab-note"><span>◇</span><p>这是一个可探索的气象模型，<br>不是实时天气，也不用于预报。</p></div>
+    </aside>
+
+    <section id="mapStage" class="map-stage" aria-label="西北太平洋模拟地图">
+      <canvas id="mapCanvas" aria-label="台风云系、风圈、降雨与路径地图" tabindex="0"></canvas>
+      <div class="map-heading"><div class="map-kicker">THE OCEAN IS YOUR LABORATORY</div><h2>西北太平洋<span>WNP</span></h2><p>100°E—175°E · 0°N—55°N</p></div>
+      <div class="map-status"><span class="live-dot"></span><span id="mapStatus">模拟就绪</span></div>
+      <div class="layer-toolbar" aria-label="地图图层">
+        <button data-layer="clouds" aria-pressed="true" class="active">云系</button>
+        <button data-layer="rings" aria-pressed="true" class="active">风圈</button>
+        <button data-layer="rain" aria-pressed="false">降雨</button>
+        <button data-layer="wind" aria-pressed="false">风场</button>
+        <button data-layer="track" aria-pressed="true" class="active">路径</button>
+      </div>
+      <div class="map-navigation"><button id="zoomIn" aria-label="放大地图">＋</button><button id="zoomOut" aria-label="缩小地图">−</button><button id="fitMap" aria-label="恢复全图">⌖</button></div>
+      <div id="mapHint" class="map-hint">点击系统查看 · 滚轮缩放 · 拖动地图</div>
+      <div id="mapProbe" class="map-probe" hidden></div>
+      <div class="map-legend"><div><span class="legend-ring seven"></span>七级<span class="legend-ring ten"></span>十级<span class="legend-ring twelve"></span>十二级风圈</div><div id="rainLegend" hidden><span class="rain-scale"></span>降雨 轻 → 强</div><small>风圈为模型估算 · 云系比例作视觉增强</small></div>
+      <div class="map-coordinate"><span id="cursorCoord">135.0°E / 20.0°N</span><span id="mapScale">500 km</span></div>
+      <div id="loadState" class="load-state"><span class="loading-mark">◎</span><p>正在准备海洋与气象模型…</p></div>
+    </section>
+
+    <aside class="observation-panel" aria-label="风暴观测">
+      <div class="section-heading observation-heading"><span class="section-kicker">02 / OBSERVATORY</span><span id="stormNumber" class="number-tag">90W</span></div>
+      <div class="storm-heading"><span id="stormCategory" class="category-badge">热带扰动</span><h2 id="stormName">等待命名</h2><p id="stormEnglish">TROPICAL DISTURBANCE</p></div>
+      <div id="retiredNote" class="retired-note" hidden>已变性 · 台风停编，气旋仍在活动</div>
+      <div class="wind-reading"><strong id="windLevel">5</strong><span>级<small>最大持续风力</small></span></div>
+      <div class="metric-pair"><div><span>最大风速</span><b id="windSpeed">9.0<small>m/s</small></b></div><div><span>中心气压</span><b id="pressure">1006<small>hPa</small></b></div></div>
+      <div class="location-line"><span id="stormLocation">16.0°N / 143.0°E</span><span id="surfaceState">海上</span></div>
+      <section class="radii-section"><div class="section-heading"><h3>风圈半径</h3><span>四象限范围 / km</span></div><div id="radii"></div></section>
+      <section class="chart-section"><div class="section-heading"><h3>强度演化</h3><span>m/s</span></div><svg id="intensityChart" viewBox="0 0 260 85" role="img" aria-label="已演化时段的风速曲线"></svg><div class="chart-labels"><span>生成</span><span id="peakLabel">当前峰值 9 m/s</span><span id="chartEnd">+288h</span></div></section>
+      <section class="impact-section"><div class="section-heading"><h3>风雨影响</h3><span id="impactType">海上</span></div><p id="impactText">远海风雨活动，暂未影响沿岸观测点。</p></section>
+      <section class="event-section"><div class="section-heading"><h3>风暴纪事</h3><span>TIMELINE</span></div><ol id="eventList"></ol></section>
+    </aside>
+  </main>
+
+  <footer class="timeline-panel">
+    <div class="playback-buttons"><button id="playButton" class="play-button" aria-label="播放模拟">▶</button><button id="resetButton" class="reset-button" aria-label="回到生成时刻">↶</button><select id="speed" aria-label="播放速度"><option value="1">1× 速度</option><option value="4" selected>4× 速度</option><option value="12">12× 速度</option></select></div>
+    <div class="time-display"><span>模拟时间</span><strong id="simTime">第 3 天 <em>00:00</em></strong></div>
+    <div class="timeline-track"><div class="timeline-caption"><span>热带扰动</span><span id="timelinePhase">暖海增强</span><span>生命周期结束</span></div><input id="timeline" type="range" min="0" max="288" step="1" value="48" aria-label="模拟时间轴"><div id="timelineEvents" class="timeline-events"></div></div>
+    <div class="timeline-tip"><span class="keycap">空格</span>播放 / 暂停<small>← → 逐小时回放</small></div>
+  </footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="forgeDialog" aria-labelledby="forgeTitle">
+    <div class="dialog-heading"><div><span class="section-kicker">STORM FORGE</span><h2 id="forgeTitle">创造你的风暴</h2></div><button id="closeForge" aria-label="关闭台风工坊">×</button></div>
+    <p id="forgeTime"></p>
+    <form id="forgeForm">
+      <div class="forge-grid">
+        <label>初始阶段<select id="forgePreset"><option value="9">热带扰动</option><option value="14">热带低压</option><option value="20">热带风暴</option><option value="28">强热带风暴</option><option value="35">台风</option><option value="45">强台风</option><option value="60">超强台风</option></select></label>
+        <label>初始风速 · m/s<input id="forgeWind" type="number" min="1" max="75" step="0.1" value="9" required></label>
+        <label>出生经度 · °E<input id="forgeLon" type="number" min="110" max="165" step="any" value="150" required></label>
+        <label>出生纬度 · °N<input id="forgeLat" type="number" min="5" max="28" step="any" value="15" required></label>
+        <label>环流规模 · 倍<input id="forgeSize" type="number" min="0.6" max="2" step="0.1" value="1.2" required></label>
+        <label>引导路径<select id="forgeScenario"><option value="recurve">北上变性</option><option value="landfall">西行登陆</option><option value="ocean">海上生命周期</option></select></label>
+      </div>
+      <p id="forgePreview" class="forge-preview" aria-live="polite"></p>
+      <p class="forge-note">名称自动领取，命名表不可编辑。未命名就消散不占用名字；140 名用完，从达维开始下一轮。气压随强度估算，不与风速固定对应。</p>
+      <p id="forgeError" role="alert"></p>
+      <div class="forge-actions"><button id="forgePick" type="button">在地图上选位置</button><button id="forgeSubmit" type="submit">创建这个系统 →</button></div>
+    </form>
+  </dialog>
+  <dialog id="namesDialog"><div class="dialog-heading"><div><span class="section-kicker">OFFICIAL NAMING LIST</span><h2>西北太平洋固定命名表</h2></div><button id="closeNames" aria-label="关闭命名表">×</button></div><p>JMA 2026 版 · 共 140 个名字，按表序循环。达到热带风暴级才命名，不能自定义。实验从表首开始，不代表真实年份的命名进度。中文未收录的名称保留官方英文。</p><div id="nameTable" class="name-table"></div><a href="https://www.jma.go.jp/jma/jma-eng/jma-center/rsmc-hp-pub-eg/tyname.html" target="_blank" rel="noreferrer">查看 JMA 官方来源 ↗</a></dialog>
+</body>
+</html>

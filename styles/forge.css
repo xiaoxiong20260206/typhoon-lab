@@ -1,0 +1,24 @@
+#systemList{max-height:154px;overflow-y:auto;overscroll-behavior:contain}
+.system-item{gap:5px;flex-wrap:wrap}.system-item small{white-space:nowrap}
+.next-name{font-size:.65rem;color:var(--muted);margin:7px 0}
+.system-list-hint{font-size:.57rem;color:var(--muted);line-height:1.5}
+.forge-button{background:var(--accent);color:#16272a;border:1px solid var(--accent)}
+@media(min-width:951px){
+  .experiment-panel{display:flex;flex-direction:column}
+  .experiment-panel>*{flex-shrink:0}
+  .system-section{order:1}
+  .environment{order:2}
+  .lab-note{order:3}
+}
+#forgeDialog{width:min(570px,92vw);overflow-y:auto}
+#forgeDialog p{margin:14px 0;font-size:.78rem}
+.forge-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.forge-grid label{display:flex;flex-direction:column;gap:7px;font-size:.75rem;color:var(--muted)}
+.forge-grid input,.forge-grid select{width:100%;min-width:0;border:1px solid #4c5b58;border-radius:5px;background:#10252b;color:var(--text);padding:10px;font:inherit}
+.forge-preview{border-left:2px solid var(--accent);padding:8px 12px;background:#a6c2a010}
+#forgeError{color:#ffa99a}
+.forge-actions{display:flex;gap:10px;justify-content:space-between;margin-top:18px}
+.forge-actions button{padding:10px 12px;border:1px solid #63766d;border-radius:5px;font-size:.78rem}
+#forgeSubmit{background:var(--accent);color:#16272a}
+@media(min-width:951px) and (max-height:830px){#systemList{max-height:74px}.next-name{margin:4px 0}.system-section .create-button{padding:6px}.system-section .section-heading{margin-bottom:4px}}
+@media(max-width:400px){.forge-grid{gap:12px}.forge-actions{flex-wrap:wrap}.forge-actions button{flex:1}}

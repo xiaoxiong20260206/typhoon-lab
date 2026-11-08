@@ -1,0 +1,59 @@
+/* Keep the creation controls and observation essentials on screen at laptop sizes. */
+@media (min-width: 951px) {
+  .experiment-panel, .observation-panel { padding-top: 18px; padding-bottom: 16px; }
+  .experiment-panel > h2 { font-size: 1.14rem; margin-top: 5px; }
+  .intro { font-size: .68rem; margin-top: 4px; }
+  .control-section { margin-top: 18px; }
+  .section-heading { margin-bottom: 10px; }
+  .scenario { padding: 7px 9px; }
+  .scenario small { font-size: .59rem; margin-top: 1px; }
+  .environment { padding-top: 14px; }
+  .range-label { margin-top: 9px; font-size: .77rem; }
+  input[type=range] { appearance: none; -webkit-appearance: none; }
+  input[type=range]::-webkit-slider-thumb {
+    width: 12px; height: 12px; margin-top: -4.5px; border-radius: 50%; background: var(--accent);
+  }
+  .environment .fineprint { margin-top: 9px; font-size: .59rem; }
+  .system-section { margin-top: 15px; padding-top: 12px; }
+  .lab-note { margin-top: 14px; font-size: .60rem; }
+  .observation-heading { margin-bottom: 14px; }
+  .storm-heading h2 { font-size: 2.1rem; }
+  .wind-reading { margin-top: 8px; }
+  .wind-reading > strong { font-size: 4.5rem; }
+  .metric-pair { margin-top: 10px; }
+  .metric-pair b { font-size: 1.65rem; }
+  .radii-section, .chart-section, .impact-section, .event-section { margin-top: 16px; }
+  .impact-section, .event-section { padding-top: 12px; }
+  .chart-section svg { height: 64px; }
+  .event-section li { padding-bottom: 9px; font-size: .65rem; }
+  .impact-section p { font-size: .68rem; }
+}
+@media (min-width: 951px) and (max-height: 830px) {
+  .experiment-panel, .observation-panel { padding-top: 14px; }
+  .experiment-panel > .intro { display: none; }
+  .control-section { margin-top: 12px; }
+  .scenario { padding: 3px 8px; }
+  .scenario small { display: none; }
+  .route-icon { font-size: 23px; line-height: 30px; }
+  .environment { padding-top: 10px; }
+  .environment .section-heading { margin-bottom: 4px; }
+  .range-label { margin-top: 6px; }
+  .range-ends { font-size: .56rem; line-height: 1.25; }
+  .environment input { margin-top: 4px; }
+  .environment .fineprint { display: none; }
+  .system-section { margin-top: 9px; padding-top: 8px; }
+  .create-button { padding: 8px 6px; margin-top: 3px; }
+  .lab-note { display: none; }
+  .observation-heading { margin-bottom: 8px; }
+  .storm-heading h2 { font-size: 1.8rem; }
+  .wind-reading > strong { font-size: 3.8rem; }
+  .wind-reading { margin-top: 4px; }
+  .metric-pair { margin-top: 8px; }
+  .metric-pair b { font-size: 1.45rem; }
+  .radii-section, .chart-section, .impact-section, .event-section { margin-top: 11px; }
+  .radius-row { margin: 6px 0; }
+  .chart-section svg { height: 48px; }
+  .location-line { margin-top: 7px; padding: 7px 0; }
+  .retired-note { font-size: .64rem; padding: 5px 7px; }
+  .event-section li { font-size: .61rem; padding-bottom: 6px; }
+}

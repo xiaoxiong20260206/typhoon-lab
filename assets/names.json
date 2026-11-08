@@ -1,0 +1,566 @@
+{
+  "version": "JMA 2026",
+  "source": "https://www.jma.go.jp/jma/jma-eng/jma-center/rsmc-hp-pub-eg/tyname.html",
+  "names": [
+    {
+      "en": "Damrey",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Tianma",
+      "contributor": "China"
+    },
+    {
+      "en": "Kirogi",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Yun-yeung",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Koinu",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Bolaven",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Sanba",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Jelawat",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Tirou",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Maliksi",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Gaemi",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Prapiroon",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Maria",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Son-Tinh",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Ampil",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Wukong",
+      "contributor": "China"
+    },
+    {
+      "en": "Jongdari",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Shanshan",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Tomo",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Leepi",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Bebinca",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Pulasan",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Soulik",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Cimaron",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Narae",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Burapha",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Barijat",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Hoaban",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Koki",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Yinxing",
+      "contributor": "China"
+    },
+    {
+      "en": "Gaeguri",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Dim-sum",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Hebi",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Pabuk",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Wutip",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Sepat",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Mun",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Danas",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Nari",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Wipha",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Francisco",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Co-May",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Krosa",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Bailu",
+      "contributor": "China"
+    },
+    {
+      "en": "Podul",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Lingling",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Kajiki",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Nongfa",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Peipah",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Tapah",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Mitag",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Ragasa",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Neoguri",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Bualoi",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Matmo",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Halong",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Nakri",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Fengshen",
+      "contributor": "China"
+    },
+    {
+      "en": "Kalmaegi",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Fung-wong",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Koto",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Nokaen",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Penha",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Nuri",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Sinlaku",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Hagupit",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Jangmi",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Mekkhala",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Higos",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Bavi",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Maysak",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Haishen",
+      "contributor": "China"
+    },
+    {
+      "en": "Noul",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Dolphin",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Kujira",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Chan-hom",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Peilou",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Nangka",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Saudel",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Narra",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Gaenari",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Atsani",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Etau",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Bang-Lang",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Krovanh",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Dujuan",
+      "contributor": "China"
+    },
+    {
+      "en": "Surigae",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Choi-wan",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Koguma",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Champi",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "In-fa",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Cempaka",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Nepartak",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Lupit",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Mirinae",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Nida",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Omais",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Luc-Binh",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Chanthu",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Dianmu",
+      "contributor": "China"
+    },
+    {
+      "en": "Mindulle",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Lionrock",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Tokei",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Namtheun",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Malou",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Nyatoh",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Sarbul",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Amuyao",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Gosari",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Chaba",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Aere",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Songda",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Trases",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Mulan",
+      "contributor": "China"
+    },
+    {
+      "en": "Meari",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Tsing-ma",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Tokage",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Ong-mang",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Muifa",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Merbok",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Nanmadol",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Talas",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Hodu",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Kulap",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Roke",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Sonca",
+      "contributor": "Viet Nam"
+    },
+    {
+      "en": "Nesat",
+      "contributor": "Cambodia"
+    },
+    {
+      "en": "Haitang",
+      "contributor": "China"
+    },
+    {
+      "en": "Jamjari",
+      "contributor": "DPR Korea"
+    },
+    {
+      "en": "Banyan",
+      "contributor": "Hong Kong, China"
+    },
+    {
+      "en": "Yamaneko",
+      "contributor": "Japan"
+    },
+    {
+      "en": "Pakhar",
+      "contributor": "Lao PDR"
+    },
+    {
+      "en": "Sanvu",
+      "contributor": "Macao, China"
+    },
+    {
+      "en": "Mawar",
+      "contributor": "Malaysia"
+    },
+    {
+      "en": "Guchol",
+      "contributor": "Micronesia"
+    },
+    {
+      "en": "Talim",
+      "contributor": "Philippines"
+    },
+    {
+      "en": "Bori",
+      "contributor": "RO Korea"
+    },
+    {
+      "en": "Khanun",
+      "contributor": "Thailand"
+    },
+    {
+      "en": "Lan",
+      "contributor": "U.S.A."
+    },
+    {
+      "en": "Saobien",
+      "contributor": "Viet Nam"
+    }
+  ]
+}
