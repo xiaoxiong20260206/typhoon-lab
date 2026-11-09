@@ -1,0 +1,7 @@
+.publish/
+.site-build-*/
+Output/
+node_modules/
+.DS_Store
+.env*
+.static-site-deploy.json

@@ -1,0 +1,135 @@
+// Standalone local rendering adapted from html-screenshot's Puppeteer workflow.
+// Uses a temporary browser profile; does not connect to or change the MyFlicker runtime.
+import {createRequire} from 'node:module';
+import {mkdir,writeFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);
+const siteUrl=new URL(process.env.SITE_URL||'http://127.0.0.1:8770/');
+siteUrl.searchParams.set('layout','classic');
+let puppeteer;
+try{puppeteer=require('puppeteer');}catch{
+  if(!process.env.PUPPETEER_MODULE)throw Error('Set PUPPETEER_MODULE to an installed Puppeteer module, or install Puppeteer as a development dependency.');
+  puppeteer=require(process.env.PUPPETEER_MODULE);
+}
+await mkdir('Output',{recursive:true});
+const browser=await puppeteer.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
+const page=await browser.newPage(),errors=[],failures=[],checks=[];
+page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>failures.push(r.url()));
+const check=(name,value)=>{assert.ok(value,name);checks.push(name);console.log(`PASS ${name}`);};
+const seek=async hour=>{await page.$eval('#timeline',(el,h)=>{el.value=h;el.dispatchEvent(new Event('input',{bubbles:true}));},hour);};
+const frame=()=>page.evaluate(()=>window.typhoonLab.frame.storms[0]);
+try{
+  await page.setViewport({width:1440,height:960,deviceScaleFactor:1});
+  await page.goto(siteUrl.href,{waitUntil:'networkidle0',timeout:30000});
+  await page.waitForFunction(()=>!!window.typhoonLab,{timeout:15000});
+  if(await page.evaluate(()=>window.typhoonLab.theater.active))await page.click('#renderToggle');
+  await page.evaluate(()=>document.fonts.ready);
+  check('startup and canonical name', (await frame()).name.en==='Damrey');
+  await page.screenshot({path:'Output/desktop.png',fullPage:false});
+  const layout=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,map:window.typhoonLab.map,panels:[...document.querySelectorAll('aside')].map(e=>({height:e.clientHeight,scroll:e.scrollHeight}))}));
+  check('desktop no horizontal overflow',layout.scrollWidth<=layout.width);
+  check('desktop create control visible without sidebar scrolling',await page.evaluate(()=>document.getElementById('createButton').getBoundingClientRect().bottom<=document.querySelector('.experiment-panel').getBoundingClientRect().bottom));
+  check('map actually painted',await page.$eval('#mapCanvas',c=>{const ctx=c.getContext('2d'),a=ctx.getImageData(c.width/2,c.height/2,1,1).data;return a[3]===255;}));
+  await page.click('#resetButton');check('reset returns unnamed disturbance',!(await frame()).name&&(await frame()).invest==='90W');
+  check('no premature 7/10/12 rings',await page.$eval('#radii',e=>e.querySelectorAll('.absent').length===3));
+  await seek(11);check('below storm threshold still unnamed',!(await frame()).name);
+  await seek(12);check('named on reaching tropical storm',!!(await frame()).name);
+  await seek(35);check('12-level ring available on typhoon upgrade',await page.$eval('#radii',e=>e.querySelectorAll('.absent').length===0));
+  for(const key of ['rain','wind','clouds','rings','track']){
+    await page.click(`[data-layer="${key}"]`);
+    check(`${key} layer toggle state`,await page.$eval(`[data-layer="${key}"]`,el=>el.getAttribute('aria-pressed')===String(el.classList.contains('active'))));
+    if(['clouds','rings','track'].includes(key))await page.click(`[data-layer="${key}"]`);
+  }
+  await page.click('#namesButton');check('fixed table has 140 entries',await page.$$eval('#nameTable .name-cell',els=>els.length===140));
+  check('no rename field',await page.$$eval('#namesDialog input',els=>els.length===0));
+  await page.keyboard.press('Escape');
+  await page.click('#zoomIn');check('zoom changes map',await page.evaluate(()=>window.typhoonLab.map.zoom>1));
+  await page.click('#fitMap');check('fit restores region',await page.evaluate(()=>window.typhoonLab.map.zoom===1));
+  await page.click('#createButton');await page.focus('#mapCanvas');await page.keyboard.press('Enter');
+  check('keyboard creates second ocean disturbance without rewinding',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.hour===35&&window.typhoonLab.frame.storms[1].bornAt===35));
+  await seek(48);check('second system gets next fixed name',await page.evaluate(()=>window.typhoonLab.frame.storms[1].name.en==='Tianma'));
+  await page.click('#undoButton');check('undo restores one system',await page.evaluate(()=>window.typhoonLab.frame.storms.length===1));
+  const oldFrame=await frame();
+  for(let i=0;i<7;i++){
+    await page.click('#forgeButton');
+    await page.select('#forgePreset',i===6?'60':'20');
+    await page.$eval('#forgeLon',(el,v)=>el.value=v,140+i*3);
+    await page.$eval('#forgeLat',(el,v)=>el.value=v,12+i);
+    await page.click('#forgeSubmit');
+    await page.waitForFunction(()=>!document.getElementById('forgeDialog').open);
+  }
+  check('workshop creates eight systems without four-system cap',await page.evaluate(()=>window.typhoonLab.frame.storms.length===8&&document.querySelectorAll('.system-item').length===8&&!document.getElementById('createButton').disabled));
+  check('creation preserves current time and original system',await page.evaluate(old=>window.typhoonLab.state.hour===48&&JSON.stringify(window.typhoonLab.frame.storms[0])===JSON.stringify(old),oldFrame));
+  check('first eight names are distinct and table ordered',await page.evaluate(()=>window.typhoonLab.frame.storms.every((s,i)=>s.name.en===window.typhoonLab.names[i].en)));
+  check('custom super typhoon has correct initial wind and pressure',await page.evaluate(()=>{const s=window.typhoonLab.frame.storms[7];return s.wind===60&&s.pressure<950&&s.age===0;}));
+  check('newly selected system visible in scrollable list',await page.evaluate(()=>{const r=document.querySelector('.system-item.active').getBoundingClientRect(),l=document.getElementById('systemList').getBoundingClientRect();return r.top>=l.top&&r.bottom<=l.bottom+1&&!document.getElementById('systemListHint').hidden;}));
+  check('next name indicator advances by named systems',await page.evaluate(()=>document.getElementById('nextName').textContent===`下一名：${window.typhoonLab.names[8].cn} · 第 1 轮`));
+  await page.screenshot({path:'Output/eight-systems.png',fullPage:false});
+  await seek(47);check('future systems absent when rewinding',await page.evaluate(()=>window.typhoonLab.frame.storms.length===1&&window.typhoonLab.state.selected===1));
+  await seek(48);check('future systems return at their birth hour',await page.evaluate(()=>window.typhoonLab.frame.storms.length===8));
+  await page.click('#forgeButton');
+  await page.$eval('#forgeLon',el=>el.value=115);await page.$eval('#forgeLat',el=>el.value=25);
+  await page.click('#forgeSubmit');
+  check('workshop rejects creation on land',await page.evaluate(()=>document.getElementById('forgeDialog').open&&!!document.getElementById('forgeError').textContent&&window.typhoonLab.state.seeds.length===8));
+  await page.$eval('#forgeLon',el=>el.value='');await page.click('#forgeSubmit');
+  check('workshop rejects blank coordinate',await page.evaluate(()=>!document.getElementById('forgeLon').validity.valid&&window.typhoonLab.state.seeds.length===8));
+  await page.$eval('#forgeLon',el=>el.value=180);await page.click('#forgeSubmit');
+  check('workshop rejects out-of-region coordinate',await page.evaluate(()=>!document.getElementById('forgeLon').validity.valid&&window.typhoonLab.state.seeds.length===8));
+  await page.click('#closeForge');
+  await page.click('#forgeButton');await page.click('#forgePick');
+  await page.keyboard.press('Enter');
+  check('workshop map picking returns coordinates to form',await page.evaluate(()=>document.getElementById('forgeDialog').open&&Number(document.getElementById('forgeLon').value)>=140&&Number(document.getElementById('forgeLon').value)<=161));
+  await page.click('#closeForge');
+  await page.click('[data-scenario="ocean"]');
+  for(const [id,value] of [['sst',24],['shear',30]])await page.$eval(`#${id}`,(el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},value);
+  await seek(288);
+  check('failed embryo explicitly displays unnamed after dissipation',await page.evaluate(()=>window.typhoonLab.frame.storms[0].status==='dissipated'&&document.getElementById('stormName').textContent==='未命名'&&document.querySelector('.system-item').textContent.includes('未命名')));
+  await page.click('#forgeButton');await page.select('#forgePreset','20');
+  await page.$eval('#forgeLon',el=>el.value=150);await page.$eval('#forgeLat',el=>el.value=15);
+  await page.click('#forgeSubmit');
+  check('next creation after failed embryo receives Damrey not Tianma',await page.evaluate(()=>window.typhoonLab.frame.storms[1].name.en==='Damrey'&&window.typhoonLab.state.hour===288));
+  check('timeline extends to cover late creation',await page.$eval('#timeline',el=>Number(el.max)===576));
+  await seek(300);check('late creation can be replayed beyond original end',await page.evaluate(()=>window.typhoonLab.frame.storms[1].age===12));
+  for(const [id,value] of [['sst',29.5],['shear',9]])await page.$eval(`#${id}`,(el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},value);
+  await page.click('[data-scenario="landfall"]');await seek(120);check('landfall scenario reaches land', (await frame()).onLand);
+  await seek(170);check('landfall dissipates',(await frame()).status==='dissipated');
+  await page.click('[data-scenario="recurve"]');await seek(140);
+  check('northern transition retires but stays active',(await frame()).status==='extratropical'&&(await frame()).retired&&(await frame()).wind>0);
+  await page.screenshot({path:'Output/extratropical.png',fullPage:false});
+  await seek(200);check('extratropical eventually dissipates',(await frame()).status==='dissipated');
+  await seek(48);const before=(await frame()).wind;
+  await page.$eval('#sst',el=>{el.value=24;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});
+  check('cold sea reduces intensity',(await frame()).wind<before);
+  await page.$eval('#sst',el=>{el.value=29.5;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.click('#playButton');await page.waitForFunction(()=>window.typhoonLab.state.hour>49,{timeout:5000});await page.click('#playButton');
+  check('play advances and pause stops',await page.evaluate(()=>!window.typhoonLab.state.playing&&window.typhoonLab.state.hour>49));
+  check('paused map avoids redundant repainting',await page.evaluate(()=>new Promise(resolve=>{
+    const ctx=document.getElementById('mapCanvas').getContext('2d'),original=ctx.drawImage;let count=0,frames=0;
+    ctx.drawImage=function(...args){count++;return original.apply(this,args);};
+    const next=()=>{if(++frames<12)requestAnimationFrame(next);else{ctx.drawImage=original;resolve(count===0);}};requestAnimationFrame(next);
+  })));
+  await seek(48);await page.click('[data-layer="rain"]');await page.click('[data-layer="wind"]');
+  await page.setViewport({width:1366,height:768,deviceScaleFactor:1});
+  await page.waitForFunction(()=>window.typhoonLab.map.width>100&&window.typhoonLab.map.height>400);
+  await page.$eval('.experiment-panel',el=>el.scrollTop=0);
+  check('laptop creation control visible',await page.evaluate(()=>document.getElementById('createButton').getBoundingClientRect().bottom<=document.querySelector('.experiment-panel').getBoundingClientRect().bottom));
+  await page.screenshot({path:'Output/laptop.png',fullPage:false});
+  await page.setViewport({width:390,height:844,deviceScaleFactor:1});
+  await page.waitForFunction(()=>window.typhoonLab.map.width===390);
+  check('mobile no horizontal overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  check('mobile map and timeline visible',await page.evaluate(()=>document.getElementById('mapCanvas').getBoundingClientRect().height>300&&document.querySelector('.timeline-panel').getBoundingClientRect().bottom<=innerHeight+1));
+  await page.screenshot({path:'Output/mobile.png',fullPage:false});
+  await page.screenshot({path:'Output/mobile-full.png',fullPage:true});
+  await page.click('#forgeButton');
+  check('mobile workshop fits screen',await page.$eval('#forgeDialog',el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&el.scrollWidth<=el.clientWidth;}));
+  await page.screenshot({path:'Output/workshop-mobile.png',fullPage:false});
+  await page.click('#closeForge');
+  await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'networkidle0'});
+  check('guide and limitations available',await page.$eval('h1',el=>el.textContent.includes('模型的边界')));
+  check('no browser JS errors',errors.length===0);check('no failed resources',failures.length===0);
+  await writeFile('Output/browser-verification.json',JSON.stringify({siteUrl:siteUrl.href,checks,errors,failures,layout},null,2));
+  console.log(JSON.stringify({passed:checks.length,errors,failures,layout},null,2));
+}catch(error){
+  await page.screenshot({path:'Output/browser-failure.png',fullPage:false}).catch(()=>{});
+  console.error('BROWSER TEST FAILURE',error);console.error({errors,failures});process.exitCode=1;
+}finally{await browser.close();}
