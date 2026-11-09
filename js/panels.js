@@ -4,8 +4,10 @@ import {PLACES} from './geo.js';
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const set=(id,value)=>{const el=$(id);if(el.textContent!==String(value))el.textContent=value;};
+let timelineRun,timelineSelection;
 export function updatePanels(run,hour,selected,onSelect){
   const frame=run.frames[hour],s=frame.storms.find(s=>s.id===selected)||frame.storms[0],cat=describe(s);
+  const details=!document.body.classList.contains('immersive')||$('workspaceDrawer').open;
   set('stormName',s.name?.cn||'未命名');
   set('stormEnglish',s.name?.en.toUpperCase()||(s.number?'TROPICAL DEPRESSION':'TROPICAL DISTURBANCE'));
   set('stormCategory',cat.name);$('stormCategory').style.color=cat.color;
@@ -17,6 +19,7 @@ export function updatePanels(run,hour,selected,onSelect){
   set('surfaceState',s.status==='dissipated'?'已消散':s.onLand?'陆地上':'海上');
   $('retiredNote').hidden=!s.retired;
   set('retiredNote',s.status==='dissipated'?'已停编 · 温带气旋已消散':'已变性 · 台风停编，气旋仍在活动');
+  if(details){
   const radii=ringRadii(s);
   $('radii').innerHTML=[7,10,12].map((level,i)=>{
     const r=radii[level];
@@ -34,12 +37,13 @@ export function updatePanels(run,hour,selected,onSelect){
   if(selectionChanged){const active=list.querySelector('.active');if(active)list.scrollTop+=active.getBoundingClientRect().top-list.getBoundingClientRect().top;}
   $('systemListHint').hidden=list.scrollHeight<=list.clientHeight;
   set('systemCount',`${frame.storms.length} 个 · 活动 ${frame.storms.filter(s=>s.status!=='dissipated').length}`);
+  updateChart(run,hour,s);updateImpact(s,frame.storms);
+  }
   $('simTime').innerHTML=`第 ${Math.floor(hour/24)+1} 天 <em>${String(hour%24).padStart(2,'0')}:00</em>`;
   set('timelinePhase',s.status==='dissipated'?'生命周期结束':s.status==='extratropical'?'温带变性 · 已停编':s.onLand?'登陆衰减':cat.name);
   $('timeline').max=run.frames.length-1;$('timeline').value=hour;
   set('chartEnd',`+${run.frames.length-1}h`);
-  $('timelineEvents').innerHTML=run.events.filter(e=>e.id===s.id).map(e=>`<i style="left:${e.hour/(run.frames.length-1)*100}%" title="+${e.hour}h：${escape(e.text)}"></i>`).join('');
-  updateChart(run,hour,s);updateImpact(s,frame.storms);
+  if(timelineRun!==run||timelineSelection!==selected){$('timelineEvents').innerHTML=run.events.filter(e=>e.id===s.id).map(e=>`<i style="left:${e.hour/(run.frames.length-1)*100}%" title="+${e.hour}h：${escape(e.text)}"></i>`).join('');timelineRun=run;timelineSelection=selected;}
 }
 function updateChart(run,hour,s){
   const x=h=>h/(run.frames.length-1)*260,y=v=>77-v/75*68;

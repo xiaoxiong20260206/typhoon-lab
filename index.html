@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles/compact.css">
   <link rel="stylesheet" href="styles/forge.css">
   <link rel="stylesheet" href="styles/theater.css">
+  <link rel="stylesheet" href="styles/immersive.css">
   <script defer src="assets/vendor/three.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -19,7 +20,7 @@
   <header class="masthead">
     <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><a href="guide.html">模拟说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -68,8 +69,10 @@
       <canvas id="sceneCanvas" aria-label="三维风暴：拖动旋转、滚轮缩放，点击海面查看风雨" tabindex="0" hidden></canvas>
       <div id="placeLabels" aria-hidden="true"></div>
       <div id="sceneLabels" aria-label="三维场景中的系统" hidden></div>
+      <div id="sceneActions" class="scene-actions immersive-only"><label class="camera-control" for="cameraSelect">镜头<select id="cameraSelect"><option value="overview">全域俯瞰</option><option value="follow" selected>追随风暴</option><option value="eye">风眼近景</option><option value="orbit">电影巡航</option></select></label></div>
+      <section id="stormSummary" class="storm-summary immersive-only" aria-label="当前风暴"><p id="summaryCategory"></p><h2 id="summaryName"></h2><p id="summaryNumbers"></p><p id="summaryStatus"></p><div class="summary-actions"><select id="stormSwitcher" aria-label="切换风暴"></select><button id="detailsButton" aria-controls="workspaceDrawer" aria-expanded="false">详细观测 ↗</button></div></section>
       <div class="view-toolbar" aria-label="观察镜头">
-        <button data-view="overview" aria-pressed="false">全域</button><button data-view="follow" class="active" aria-pressed="true">追风</button><button data-view="eye" aria-pressed="false">风眼近景</button>
+        <button data-view="overview" aria-pressed="false">全域</button><button data-view="follow" class="active" aria-pressed="true">追风</button><button data-view="eye" aria-pressed="false">风眼近景</button><button data-view="orbit" aria-pressed="false" class="orbit-option">巡航</button>
         <span></span><button id="renderToggle" aria-pressed="true">3D / 切换二维</button>
       </div>
       <div class="experience-controls"><button id="cinemaButton" aria-pressed="false">影院模式</button><button id="soundButton" aria-pressed="false">开启声音</button></div>
@@ -114,6 +117,7 @@
     <div class="timeline-tip"><span class="keycap">空格</span>播放 / 暂停<small>← → 逐小时回放</small></div>
   </footer>
   <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="workspaceDrawer" aria-labelledby="drawerTitle"><div class="drawer-heading"><h2 id="drawerTitle">实验</h2><button id="drawerClose" aria-label="关闭面板">×</button></div><div id="drawerBody"></div></dialog>
   <dialog id="forgeDialog" aria-labelledby="forgeTitle">
     <div class="dialog-heading"><div><span class="section-kicker">STORM FORGE</span><h2 id="forgeTitle">创造你的风暴</h2></div><button id="closeForge" aria-label="关闭台风工坊">×</button></div>
     <p id="forgeTime"></p>

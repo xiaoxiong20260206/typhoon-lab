@@ -5,13 +5,15 @@ import {PacificMap} from './map.js';
 import {$,updatePanels,renderNames,toast} from './panels.js';
 import {bindForge} from './forge.js';
 import {StormSound} from './sound.js';
+import {initShell} from './shell.js';
 
 const state={scenario:'recurve',env:{...DEFAULT_ENV},seeds:[{lon:143,lat:16}],hour:48,selected:1,playing:false,speed:4};
 let map,run,names,isLand,forge,last=0,animationTime=0,lastPaint=0;
-let theater=null;const sound=new StormSound();
+let theater=null,shell;const sound=new StormSound();
 const endHour=()=>run.frames.length-1;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function init(){
+  shell=initShell({select:selectStorm});
   const get=async path=>{const response=await fetch(path);if(!response.ok)throw Error(`${path} 加载失败：${response.status}`);return response.json();};
   const [land,nameData]=await Promise.all([get('assets/land.json'),get('assets/names.json')]);
   if(nameData.names.length!==140||!land.polygons.length)throw Error('本地数据不完整');
@@ -37,6 +39,7 @@ function set3D(active){
   $('mapStage').classList.toggle('three-active',active);$('mapCanvas').tabIndex=active?-1:0;
   $('renderToggle').textContent=active?'3D / 切换二维':'开启 3D';$('renderToggle').setAttribute('aria-pressed',String(active));
   $('quality').disabled=!active;document.querySelectorAll('[data-view]').forEach(b=>b.disabled=!active);refresh();
+  $('cameraSelect').disabled=!active;
 }
 function rebuild(){
   run=simulate({scenario:state.scenario,env:state.env,seeds:state.seeds,names,isLand});
@@ -48,6 +51,7 @@ function refresh(){
   if(!run.frames[hour].storms.some(s=>s.id===state.selected))state.selected=run.frames[hour].storms[0].id;
   map.frame=run.frames[hour];map.selected=state.selected;
   updatePanels(run,hour,state.selected,selectStorm);
+  shell?.update(map.frame,state.selected);
   const count=map.frame.storms.filter(s=>s.name).length;
   $('nextName').textContent=`下一名：${names[count%names.length].cn} · 第 ${Math.floor(count/names.length)+1} 轮`;
   $('undoButton').hidden=state.seeds.length<2;
@@ -86,10 +90,11 @@ function createAt(lon,lat,options={}){
   return true;
 }
 function bind(){
+  document.addEventListener('lab:panel-open',refresh);
   forge=bindForge({create:createAt,onOpen:()=>{state.playing=false;setCreating(false);updatePlayback();return state;},onPick:()=>{setCreating(true);if(theater?.active)theater.setMode('overview');$(theater?.active?'sceneCanvas':'mapCanvas').focus();}});
   $('renderToggle').addEventListener('click',async()=>{if(!theater)await initTheater();else set3D(!theater.active);});
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{theater?.setMode(button.dataset.view);document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});sound.cue();updatePlayback();}));
-  $('cinemaButton').addEventListener('click',()=>{const active=document.body.classList.toggle('cinema');$('cinemaButton').textContent=active?'退出影院':'影院模式';$('cinemaButton').setAttribute('aria-pressed',String(active));$('cinemaReadout').hidden=!active;});
+  $('cinemaButton').addEventListener('click',()=>{const active=document.body.classList.toggle('cinema');$('cinemaButton').textContent=active?'退出影院':'影院模式';$('cinemaButton').setAttribute('aria-pressed',String(active));$('cinemaReadout').hidden=!active;document.dispatchEvent(new Event('lab:cinema-change'));});
   $('soundButton').addEventListener('click',async()=>{try{if(sound.enabled)sound.disable();else await sound.enable();$('soundButton').textContent=sound.enabled?'声音已开启':'开启声音';$('soundButton').setAttribute('aria-pressed',String(sound.enabled));updatePlayback();}catch(error){toast(`声音未开启：${error.message}`);}});
   $('volume').addEventListener('input',e=>sound.setVolume(Number(e.target.value)/100));
   $('quality').addEventListener('change',e=>theater?.setQuality(e.target.value));
