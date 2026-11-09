@@ -29,6 +29,8 @@ async function collect(dir,prefix=''){
 }
 await collect(directory);
 if(!built.some(entry=>entry.path==='index.html'))throw Error('Build output is missing index.html');
+// 构建目录不含 .nojekyll，固定补入，避免 Pages 走 Jekyll 处理
+if(!built.some(entry=>entry.path==='.nojekyll'))built.push({path:'.nojekyll',mode:'100644',type:'blob',content:''});
 
 const head=api('git/ref/heads/main').object.sha;
 const previous=api(`git/commits/${head}`);
