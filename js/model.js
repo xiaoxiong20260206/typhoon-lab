@@ -1,6 +1,6 @@
-import {clamp,describe} from './rules.js?v=c6e80bca356e';
-import {DEFAULT_NAMES} from './names.js?v=c6e80bca356e';
-import {cleanCustomName} from './naming.js?v=c6e80bca356e';
+import {clamp,describe} from './rules.js?v=aced45d83ba1';
+import {DEFAULT_NAMES} from './names.js?v=aced45d83ba1';
+import {cleanCustomName} from './naming.js?v=aced45d83ba1';
 
 export const DEFAULT_ENV=Object.freeze({sst:29.5,shear:9,cold:65,size:1.2});
 export const SCENARIOS=Object.freeze({
@@ -8,6 +8,48 @@ export const SCENARIOS=Object.freeze({
   landfall:{title:'西行登陆',subtitle:'西行增强 → 登陆减弱 → 残余消散',lon:137,lat:17},
   ocean:{title:'海上生命周期',subtitle:'远海生成 → 成熟台风 → 海上消散',lon:151,lat:14}
 });
+function officialPointInterpolate(storm,relativeHour){
+  const points=storm.official.points;let index=Math.max(0,storm.officialCursor||0);
+  while(index+1<points.length&&points[index+1][0]/10<=relativeHour)index++;
+  storm.officialCursor=index;
+  const a=points[index],b=points[index+1]||a,span=(b[0]-a[0])/10;
+  const ratio=span>0?clamp((relativeHour-a[0]/10)/span,0,1):0;
+  return {
+    lon:clamp((a[1]+(b[1]-a[1])*ratio)/10,100,180),
+    lat:clamp((a[2]+(b[2]-a[2])*ratio)/10,0,60),
+    wind:Math.round(clamp((a[3]+(b[3]-a[3])*ratio)/10,0,110)*10)/10,
+    pressure:Math.round(a[4]&&b[4]?a[4]+(b[4]-a[4])*ratio:(a[4]||b[4]||0)),
+    nature:ratio<.5?a[5]:b[5]
+  };
+}
+function replayOfficial(s,hour,events){
+  const relativeHour=hour-s.bornAt;
+  const endHour=s.official.points.at(-1)[0]/10;
+  if(s.status==='dissipated'){s.cloudOpacity=Math.max(0,1-(hour-s.dissipatedAt)/12);return;}
+  if(relativeHour>=endHour){
+    if(!s.officialEnded){
+      s.officialEnded=true;s.dissipatedAt=hour;
+      if(s.official.points.at(-1)[5]===4){s.status='extratropical';s.retired=true;s.exAt=s.exAt||hour;}
+      event(events,hour,s,s.status==='extratropical'?'历史路径结束，温带气旋继续减弱':'历史路径结束，环流消散');
+    }
+    s.cloudOpacity=Math.max(0,1-(relativeHour-endHour)/12);
+    if(s.status!=='extratropical'){s.status='dissipated';s.wind=0;s.pressure=1010;}
+    else{s.wind=Math.max(0,s.wind-.35);s.pressure=Math.min(1010,s.pressure+.5);}
+    s.cause='历史路径结束：'+(s.status==='extratropical'?'温带气旋继续减弱，云系逐渐消散。':'环流消散，残余云系逐渐散去。');
+    return;
+  }
+  const point=officialPointInterpolate(s,relativeHour);
+  s.lon=point.lon;s.lat=point.lat;s.wind=point.wind;s.peak=Math.max(s.peak,s.wind);
+  s.onLand=false;s.landHours=0;s.age=Math.max(0,relativeHour);
+  const wasExtratropical=s.status==='extratropical';
+  s.status=point.nature===4?'extratropical':'tropical';
+  s.retired=s.status==='extratropical';
+  if(s.status==='extratropical'&&!wasExtratropical){
+    s.exAt=hour;event(events,hour,s,'历史路径显示变性为温带气旋，台风停编');
+  }else if(s.status==='tropical'&&wasExtratropical){s.exAt=null;event(events,hour,s,'历史路径回到热带气旋阶段');}
+  s.pressure=point.pressure||Math.round(1010-0.031*s.wind*s.wind-(s.size-1)*4-(s.status==='extratropical'?7:0));
+  s.cause='按 IBTrACS 最佳路径重放：真实历史位置与强度，不随当前环境参数重新推演。';
+}
 function event(events,hour,s,text){events.push({hour,id:s.id,text});}
 function identify(s,counters,names,hour,events){
   if(s.wind>=10.8&&!s.number){s.number=`${String(++counters.number).padStart(2,'0')}W`;event(events,hour,s,`升格热带低压，编为 ${s.number}`);}
@@ -36,19 +78,23 @@ export function simulate(options={}){
   const scenario=options.scenario||'recurve',preset=SCENARIOS[scenario]||SCENARIOS.recurve;
   const env={...DEFAULT_ENV,...options.env},names=options.names?.length?options.names:DEFAULT_NAMES;
   const seeds=options.seeds||[{lon:preset.lon,lat:preset.lat}];
-  const isLand=options.isLand||(()=>false),hours=Math.max(1,Math.floor(options.hours??Math.max(288,...seeds.map(s=>(s.bornAt||0)+288))));
+  const isLand=options.isLand||(()=>false),hours=Math.max(1,Math.floor(options.hours??Math.max(288,...seeds.map(seed=>(seed.bornAt||0)+(seed.kind==='official'?seed.official.points.at(-1)[0]/10:288)))));
   const counters={number:0,name:0},events=[],frames=[];
   const storms=seeds.map((seed,i)=>{
-    const bornAt=Math.max(0,Math.floor(seed.bornAt||0)),customName=cleanCustomName(seed.customName);
+    const bornAt=Math.max(0,Math.floor(seed.bornAt||0)),customName=cleanCustomName(seed.customName),official=seed.kind==='official'?seed.official:null;
     return {
       id:i+1,sourceId:typeof seed.sourceId==='string'?seed.sourceId:null,
-      invest:`${90+i%10}W`,number:null,name:customName?{cn:customName,en:customName}:null,
-      custom:!!customName,namedAt:customName?bornAt:null,
+      invest:official?null:`${90+i%10}W`,number:official?.number||null,
+      name:official?{cn:official.name,en:official.name}:customName?{cn:customName,en:customName}:null,
+      custom:!!customName&&!official,namedAt:official||customName?bornAt:null,
       bornAt,scenario:seed.scenario||scenario,
-      lon:clamp(seed.lon,102,172),lat:clamp(seed.lat,3,53),wind:seed.wind??9,
-      size:seed.size??env.size,pressure:Math.round(1010-0.031*(seed.wind??9)**2-((seed.size??env.size)-1)*4),status:'tropical',retired:false,
-      onLand:false,landHours:0,exAt:null,dissipatedAt:null,peak:seed.wind??9,age:0,
-      cloudOpacity:1,cause:'暖海上的对流正在组织，尚未达到命名标准。'
+      lon:official?official.points[0][1]/10:clamp(seed.lon,102,172),lat:official?official.points[0][2]/10:clamp(seed.lat,3,53),
+      wind:official?official.points[0][3]/10:(seed.wind??9),size:seed.size??env.size,
+      pressure:official?official.points[0][4]:Math.round(1010-0.031*(seed.wind??9)**2-((seed.size??env.size)-1)*4),
+      status:'tropical',retired:false,officialCursor:0,
+      onLand:false,landHours:0,exAt:null,dissipatedAt:null,peak:official?official.points[0][3]/10:(seed.wind??9),age:0,
+      cloudOpacity:1,cause:official?'官方历史台风：按 IBTrACS 最佳路径重放。':'暖海上的对流正在组织，尚未达到命名标准。',
+      official:official?{...official,points:official.points}:null
     };
   });
   for(let hour=0;hour<=hours;hour++){
@@ -56,12 +102,14 @@ export function simulate(options={}){
       if(hour<s.bornAt)continue;
       if(hour===s.bornAt){
         s.onLand=isLand(s.lon,s.lat);
-        event(events,hour,s,`系统 #${s.id} 生成，监测编号 ${s.invest}`);
+        if(s.official){replayOfficial(s,hour,events);event(events,hour,s,'官方台风 '+s.name.en+'（'+(s.official.season||'')+(s.number?' · '+s.number:'')+'）加入实验，按真实历史路径重放');continue;}
+        event(events,hour,s,'系统 #'+s.id+' 生成，监测编号 '+s.invest);
         if(s.custom)event(events,hour,s,`使用自定义名称「${s.name.cn}」；不占用官方命名表`);
         identify(s,counters,names,hour,events);continue;
       }
       s.age=hour-s.bornAt;
       if(s.status==='dissipated'){s.cloudOpacity=Math.max(0,1-(hour-s.dissipatedAt)/12);continue;}
+      if(s.official){replayOfficial(s,hour,events);continue;}
       const before=describe(s).name,hadName=!!s.name,hadNumber=!!s.number;
       movement(s,s.scenario,s.age);
       const land=isLand(s.lon,s.lat);

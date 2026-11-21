@@ -90,3 +90,12 @@
 - README、guide 和旧版回归脚本中涉及官方命名顺序的用例，必须在工坊显式选择 `auto`；不能把默认自定义名称误判为官方命名表回归失败。
 - 当前公网 v2.5.0 提交 `0e140dd809de2bf8b4bda848804d04e3dcc6cc01`，资源版本 `c6e80bca356e`，Pages 工作流 `44883679151` 成功；32 个运行文件与本地发布包一致，公网完整浏览器回归通过。
 - 当前内网版本 `9fd2ea13`，上传 32 个运行文件；固定地址和版本地址未登录仍返回 SSO 302，`myflicker-browser` 45 秒超时，**内网应用渲染验收仍未完成，不计通过**。
+
+## v2.6.0 官方真实台风库维护
+
+- `scripts/prepare-official-storms.mjs` 从本地 `Output/ibtracs.WP.v04r01.csv` 生成 `assets/official-storms.json`；原始 109MB CSV、统计脚本和检查结果不得上传公网或内网。
+- 官方目录只收录 1945–2026 年 IBTrACS v04r01 西北太平洋有名称且强度可用、完整轨迹保持在 100°E–180°E、0°N–60°N 的系统，当前 1965 个、129604 个路径点。任何数量变化必须同步 `tests/official-storms.test.mjs` 与说明文档。
+- 官方台风是历史最佳路径重放，不是预报或再分析，不得受海温、风切变、环流规模或冷空气参数重算。自建系统仍走原有气象规则；两者共享同一个模拟 frame，但不得声称已实现相互作用、复活或吞并。
+- `state.activeOfficial` 保存官方资料 id，`sourceId` 必须为 `official:<IBTrACS_SID>`，并随 `typhoon-lab-session-v1` 清洗和持久化。官方资料只读：只能加入、查看、移出，不得改名、删除或写回 `assets/names.json`。
+- 统计“下一名”和官方命名事件必须排除 `official=true` 的系统。官方台风真实名称与编号不消耗 140 名动态命名表。
+- `tests/official-storms.test.mjs` 必须覆盖目录完整性、ID 唯一性、坐标强度范围、历史轨迹重放与命名表隔离；沉浸回归覆盖官方搜索、加入、只读约束、2D/3D 同步与移动端；彻底关闭浏览器测试覆盖官方选择恢复。

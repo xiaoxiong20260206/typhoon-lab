@@ -1,26 +1,28 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=c6e80bca356e';
-import {makeLandTest} from './geo.js?v=c6e80bca356e';
-import {localizeNames} from './names.js?v=c6e80bca356e';
-import {PacificMap} from './map.js?v=c6e80bca356e';
-import {$,updatePanels,renderNames,toast} from './panels.js?v=c6e80bca356e';
-import {bindForge} from './forge.js?v=c6e80bca356e';
-import {bindStormLibrary} from './library.js?v=c6e80bca356e';
-import {StormSound} from './sound.js?v=c6e80bca356e';
-import {initShell} from './shell.js?v=c6e80bca356e';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=c6e80bca356e';
-import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=c6e80bca356e';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=aced45d83ba1';
+import {makeLandTest} from './geo.js?v=aced45d83ba1';
+import {localizeNames} from './names.js?v=aced45d83ba1';
+import {PacificMap} from './map.js?v=aced45d83ba1';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=aced45d83ba1';
+import {bindForge} from './forge.js?v=aced45d83ba1';
+import {bindStormLibrary} from './library.js?v=aced45d83ba1';
+import {StormSound} from './sound.js?v=aced45d83ba1';
+import {initShell} from './shell.js?v=aced45d83ba1';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=aced45d83ba1';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=aced45d83ba1';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
 const assetVersion=new URL(import.meta.url).searchParams.get('v')||'';
 if(assetVersion)$('buildTag').title=`资源缓存版本 ${assetVersion}`;
-const state={scenario:['recurve','landfall','ocean'].includes(savedSession?.scenario)?savedSession.scenario:'recurve',env:{...DEFAULT_ENV,...savedSession?.env},seeds:[],history:savedSession?.history||[],activeHistory:new Set(savedSession?.activeHistory||[]),visibleStorms:savedSession?.visibleStorms==null?null:new Set(savedSession.visibleStorms),hour:savedSession?.hour??48,selected:1,playing:false,speed:4};
-let map,run,names,isLand,forge,library,last=0,animationTime=0,lastPaint=0;
+const state={scenario:['recurve','landfall','ocean'].includes(savedSession?.scenario)?savedSession.scenario:'recurve',env:{...DEFAULT_ENV,...savedSession?.env},seeds:[],history:savedSession?.history||[],activeHistory:new Set(savedSession?.activeHistory||[]),activeOfficial:new Set(savedSession?.activeOfficial||[]),visibleStorms:savedSession?.visibleStorms==null?null:new Set(savedSession.visibleStorms),hour:savedSession?.hour??48,selected:1,playing:false,speed:4};
+let map,run,names,officialStorms=[],isLand,forge,library,last=0,animationTime=0,lastPaint=0;
 let theater=null,shell;const sound=new StormSound();
 const endHour=()=>run.frames.length-1;
 function applySeeds(){
   const preset=SCENARIOS[state.scenario];
-  state.seeds=[{sourceId:'base',lon:preset.lon,lat:preset.lat},...state.history.filter(entry=>state.activeHistory.has(entry.id)).map(entry=>({...entry.seed,sourceId:entry.id}))];
+  state.seeds=[{sourceId:'base',lon:preset.lon,lat:preset.lat},
+    ...state.history.filter(entry=>state.activeHistory.has(entry.id)).map(entry=>({...entry.seed,sourceId:entry.id})),
+    ...officialStorms.filter(storm=>state.activeOfficial.has(storm.id)).map(storm=>({sourceId:'official:'+storm.id,kind:'official',official:storm}))];
   if(state.visibleStorms){
     const keys=new Set(state.seeds.map(seed=>seed.sourceId));
     for(const key of state.visibleStorms)if(!keys.has(key))state.visibleStorms.delete(key);
@@ -28,7 +30,7 @@ function applySeeds(){
   }
 }
 function persist(quiet=false){
-  const saved=saveSession({version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory],visibleStorms:state.visibleStorms===null?null:[...state.visibleStorms]});
+  const saved=saveSession({version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory],activeOfficial:[...state.activeOfficial],visibleStorms:state.visibleStorms===null?null:[...state.visibleStorms]});
   storageReady=saved;
   if(!saved&&!quiet)toast('当前浏览器无法自动保存历史创建，模拟仍可继续使用。');
   return saved;
@@ -39,9 +41,12 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function init(){
   shell=initShell({select:selectStorm});
   const get=async path=>{const request=assetVersion?`${path}?v=${encodeURIComponent(assetVersion)}`:path,response=await fetch(request);if(!response.ok)throw Error(`${path} 加载失败：${response.status}`);return response.json();};
-  const [land,nameData]=await Promise.all([get('assets/land.json'),get('assets/names.json')]);
-  if(nameData.names.length!==140||!land.polygons.length)throw Error('本地数据不完整');
+  const [land,nameData,officialData]=await Promise.all([get('assets/land.json'),get('assets/names.json'),get('assets/official-storms.json')]);
+  if(nameData.names.length!==140||!land.polygons.length||officialData?.version!==1||!Array.isArray(officialData.storms)||officialData.count!==officialData.storms.length)throw Error('本地数据不完整');
   names=localizeNames(nameData);isLand=makeLandTest(land.polygons);
+  officialStorms=officialData.storms;
+  const officialIds=new Set(officialStorms.map(storm=>storm.id));
+  for(const id of state.activeOfficial)if(!officialIds.has(id))state.activeOfficial.delete(id);
   map=new PacificMap($('mapCanvas'),land.polygons,isLand);
   map.onCreate=(lon,lat)=>{if(forge?.picking){setCreating(false);forge.locate(lon,lat);}else createAt(lon,lat);};map.onSelect=selectStorm;
   applySeeds();
@@ -55,7 +60,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=c6e80bca356e');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=aced45d83ba1');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -83,9 +88,9 @@ function refresh(){
   map.frame=visible.length===fullFrame.storms.length?fullFrame:{...fullFrame,storms:visible};map.selected=state.selected;
   updatePanels(run,hour,state.selected,selectStorm);
   shell?.update(map.frame,state.selected);
-  const count=fullFrame.storms.filter(s=>s.name&&!s.custom).length;
+  const count=fullFrame.storms.filter(s=>s.name&&!s.custom&&!s.official).length;
   $('nextName').textContent=`下一名：${names[count%names.length].cn} · 第 ${Math.floor(count/names.length)+1} 轮`;
-  $('undoButton').hidden=state.seeds.length<2;
+  $('undoButton').hidden=!state.history.some(entry=>state.activeHistory.has(entry.id));
   const selected=map.frame.storms.find(s=>s.id===state.selected);
   $('cinemaReadout').textContent=`${selected.name?.cn||'未命名'} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
   $('theaterCaption').querySelector('strong').textContent=selected.status==='dissipated'?'风暴终将归于平静。':selected.status==='extratropical'?'在北方，成为另一种风暴。':'走近风暴的中心。';
@@ -105,6 +110,8 @@ function updateLibrary(){
     selectedId:state.selected,
     history:state.history,
     activeHistory:state.activeHistory,
+    officialStorms,
+    activeOfficial:state.activeOfficial,
     storageReady
   });
 }
@@ -128,6 +135,15 @@ function toggleHistory(id,active){
   applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
   const entry=state.history.find(item=>item.id===id);
   toast(active?`已加入演示：+${entry.seed.bornAt}h 创建的系统。${map.frame.storms.length>1?'多个系统会同时演化。':''}`:'已移出演示，历史创建仍保留在本浏览器。');
+  return true;
+}
+function toggleOfficial(id,active){
+  const storm=officialStorms.find(item=>item.id===id),sourceId=selectedSourceId();
+  if(!storm)return false;
+  if(active)state.activeOfficial.add(id);else state.activeOfficial.delete(id);
+  if(state.visibleStorms){if(active)state.visibleStorms.add('official:'+id);else state.visibleStorms.delete('official:'+id);}
+  applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
+  toast(active?'已加入官方台风「'+storm.name+'」：按 '+storm.season+' 年 IBTrACS 历史最佳路径重放。':'已移出官方台风；官方资料仍保留在台风库。');
   return true;
 }
 function renameHistory(id,value){
@@ -215,6 +231,7 @@ function bind(){
     onVisibility:toggleStormVisibility,
     onSelect:selectStorm,
     onHistory:toggleHistory,
+    onOfficial:toggleOfficial,
     onRename:renameHistory,
     onDelete:deleteHistory,
     onShowAll:showAllStorms,
@@ -240,9 +257,9 @@ function bind(){
     input.addEventListener('change',()=>{rebuild();toast('环境已更新：重新计算同一实验，当前回放时刻已保留。');});
   }
   document.querySelectorAll('[data-scenario]').forEach(button=>button.addEventListener('click',()=>{
-    state.scenario=button.dataset.scenario;state.activeHistory.clear();applySeeds();state.selected=1;state.hour=0;state.playing=false;setCreating(false);
+    state.scenario=button.dataset.scenario;state.activeHistory.clear();state.activeOfficial.clear();applySeeds();state.selected=1;state.hour=0;state.playing=false;setCreating(false);
     document.querySelectorAll('[data-scenario]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
-    rebuild();persist(true);toast(`已开启「${SCENARIOS[state.scenario].title}」实验；历史创建已保留，可勾选加入。`);
+    rebuild();persist(true);toast('已开启「'+SCENARIOS[state.scenario].title+'」实验；历史创建与官方资料保留，可重新勾选加入。');
   }));
   document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>{
     const layer=button.dataset.layer;map.layers[layer]=!map.layers[layer];button.classList.toggle('active',map.layers[layer]);button.setAttribute('aria-pressed',String(map.layers[layer]));
@@ -251,7 +268,7 @@ function bind(){
   $('zoomIn').addEventListener('click',()=>theater?.active?theater.zoom(.8):map.setZoom(map.zoom*1.25));$('zoomOut').addEventListener('click',()=>theater?.active?theater.zoom(1.25):map.setZoom(map.zoom/1.25));$('fitMap').addEventListener('click',()=>theater?.active?$('mapStage').querySelector('[data-view="overview"]').click():map.fit());
   $('createButton').addEventListener('click',()=>{setCreating(!map.creating);if(map.creating){state.playing=false;if(theater?.active)theater.setMode('overview');updatePlayback();toast('点击暖海生成；键盘操作可聚焦地图并按 Enter 使用默认海洋落点。');}});
   $('undoButton').addEventListener('click',()=>{
-    if(state.seeds.length<2)return;
+    if(!state.history.some(entry=>state.activeHistory.has(entry.id)))return;
     const index=state.history.findLastIndex(entry=>state.activeHistory.has(entry.id));
     if(index<0)return;
     const [entry]=state.history.splice(index,1);state.activeHistory.delete(entry.id);state.visibleStorms?.delete(entry.id);applySeeds();
@@ -259,7 +276,7 @@ function bind(){
   });
   $('stormLibraryButton').addEventListener('click',e=>library.open('current',e.currentTarget));
   $('historyButton').addEventListener('click',e=>library.open('history',e.currentTarget));
-  $('namesButton').addEventListener('click',()=>{const used=run.frames[Math.floor(state.hour)].storms.filter(s=>s.name&&!s.custom).map(s=>s.name.en);renderNames(names,used);$('namesDialog').showModal();});
+  $('namesButton').addEventListener('click',()=>{const used=run.frames[Math.floor(state.hour)].storms.filter(s=>s.name&&!s.custom&&!s.official).map(s=>s.name.en);renderNames(names,used);$('namesDialog').showModal();});
   $('closeNames').addEventListener('click',()=>$('namesDialog').close());
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){

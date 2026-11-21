@@ -1,6 +1,6 @@
-import {$} from './panels.js?v=c6e80bca356e';
-import {describe,beaufort} from './rules.js?v=c6e80bca356e';
-import {cleanCustomName,isCustomNameTaken,MAX_CUSTOM_NAME_LENGTH} from './naming.js?v=c6e80bca356e';
+import {$} from './panels.js?v=aced45d83ba1';
+import {describe,beaufort} from './rules.js?v=aced45d83ba1';
+import {cleanCustomName,isCustomNameTaken,MAX_CUSTOM_NAME_LENGTH} from './naming.js?v=aced45d83ba1';
 
 export function bindForge({create,onOpen,onPick}){
   const dialog=$('forgeDialog'),form=$('forgeForm');

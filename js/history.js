@@ -1,4 +1,4 @@
-import {cleanCustomName} from './naming.js?v=c6e80bca356e';
+import {cleanCustomName} from './naming.js?v=aced45d83ba1';
 
 const KEY='typhoon-lab-session-v1';
 
@@ -39,9 +39,10 @@ export function loadSession(storage=defaultStorage()){
     const data=JSON.parse(raw),history=normalizeHistory(data?.history);
     const scenario=['recurve','landfall','ocean'].includes(data?.scenario)?data.scenario:'recurve';
     const active=new Set((Array.isArray(data?.activeHistory)?data.activeHistory:[]).filter(id=>history.some(entry=>entry.id===id)));
+    const activeOfficial=[...new Set((Array.isArray(data?.activeOfficial)?data.activeOfficial:[]).filter(value=>typeof value==='string'))].slice(0,500);
     const visibleStorms=data?.visibleStorms===null?null:Array.isArray(data?.visibleStorms)
       ?[...new Set(data.visibleStorms.filter(value=>typeof value==='string'))].slice(0,500):null;
-    return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],visibleStorms,hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
+    return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],activeOfficial,visibleStorms,hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
   }catch{return null;}
 }
 export function saveSession(session,storage=defaultStorage()){
