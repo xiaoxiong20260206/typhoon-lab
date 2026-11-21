@@ -1,5 +1,18 @@
 # 部署记录
 
+## 2026-11-21 15:34（任务时间） · v2.4.0 · 自定义命名与地图展示多选
+
+- 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交：`2e25cbb35999fa4eecfae53eec4d184a26211df3`；Pages 工作流 `44880437597` 成功，状态 completed/success。资源版本 `d79f98f758ed`，页面版本标记 `v2.4.0`。
+- 台风工坊新增官方自动命名/自定义名称两种方式。自定义名称最多 20 个字符，立即显示并随历史保存；不写入、不消耗、不重排 JMA 140 名固定命名表，也不改变官方“下一名”。
+- 地图新增「展示 n/n」多选下拉，可逐项过滤二维与三维展示对象，并提供「全部」「仅当前」。隐藏系统仍参与完整模拟、编号、命名和事件序列；至少保留一个展示系统。
+- 自定义名称与展示集合写入 `typhoon-lab-session-v1`，完整关闭浏览器再打开后可恢复。修复展示浮层关闭状态仍可见的问题；修正后同条件首屏可见控件保持 12 个。
+- 公网 30 个运行文件逐一 HTTP 成功并与本地发布包 SHA-256 逐字节一致。本地 39 项模型测试、43 项沉浸布局、12 项完整关闭重开、26 项三维、51 项经典模式及性能预算全部通过。
+- 公网真实浏览器回归：沉浸布局 43 项、完整关闭重开 12 项、三维/声音 26 项、经典模式 51 项及性能预算全部通过；无 JS/shader 错误或失败资源。8 系统全域自动画质为 32344 个三角形、33 draw calls；帧间隔中位约 16.7ms，不作跨设备 FPS 承诺。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；内网版本 `edef2329`：https://typhoonlab-edef2329.frontend-cloud.corp.kuaishou.com/ 。平台项目 `typhoonlab`（28596）最新版本已确认，上传目录 `.publish/site-1795246256757`，30 个运行文件、308.3 KB；访问配置 `amc/ready`，未修改 SSO 与白名单。
+- 内网白屏回归：**未完成，不计通过**。固定地址与版本地址的未登录请求均为 HTTP 302 跳转快手 SSO；MyFlicker Electron 内置浏览器 `new_tab` 等待 45 秒后 `EXECUTION_TIMEOUT`。需已授权浏览器复验应用 DOM 与交互。
+- 权限管理：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
+
 ## 2026-11-21 14:47（任务时间） · v2.3.0 · 深海仪表视觉收口
 
 - 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/
