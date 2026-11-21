@@ -1,6 +1,7 @@
-import {cleanCustomName} from './naming.js?v=49c5a791b041';
+import {cleanCustomName} from './naming.js?v=f105babb07bd';
 
-const KEY='typhoon-lab-session-v1';
+export const SESSION_KEY='typhoon-lab-session-v1';
+export const BACKUP_KEY=`${SESSION_KEY}-backup`;
 
 function defaultStorage(){
   try{return globalThis.localStorage;}catch{return null;}
@@ -30,13 +31,12 @@ function normalizeEnv(value){
   env.cold=Math.min(100,Math.max(0,env.cold));env.size=Math.min(2,Math.max(.6,env.size));
   return env;
 }
-export function loadSession(storage=defaultStorage()){
-  if(!storage)return null;
-  let raw;
-  try{raw=storage.getItem(KEY);}catch{return null;}
+function parseSession(raw){
   if(!raw)return null;
   try{
-    const data=JSON.parse(raw),history=normalizeHistory(data?.history);
+    const data=JSON.parse(raw);
+    if(!data||typeof data!=='object'||Array.isArray(data)||!['history','scenario','hour'].some(key=>key in data))return null;
+    const history=normalizeHistory(data.history);
     const scenario=['recurve','landfall','ocean'].includes(data?.scenario)?data.scenario:'recurve';
     const active=new Set((Array.isArray(data?.activeHistory)?data.activeHistory:[]).filter(id=>history.some(entry=>entry.id===id)));
     const activeOfficial=[...new Set((Array.isArray(data?.activeOfficial)?data.activeOfficial:[]).filter(value=>typeof value==='string'))].slice(0,500);
@@ -45,12 +45,32 @@ export function loadSession(storage=defaultStorage()){
     return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],activeOfficial,visibleStorms,hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
   }catch{return null;}
 }
+export function loadSession(storage=defaultStorage()){
+  if(!storage)return null;
+  const keys=[SESSION_KEY,BACKUP_KEY];
+  for(const [index,key] of keys.entries()){
+    let raw;
+    try{raw=storage.getItem(key);}catch{return null;}
+    const session=parseSession(raw);
+    if(session){
+      if(index&&raw)try{storage.setItem(SESSION_KEY,raw);}catch{}
+      return session;
+    }
+  }
+  return null;
+}
 export function saveSession(session,storage=defaultStorage()){
   if(!storage)return false;
-  try{storage.setItem(KEY,JSON.stringify(session));return true;}catch{return false;}
+  let raw;
+  try{raw=JSON.stringify(session);}catch{return false;}
+  let saved=false;
+  for(const key of [SESSION_KEY,BACKUP_KEY]){
+    try{storage.setItem(key,raw);saved=true;}catch{}
+  }
+  return saved;
 }
 export function storageAvailable(storage=defaultStorage()){
   if(!storage)return false;
-  const probe=`${KEY}-probe`;
+  const probe=`${SESSION_KEY}-probe`;
   try{storage.setItem(probe,'1');storage.removeItem(probe);return true;}catch{return false;}
 }

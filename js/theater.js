@@ -1,6 +1,6 @@
-import {clamp,describe,displayName,radiusAt,windRings} from './rules.js?v=49c5a791b041';
-import {surfacePoint,geographicPoint,cloudProfile,cloudDetail,GLOBE_RADIUS} from './scene-math.js?v=49c5a791b041';
-import {PLACES} from './geo.js?v=49c5a791b041';
+import {clamp,describe,displayName,radiusAt,windRings} from './rules.js?v=f105babb07bd';
+import {surfacePoint,geographicPoint,cloudProfile,cloudDetail,GLOBE_RADIUS} from './scene-math.js?v=f105babb07bd';
+import {PLACES} from './geo.js?v=f105babb07bd';
 
 const TAU=Math.PI*2;
 const seeded=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};

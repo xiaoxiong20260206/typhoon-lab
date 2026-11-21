@@ -1,15 +1,15 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=49c5a791b041';
-import {summaryName} from './rules.js?v=49c5a791b041';
-import {makeLandTest} from './geo.js?v=49c5a791b041';
-import {localizeNames} from './names.js?v=49c5a791b041';
-import {PacificMap} from './map.js?v=49c5a791b041';
-import {$,updatePanels,renderNames,toast} from './panels.js?v=49c5a791b041';
-import {bindForge} from './forge.js?v=49c5a791b041';
-import {bindStormLibrary} from './library.js?v=49c5a791b041';
-import {StormSound} from './sound.js?v=49c5a791b041';
-import {initShell} from './shell.js?v=49c5a791b041';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=49c5a791b041';
-import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=49c5a791b041';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=f105babb07bd';
+import {summaryName} from './rules.js?v=f105babb07bd';
+import {makeLandTest} from './geo.js?v=f105babb07bd';
+import {localizeNames} from './names.js?v=f105babb07bd';
+import {PacificMap} from './map.js?v=f105babb07bd';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=f105babb07bd';
+import {bindForge} from './forge.js?v=f105babb07bd';
+import {bindStormLibrary} from './library.js?v=f105babb07bd';
+import {StormSound} from './sound.js?v=f105babb07bd';
+import {initShell} from './shell.js?v=f105babb07bd';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=f105babb07bd';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=f105babb07bd';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
@@ -61,7 +61,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=49c5a791b041');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=f105babb07bd');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
