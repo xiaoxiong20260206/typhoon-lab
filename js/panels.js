@@ -54,6 +54,25 @@ function updateChart(run,hour,s){
   set('peakLabel',`当前峰值 ${s.peak.toFixed(1)} m/s`);
   $('intensityChart').setAttribute('aria-label',`已回放 ${hour} 小时，风速峰值 ${s.peak.toFixed(1)} 米每秒`);
 }
+export function updateHistory(history,active,getStorm,onToggle){
+  const list=$('historyList'),scroll=list.scrollTop;
+  list.replaceChildren();
+  for(const entry of history){
+    const seed=entry.seed,storm=getStorm(entry),item=document.createElement('label');
+    item.className='history-item';
+    const input=document.createElement('input');input.type='checkbox';input.checked=active.has(entry.id);
+    input.setAttribute('aria-label',`将历史系统 ${seed.lon.toFixed(0)}°E ${seed.lat.toFixed(0)}°N 加入演示`);
+    input.addEventListener('change',()=>onToggle(entry.id,input.checked));
+    const text=document.createElement('span');
+    text.innerHTML=`<b>${escape(storm?.name?.cn||storm?.number||storm?.invest||'未命名')}</b><small>+${seed.bornAt}h · ${seed.lon.toFixed(1)}°E / ${seed.lat.toFixed(1)}°N · 初始 ${seed.wind} m/s</small>`;
+    item.append(input,text);list.append(item);
+  }
+  list.scrollTop=scroll;
+  const count=history.filter(entry=>active.has(entry.id)).length;
+  $('historyCount').textContent=`自动保存 · ${history.length} 个${count?` · 演示 ${count}`:''}`;
+  list.hidden=!history.length;
+  document.querySelector('#historyDetails .fineprint').hidden=!history.length;
+}
 function updateImpact(s,storms){
   if(s.status==='dissipated'){set('impactType','影响结束');set('impactText',s.cause);return;}
   const impacted=PLACES.map(([name,lon,lat])=>({name,...weatherAt(s,lon,lat)})).filter(p=>p.wind>=10.8||p.rain>=2).sort((a,b)=>b.wind-a.wind);

@@ -2,15 +2,28 @@ import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js';
 import {makeLandTest} from './geo.js';
 import {localizeNames} from './names.js';
 import {PacificMap} from './map.js';
-import {$,updatePanels,renderNames,toast} from './panels.js';
+import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js';
 import {bindForge} from './forge.js';
 import {StormSound} from './sound.js';
 import {initShell} from './shell.js';
+import {loadSession,saveSession} from './history.js';
 
-const state={scenario:'recurve',env:{...DEFAULT_ENV},seeds:[{lon:143,lat:16}],hour:48,selected:1,playing:false,speed:4};
+const savedSession=loadSession();
+const state={scenario:['recurve','landfall','ocean'].includes(savedSession?.scenario)?savedSession.scenario:'recurve',env:{...DEFAULT_ENV,...savedSession?.env},seeds:[],history:savedSession?.history||[],activeHistory:new Set(savedSession?.activeHistory||[]),hour:savedSession?.hour??48,selected:1,playing:false,speed:4};
 let map,run,names,isLand,forge,last=0,animationTime=0,lastPaint=0;
 let theater=null,shell;const sound=new StormSound();
 const endHour=()=>run.frames.length-1;
+function applySeeds(){
+  const preset=SCENARIOS[state.scenario];
+  state.seeds=[{lon:preset.lon,lat:preset.lat},...state.history.filter(entry=>state.activeHistory.has(entry.id)).map(entry=>entry.seed)];
+}
+function persist(quiet=false){
+  const saved=saveSession({version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory]});
+  if(!saved&&!quiet)toast('当前浏览器无法自动保存历史创建，模拟仍可继续使用。');
+  return saved;
+}
+let persistTimer=0;
+function schedulePersist(){clearTimeout(persistTimer);persistTimer=setTimeout(()=>persist(true),250);}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function init(){
   shell=initShell({select:selectStorm});
@@ -20,10 +33,11 @@ async function init(){
   names=localizeNames(nameData);isLand=makeLandTest(land.polygons);
   map=new PacificMap($('mapCanvas'),land.polygons,isLand);
   map.onCreate=(lon,lat)=>{if(forge?.picking){setCreating(false);forge.locate(lon,lat);}else createAt(lon,lat);};map.onSelect=selectStorm;
+  applySeeds();
   rebuild();bind();
   if(new URLSearchParams(location.search).get('view')!=='2d')await initTheater(land.polygons);
   else set3D(false);
-  window.addEventListener('beforeunload',()=>sound.disable());
+  window.addEventListener('beforeunload',()=>{sound.disable();persist(true);});
   $('loadState').hidden=true;
   requestAnimationFrame(tick);
   // Read-only diagnostics for reproducible local verification, no simulation mutations exposed.
@@ -59,8 +73,18 @@ function refresh(){
   $('cinemaReadout').textContent=`${selected.name?.cn||'未命名'} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
   $('theaterCaption').querySelector('strong').textContent=selected.status==='dissipated'?'风暴终将归于平静。':selected.status==='extratropical'?'在北方，成为另一种风暴。':'走近风暴的中心。';
   map.draw();updatePlayback();
+  updateHistory(state.history,state.activeHistory,entry=>{
+    const index=state.seeds.indexOf(entry.seed);
+    return index>=0?map.frame.storms.find(storm=>storm.id===index+1):null;
+  },toggleHistory);
 }
 function selectStorm(id){state.selected=id;sound.cue();refresh();}
+function toggleHistory(id,active){
+  if(active)state.activeHistory.add(id);else state.activeHistory.delete(id);
+  applySeeds();state.playing=false;rebuild();persist();
+  const entry=state.history.find(item=>item.id===id);
+  toast(active?`已加入演示：+${entry.seed.bornAt}h 创建的系统。${map.frame.storms.length>1?'多个系统会同时演化。':''}`:'已移出演示，历史创建仍保留在本浏览器。');
+}
 function updatePlayback(){
   $('playButton').textContent=state.playing?'Ⅱ':'▶';
   $('playButton').setAttribute('aria-label',state.playing?'暂停模拟':'播放模拟');
@@ -83,10 +107,13 @@ function createAt(lon,lat,options={}){
   if(![lon,lat,wind,size].every(Number.isFinite)||lon<110||lon>165||lat<5||lat>28||wind<1||wind>75||size<.6||size>2){toast('请填写有效的海洋位置、风速与环流规模。');return false;}
   if(isLand(lon,lat)){toast('系统需要在海面生成，请选择海洋位置。');return false;}
   state.hour=Math.floor(state.hour);
-  state.seeds.push({lon,lat,wind,size,scenario:options.scenario||state.scenario,bornAt:state.hour});
+  const seed={lon,lat,wind,size,scenario:options.scenario||state.scenario,bornAt:state.hour};
+  const entry={id:`h${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}`,seed,createdAt:Date.now()};
+  state.history.push(entry);state.activeHistory.add(entry.id);applySeeds();
   state.selected=state.seeds.length;state.playing=false;setCreating(false);rebuild();
   const s=map.frame.storms.find(s=>s.id===state.selected);
-  toast(`已在 +${state.hour}h 创建系统 #${s.id}：${s.name?.cn||`${s.invest} · 未命名`}。${state.seeds.length>24?'系统较多，绘制可能变慢。':'此前历史已保留。'}`);
+  const saved=persist();
+  toast(`已在 +${state.hour}h 创建系统 #${s.id}：${s.name?.cn||`${s.invest} · 未命名`}。${saved?'已自动保存。':'本浏览器暂不能自动保存。'}${state.seeds.length>24?'系统较多，绘制可能变慢。':''}`);
   return true;
 }
 function bind(){
@@ -101,17 +128,16 @@ function bind(){
   $('playButton').addEventListener('click',togglePlay);
   $('resetButton').addEventListener('click',()=>{state.hour=0;state.playing=false;animationTime=0;refresh();toast('已回到扰动生成时刻，命名与演化顺序保持不变。');});
   $('speed').addEventListener('change',e=>state.speed=Number(e.target.value));
-  $('timeline').addEventListener('input',e=>{state.hour=Number(e.target.value);state.playing=false;refresh();});
+  $('timeline').addEventListener('input',e=>{state.hour=Number(e.target.value);state.playing=false;refresh();schedulePersist();});
   for(const key of ['sst','shear','size','cold']){
     const input=$(key),units={sst:'°C',shear:'m/s',size:'倍',cold:'%'};
     input.addEventListener('input',()=>{state.env[key]=Number(input.value);$(`${key}Value`).innerHTML=`${input.value} <em>${units[key]}</em>`;});
     input.addEventListener('change',()=>{rebuild();toast('环境已更新：重新计算同一实验，当前回放时刻已保留。');});
   }
   document.querySelectorAll('[data-scenario]').forEach(button=>button.addEventListener('click',()=>{
-    state.scenario=button.dataset.scenario;const p=SCENARIOS[state.scenario];
-    state.seeds=[{lon:p.lon,lat:p.lat}];state.selected=1;state.hour=0;state.playing=false;setCreating(false);
+    state.scenario=button.dataset.scenario;state.activeHistory.clear();applySeeds();state.selected=1;state.hour=0;state.playing=false;setCreating(false);
     document.querySelectorAll('[data-scenario]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
-    rebuild();toast(`已开启「${p.title}」实验，点击播放观察完整生命周期。`);
+    rebuild();persist(true);toast(`已开启「${SCENARIOS[state.scenario].title}」实验；历史创建已保留，可勾选加入。`);
   }));
   document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>{
     const layer=button.dataset.layer;map.layers[layer]=!map.layers[layer];button.classList.toggle('active',map.layers[layer]);button.setAttribute('aria-pressed',String(map.layers[layer]));
@@ -119,7 +145,13 @@ function bind(){
   }));
   $('zoomIn').addEventListener('click',()=>theater?.active?theater.zoom(.8):map.setZoom(map.zoom*1.25));$('zoomOut').addEventListener('click',()=>theater?.active?theater.zoom(1.25):map.setZoom(map.zoom/1.25));$('fitMap').addEventListener('click',()=>theater?.active?$('mapStage').querySelector('[data-view="overview"]').click():map.fit());
   $('createButton').addEventListener('click',()=>{setCreating(!map.creating);if(map.creating){state.playing=false;if(theater?.active)theater.setMode('overview');updatePlayback();toast('点击暖海生成；键盘操作可聚焦地图并按 Enter 使用默认海洋落点。');}});
-  $('undoButton').addEventListener('click',()=>{if(state.seeds.length<2)return;state.seeds.pop();state.selected=Math.min(state.selected,state.seeds.length);rebuild();toast('已撤销最后创建的系统。');});
+  $('undoButton').addEventListener('click',()=>{
+    if(state.seeds.length<2)return;
+    const index=state.history.findLastIndex(entry=>state.activeHistory.has(entry.id));
+    if(index<0)return;
+    const [entry]=state.history.splice(index,1);state.activeHistory.delete(entry.id);applySeeds();
+    state.selected=Math.min(state.selected,state.seeds.length);rebuild();persist();toast('已撤销最后创建的系统，并同步更新本浏览器历史。');
+  });
   $('namesButton').addEventListener('click',()=>{const used=run.frames[Math.floor(state.hour)].storms.filter(s=>s.name).map(s=>s.name.en);renderNames(names,used);$('namesDialog').showModal();});
   $('closeNames').addEventListener('click',()=>$('namesDialog').close());
   document.addEventListener('keydown',e=>{

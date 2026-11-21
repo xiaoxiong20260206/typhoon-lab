@@ -6,6 +6,7 @@ export function initShell({select}){
   const $=id=>document.getElementById(id),drawer=$('workspaceDrawer'),body=$('drawerBody');
   document.body.classList.add('immersive');
   const experiment=document.querySelector('.experiment-panel'),observation=document.querySelector('.observation-panel'),display=document.createElement('section');
+  $('historyDetails').open=true;
   display.className='display-settings';
   for(const [title,selectors] of [['地图与图层',['.layer-toolbar']],['画质与声音',['.sound-controls']],['视图',['.view-toolbar','.map-navigation','#cinemaButton']],['资料',['#namesButton']]]){
     const section=document.createElement('section'),h=document.createElement('h3');h.textContent=title;section.append(h);
