@@ -1,4 +1,4 @@
-import {describe,beaufort} from './rules.js?v=0ec2d7169093';
+import {describe,beaufort} from './rules.js?v=d79f98f758ed';
 
 // Reuse the original controls: one ID, one handler and one simulation frame.
 export function initShell({select}){
@@ -30,7 +30,7 @@ export function initShell({select}){
   // Close before another native dialog or map action is opened.
   for(const id of ['createButton','namesButton','cinemaButton'])$(id).addEventListener('click',close);
   $('namesDialog').addEventListener('close',()=>$('displayButton').focus());
-  const actions=$('sceneActions');actions.prepend($('forgeButton'));actions.append($('soundButton'));
+  const actions=$('sceneActions');actions.prepend($('forgeButton'));actions.append($('soundButton'),$('visibilityDetails'));
   const cinemaHome=$('cinemaButton').parentElement;
   document.addEventListener('lab:cinema-change',()=>{(document.body.classList.contains('cinema')?actions:cinemaHome).append($('cinemaButton'));});
   $('forgeButton').textContent='＋ 创造台风';

@@ -106,6 +106,43 @@ body.immersive .camera-control select{
   font-size:.84rem;
 }
 body.immersive .camera-control select:hover:not(:disabled){background-color:#122a33;border-color:#3d5660}
+body.immersive .visibility-control{position:relative;margin:0;flex-shrink:0}
+body.immersive .visibility-control:not([open])>.visibility-popover{display:none}
+body.immersive .visibility-control summary{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  min-width:78px;min-height:40px;padding:7px 10px;
+  color:#d8e5e5;font-size:.78rem;white-space:nowrap;
+  border:1px solid transparent;border-radius:7px;cursor:pointer;list-style:none;
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+body.immersive .visibility-control summary::-webkit-details-marker{display:none}
+body.immersive .visibility-control summary:before{content:'';width:5px;height:5px;border-radius:50%;background:#edb17d;box-shadow:0 0 0 3px #edb17d1c}
+body.immersive .visibility-control summary strong{color:#f4c396;font-size:.72rem;font-variant-numeric:tabular-nums;font-weight:500}
+body.immersive .visibility-control summary:hover,
+body.immersive .visibility-control[open] summary{background:#19343e;border-color:#3e5962;color:#fff}
+body.immersive .visibility-control summary:focus-visible{outline:2px solid #edb17d;outline-offset:2px}
+body.immersive .visibility-popover{
+  position:absolute;z-index:8;top:calc(100% + 10px);right:0;
+  width:min(324px,calc(100vw - 32px));max-height:min(430px,62dvh);overflow:auto;
+  padding:12px;border:1px solid #49636c;border-radius:11px;
+  background:linear-gradient(155deg,#132f39f7,#0b222bf5);
+  box-shadow:0 24px 64px #020a10d1,inset 0 1px 0 #ffffff0b;
+}
+body.immersive .visibility-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:1px 2px 10px;border-bottom:1px solid #334d56}
+body.immersive .visibility-heading>span{font-size:.78rem;letter-spacing:.05em;color:#eef2ed}
+body.immersive .visibility-heading>div{display:flex;gap:4px}
+body.immersive .visibility-heading button{min-height:30px;padding:4px 8px;border:1px solid #3d5861;border-radius:6px;font-size:.7rem;color:#c7d5d5;background:#17323c}
+body.immersive .visibility-heading button:hover:not(:disabled){border-color:#71888e;background:#1e3a44;color:#fff}
+body.immersive .visibility-heading button:disabled{opacity:.38;cursor:not-allowed;border-color:#334a53;background:transparent}
+body.immersive .visibility-list{display:flex;flex-direction:column;gap:3px;padding:8px 0}
+body.immersive .visibility-item{display:flex;align-items:center;gap:10px;min-height:44px;padding:7px 8px;border:1px solid transparent;border-radius:7px;cursor:pointer;transition:background-color .14s ease,border-color .14s ease}
+body.immersive .visibility-item:hover{background:#18343e;border-color:#38545e}
+body.immersive .visibility-item:has(input:checked){background:#203733;border-color:#566e64;box-shadow:inset 2px 0 0 #edb17d}
+body.immersive .visibility-item input{width:16px;height:16px;margin:0;accent-color:#edb17d;flex-shrink:0}
+body.immersive .visibility-item span{min-width:0;display:flex;flex-direction:column;gap:2px}
+body.immersive .visibility-item b{font-size:.78rem;font-weight:500;color:#eef2ed}
+body.immersive .visibility-item small{font-size:.64rem;color:#a9bcc1;font-variant-numeric:tabular-nums}
+body.immersive .visibility-popover>p{margin:2px 3px 0;padding-top:9px;border-top:1px solid #334d56;font-size:.63rem;line-height:1.55;color:#9fb3b8}
 
 /* The selected storm reads as a proper observation card, not text on raw scenery. */
 body.immersive .storm-summary{
@@ -131,7 +168,8 @@ body.immersive .storm-summary:before{
   background:linear-gradient(90deg,#efb47e,#efb47e00);
 }
 body.immersive #summaryCategory{font-size:.76rem;letter-spacing:.075em;font-weight:500}
-body.immersive #summaryName{font-size:clamp(2.3rem,3.2vw,3.25rem);letter-spacing:.035em;line-height:1.12;margin:7px 0 9px;text-wrap:balance}
+body.immersive #summaryName{font-size:clamp(2.3rem,3.2vw,3.25rem);letter-spacing:.035em;line-height:1.12;margin:7px 0 9px;text-wrap:balance;overflow-wrap:anywhere;word-break:break-word}
+body.immersive #stormName{overflow-wrap:anywhere;word-break:break-word}
 body.immersive #summaryNumbers{font-size:.96rem;letter-spacing:.015em;color:#f3f2ea}
 body.immersive #summaryStatus{font-size:.75rem;color:#b9cbd0;margin-top:7px}
 body.immersive .summary-actions{margin-top:15px;gap:7px}
@@ -235,11 +273,14 @@ body.immersive .forge-grid input[type=number]{appearance:textfield;-moz-appearan
 body.immersive .forge-grid input[type=number]::-webkit-inner-spin-button,
 body.immersive .forge-grid input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 body.immersive .forge-preview{border-left-color:#edb17d;border-radius:0 7px 7px 0;background:#b8c9a312;color:#d6e0dc}
+body.immersive .forge-name-hint{margin:-2px 0 10px;color:#9fb3b8;font-size:.68rem;line-height:1.55}
+body.immersive .forge-grid input[aria-invalid=true]{border-color:#ff9b88;box-shadow:0 0 0 2px #f8717130}
 body.immersive .forge-actions button{border-color:#526b73;border-radius:7px;background:#172f38;color:#e4eceb}
 body.immersive .forge-actions button:hover{background:#1e3a44;border-color:#70878d;color:#fff}
 body.immersive #forgeSubmit{border-color:#f0bd8a;background:#edb17d;color:#16272c;font-weight:600}
 body.immersive #forgeSubmit:hover{background:#f7c89d;border-color:#ffd1a5}
 body.immersive .forge-advanced{border-top-color:#39535c}
+body.immersive.cinema .visibility-control{display:none}
 
 @media(max-height:520px){
   body.immersive .storm-summary{width:min(360px,calc(100% - 40px));padding:12px 15px 13px;bottom:18px}
@@ -261,8 +302,12 @@ body.immersive .forge-advanced{border-top-color:#39535c}
   body.immersive.cinema .scene-actions{top:82px;left:16px;right:16px;justify-content:space-between;gap:2px;padding:3px}
   body.immersive .scene-actions button{min-height:44px;padding:7px 9px}
   body.immersive .scene-actions #forgeButton{padding:8px 11px;white-space:nowrap}
-  body.immersive .camera-control{padding:0 1px 0 4px}
+  body.immersive .camera-control{padding:0 1px 0 4px;font-size:0}
   body.immersive .camera-control select{min-height:44px;max-width:126px;padding:8px 28px 8px 6px;font-size:16px;background-position:right 8px center}
+  body.immersive .visibility-control summary{min-width:68px;min-height:44px;padding:7px 8px;font-size:13px;gap:4px}
+  body.immersive .visibility-popover{top:calc(100% + 8px);width:min(324px,calc(100vw - 32px));max-height:min(52dvh,430px);padding:10px}
+  body.immersive .visibility-heading button{min-height:44px;font-size:12px}
+  body.immersive .visibility-item{min-height:46px}
   body.immersive select{font-size:16px}
   body.immersive #summaryCategory{font-size:.72rem}
   body.immersive .storm-summary{left:16px;bottom:24px;width:calc(100% - 32px);max-width:none;padding:15px 16px 16px}

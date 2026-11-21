@@ -1,3 +1,5 @@
+import {cleanCustomName} from './naming.js?v=d79f98f758ed';
+
 const KEY='typhoon-lab-session-v1';
 
 function defaultStorage(){
@@ -8,7 +10,8 @@ function normalizeSeed(seed){
   if(!seed||typeof seed!=='object')return null;
   const lon=Number(seed.lon),lat=Number(seed.lat),wind=Number(seed.wind??9),size=Number(seed.size??1.2),bornAt=Math.floor(Number(seed.bornAt??0));
   if(!finite(lon,110,165)||!finite(lat,5,28)||!finite(wind,1,75)||!finite(size,.6,2)||!finite(bornAt,0,2000))return null;
-  return {lon,lat,wind,size,bornAt,scenario:['recurve','landfall','ocean'].includes(seed.scenario)?seed.scenario:undefined};
+  const customName=cleanCustomName(seed.customName);
+  return {lon,lat,wind,size,bornAt,scenario:['recurve','landfall','ocean'].includes(seed.scenario)?seed.scenario:undefined,customName:customName||undefined};
 }
 function normalizeHistory(value){
   if(!Array.isArray(value))return [];
@@ -36,7 +39,9 @@ export function loadSession(storage=defaultStorage()){
     const data=JSON.parse(raw),history=normalizeHistory(data?.history);
     const scenario=['recurve','landfall','ocean'].includes(data?.scenario)?data.scenario:'recurve';
     const active=new Set((Array.isArray(data?.activeHistory)?data.activeHistory:[]).filter(id=>history.some(entry=>entry.id===id)));
-    return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
+    const visibleStorms=data?.visibleStorms===null?null:Array.isArray(data?.visibleStorms)
+      ?[...new Set(data.visibleStorms.filter(value=>typeof value==='string'))].slice(0,500):null;
+    return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],visibleStorms,hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
   }catch{return null;}
 }
 export function saveSession(session,storage=defaultStorage()){

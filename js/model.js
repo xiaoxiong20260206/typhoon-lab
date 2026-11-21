@@ -1,5 +1,6 @@
-import {clamp,describe} from './rules.js?v=0ec2d7169093';
-import {DEFAULT_NAMES} from './names.js?v=0ec2d7169093';
+import {clamp,describe} from './rules.js?v=d79f98f758ed';
+import {DEFAULT_NAMES} from './names.js?v=d79f98f758ed';
+import {cleanCustomName} from './naming.js?v=d79f98f758ed';
 
 export const DEFAULT_ENV=Object.freeze({sst:29.5,shear:9,cold:65,size:1.2});
 export const SCENARIOS=Object.freeze({
@@ -37,20 +38,27 @@ export function simulate(options={}){
   const seeds=options.seeds||[{lon:preset.lon,lat:preset.lat}];
   const isLand=options.isLand||(()=>false),hours=Math.max(1,Math.floor(options.hours??Math.max(288,...seeds.map(s=>(s.bornAt||0)+288))));
   const counters={number:0,name:0},events=[],frames=[];
-  const storms=seeds.map((seed,i)=>({
-    id:i+1,invest:`${90+i%10}W`,number:null,name:null,namedAt:null,
-    bornAt:Math.max(0,Math.floor(seed.bornAt||0)),scenario:seed.scenario||scenario,
-    lon:clamp(seed.lon,102,172),lat:clamp(seed.lat,3,53),wind:seed.wind??9,
-    size:seed.size??env.size,pressure:Math.round(1010-0.031*(seed.wind??9)**2-((seed.size??env.size)-1)*4),status:'tropical',retired:false,
-    onLand:false,landHours:0,exAt:null,dissipatedAt:null,peak:seed.wind??9,age:0,
-    cloudOpacity:1,cause:'暖海上的对流正在组织，尚未达到命名标准。'
-  }));
+  const storms=seeds.map((seed,i)=>{
+    const bornAt=Math.max(0,Math.floor(seed.bornAt||0)),customName=cleanCustomName(seed.customName);
+    return {
+      id:i+1,sourceId:typeof seed.sourceId==='string'?seed.sourceId:null,
+      invest:`${90+i%10}W`,number:null,name:customName?{cn:customName,en:customName}:null,
+      custom:!!customName,namedAt:customName?bornAt:null,
+      bornAt,scenario:seed.scenario||scenario,
+      lon:clamp(seed.lon,102,172),lat:clamp(seed.lat,3,53),wind:seed.wind??9,
+      size:seed.size??env.size,pressure:Math.round(1010-0.031*(seed.wind??9)**2-((seed.size??env.size)-1)*4),status:'tropical',retired:false,
+      onLand:false,landHours:0,exAt:null,dissipatedAt:null,peak:seed.wind??9,age:0,
+      cloudOpacity:1,cause:'暖海上的对流正在组织，尚未达到命名标准。'
+    };
+  });
   for(let hour=0;hour<=hours;hour++){
     for(const s of storms){
       if(hour<s.bornAt)continue;
       if(hour===s.bornAt){
         s.onLand=isLand(s.lon,s.lat);
-        event(events,hour,s,`系统 #${s.id} 生成，监测编号 ${s.invest}`);identify(s,counters,names,hour,events);continue;
+        event(events,hour,s,`系统 #${s.id} 生成，监测编号 ${s.invest}`);
+        if(s.custom)event(events,hour,s,`使用自定义名称「${s.name.cn}」；不占用官方命名表`);
+        identify(s,counters,names,hour,events);continue;
       }
       s.age=hour-s.bornAt;
       if(s.status==='dissipated'){s.cloudOpacity=Math.max(0,1-(hour-s.dissipatedAt)/12);continue;}

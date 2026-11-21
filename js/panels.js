@@ -1,5 +1,5 @@
-import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=0ec2d7169093';
-import {PLACES} from './geo.js?v=0ec2d7169093';
+import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=d79f98f758ed';
+import {PLACES} from './geo.js?v=d79f98f758ed';
 
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -77,6 +77,33 @@ export function updateHistory(history,active,getStorm,onToggle,storageReady=true
   quick.setAttribute('aria-label',`打开历史创建；${history.length} 个已保存，${count} 个正在演示`);
   list.hidden=!history.length;
   document.querySelector('#historyDetails .fineprint').hidden=!history.length;
+}
+let visibilitySignature='';
+export function updateVisibilityControls(storms,visible,selected,onToggle){
+  const list=$('visibilityList'),count=$('visibilityCount'),summary=$('visibilitySummary');
+  const signature=storms.map(storm=>`${storm.sourceId}:${storm.name?.cn||storm.number||storm.invest}:${describe(storm).name}:${storm.custom?'custom':'official'}`).join('|');
+  if(signature!==visibilitySignature){
+    list.replaceChildren();
+    for(const storm of storms){
+      const category=describe(storm),item=document.createElement('label'),input=document.createElement('input');
+      item.className='visibility-item';input.type='checkbox';input.dataset.sourceId=storm.sourceId;
+      input.checked=visible.has(storm.sourceId);
+      input.setAttribute('aria-label',`在地图上展示 ${storm.name?.cn||storm.number||storm.invest}`);
+      input.addEventListener('change',()=>onToggle(storm.sourceId,input.checked));
+      const text=document.createElement('span'),name=document.createElement('b'),meta=document.createElement('small');
+      name.textContent=storm.name?.cn||storm.number||storm.invest;
+      meta.textContent=`#${storm.id} · ${category.name}${storm.custom?' · 自定义':''}`;
+      text.append(name,meta);item.append(input,text);list.append(item);
+    }
+    visibilitySignature=signature;
+  }else{
+    for(const input of list.querySelectorAll('input[data-source-id]'))input.checked=visible.has(input.dataset.sourceId);
+  }
+  const current=storms.find(storm=>storm.id===selected);
+  count.textContent=`${visible.size} / ${storms.length}`;
+  summary.setAttribute('aria-label',`地图上正在展示 ${visible.size} 个，共 ${storms.length} 个台风；打开多选列表`);
+  $('visibilityAll').disabled=visible.size===storms.length;
+  $('visibilityOnlySelected').disabled=visible.size===1&&current&&visible.has(current.sourceId);
 }
 function updateImpact(s,storms){
   if(s.status==='dissipated'){set('impactType','影响结束');set('impactText',s.cause);return;}
