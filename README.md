@@ -93,11 +93,20 @@ npm test
 - 构建时用运行资源内容生成 12 位版本号，并注入 CSS、入口脚本、ES module import 与数据请求 URL。GitHub Pages 的十分钟静态缓存不会再让新 HTML 组合旧 JavaScript。
 - 新增 `tests/browser/persistence-reopen.test.mjs`：创建两台台风后彻底结束浏览器，再用同一浏览器配置重开，验证两条历史、两个勾选与三系统同屏演示均保留。
 
+## v2.3.0 · 深海仪表视觉收口
+
+- 新增最后加载的 `styles/polish.css`，仅覆盖沉浸布局表现层；复用原有 DOM、控件 ID、事件和同一个模拟 frame，不改变气象规则、命名、风圈或历史保存逻辑。
+- 镜头、风暴切换、播放速度、画质和台风工坊下拉框统一为自定义深色仪器表面、低对比冷边框、暖琥珀焦点与禁用态；移动端使用 16px 字号和至少 44px 的点按高度。
+- 顶部「创造台风 / 镜头 / 声音」整合为一条控制轨；风暴摘要改为可读性更高的观测卡；时间轴、海温等滑杆、按钮、抽屉、命名表和工坊共用同一套圆角、边框与状态反馈。
+- 时间轴新增按当前回放位置填充的琥珀进度，仅用于表现层；回放、暂停、缓存和 3D/2D 共享 frame 的行为不变。
+- `tests/browser/refinement.test.mjs` 新增可见下拉框自定义外观、控制轨、工坊控件与移动端字号/触控尺寸断言；桌面、风眼、移动端、工坊和实验抽屉均完成截图目检。
+
 ## 快手内网副本 · 2026-11-09
 
 - 内网地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/
 - 首次版本：https://typhoonlab-9ec8893f.frontend-cloud.corp.kuaishou.com/ ；v2.2.0 版本：https://typhoonlab-50a2007e.frontend-cloud.corp.kuaishou.com/
 - 内网 v2.2.1 版本 `7cbcdcfd`：https://typhoonlab-7cbcdcfd.frontend-cloud.corp.kuaishou.com/ 。当前版本包含本浏览器历史保存、多选演示、主界面快捷入口与缓存版本参数；气象规则不变。公网地址和 `npm run deploy` 保持不变。
+- 内网 v2.3.0 版本 `cdef1d71`：https://typhoonlab-cdef1d71.frontend-cloud.corp.kuaishou.com/ 。该版本加入深海仪表控件视觉与移动端可读性修正，运行文件与公网 v2.3.0 构建包一致。
 - 通过 `pde-agent` 的 frontend-cloud CLI 发布；登录使用 `appwrite-cf whoami` / `appwrite-cf login-ks`，禁止使用官方 `appwrite` CLI。无需给应用新增 SDK 或依赖。
 - 更新内网：运行 `npm test`、`npm run build`，审查其输出目录后执行 `npx -y --registry https://npm.corp.kuaishou.com/ @codeflicker/frontend-cloud-cli@latest deploy --dir <本次构建目录>`。CLI 自动读取本地 `.static-site-deploy.json`，不要打包整个工作目录。
 - 默认 SSO 与白名单访问。管理入口：https://myflicker.corp.kuaishou.com/web-artifacts ，本项目权限：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl 。本次未更改访问权限。

@@ -12,6 +12,9 @@ try{
   check('map uses full viewport width',await page.$eval('#mapStage',e=>e.getBoundingClientRect().width>=innerWidth-2));
   check('advanced tools start closed',await page.$eval('#workspaceDrawer',e=>!e.open));
   check('essential identity and intensity remain visible',await page.$eval('#stormSummary',e=>e.innerText.includes('达维')&&e.innerText.includes('m/s')&&e.innerText.includes('hPa')&&e.innerText.includes('级')));
+  const desktopSelects=await page.evaluate(()=>[...document.querySelectorAll('select')].filter(e=>e.getBoundingClientRect().width>0).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return{id:e.id,appearance:s.appearance,radius:parseFloat(s.borderRadius),height:r.height};}));
+  check('visible selects use the refined instrument surface',desktopSelects.every(s=>s.appearance==='none'&&s.radius<=8&&s.height>=40));
+  check('primary controls share one integrated rail',await page.$eval('#sceneActions',e=>getComputedStyle(e).borderRadius==='11px'&&e.getBoundingClientRect().height<=54));
   await page.screenshot({path:'Output/immersive-desktop.png'});
   await page.click('#experimentButton');check('experiment drawer opens',await page.$eval('#workspaceDrawer',e=>e.open&&e.dataset.panel==='experiment'));
   await page.keyboard.press('Escape');check('Escape restores trigger focus',await page.evaluate(()=>!document.getElementById('workspaceDrawer').open&&document.activeElement.id==='experimentButton'));
@@ -23,6 +26,7 @@ try{
   await page.select('#cameraSelect','orbit');check('cinematic orbit is selectable',await page.evaluate(()=>window.typhoonLab.theater.mode==='orbit'));
   await page.select('#cameraSelect','eye');await page.evaluate(()=>new Promise(r=>{let n=0;function f(){if(++n===100)r();else requestAnimationFrame(f);}f();}));await page.screenshot({path:'Output/immersive-eye.png'});
   await page.click('#forgeButton');check('creation is one click away',await page.$eval('#forgeDialog',e=>e.open));await page.select('#forgePreset','60');await page.click('#forgeSubmit');
+  check('forge selects inherit the same custom control language',await page.$eval('#forgePreset',e=>getComputedStyle(e).appearance==='none'));
   check('created system immediately selected and listed',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&document.getElementById('stormSwitcher').options.length===2&&Number(document.getElementById('stormSwitcher').value)===window.typhoonLab.state.selected));
   check('creation writes local history immediately',await page.evaluate(()=>window.typhoonLab.state.history.length===1&&window.typhoonLab.state.activeHistory.size===1&&document.querySelectorAll('#historyList .history-item').length===1));
   await page.reload({waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
@@ -46,6 +50,8 @@ try{
   await page.click('#detailsButton');check('opening details refreshes the current frame',await page.evaluate(()=>document.getElementById('intensityChart').getAttribute('aria-label').includes(`已回放 ${Math.floor(window.typhoonLab.state.hour)} 小时`)));await page.click('#drawerClose');
   await page.setViewport({width:390,height:844});await page.screenshot({path:'Output/immersive-mobile.png'});
   check('mobile fits a single screen',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight+1));
+  const mobileSelects=await page.evaluate(()=>[...document.querySelectorAll('select')].filter(e=>e.getBoundingClientRect().width>0).map(e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return{id:e.id,font:parseFloat(s.fontSize),height:r.height};}));
+  check('mobile selects are comfortably readable and tappable',mobileSelects.every(s=>s.font>=16&&s.height>=44));
   check('mobile create and play are visible',await page.evaluate(()=>['forgeButton','playButton'].every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.width>0&&r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;})));
   await page.click('#displayButton');check('mobile display drawer fits',await page.$eval('#workspaceDrawer',e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;}));await page.click('#drawerClose');
   await page.click('#displayButton');await page.click('#cinemaButton');check('immersive cinema has a visible exit',await page.$eval('#cinemaButton',e=>document.body.classList.contains('cinema')&&e.getBoundingClientRect().width>0));await page.click('#cinemaButton');
