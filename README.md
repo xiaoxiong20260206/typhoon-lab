@@ -86,11 +86,18 @@ npm test
 - 历史只保存在本浏览器，不上传服务器或账号，不跨设备同步；清除浏览器数据会删除历史。保存模块做输入清洗，坏数据、存储不可用或容量不足时自动降级，不影响模拟运行。
 - 单元测试新增 `tests/history.test.mjs`；沉浸浏览器回归新增创建即时保存、刷新恢复、多系统同时演示、移出/重新加入演示等检查。
 
+## v2.2.1 · 自动保存可见性与缓存修正
+
+- 主界面在存在历史时显示「历史与多台风 n/n」，可直接打开并滚动到勾选列表；顶部 `v2.2.1` 是当前页面版本标记。
+- 保存状态改为实时探测：`localStorage` 可写时明确显示「已保存」，被隐私模式、站点权限或容量限制阻断时明确显示“未持久保存”，不会再误报已保存。
+- 构建时用运行资源内容生成 12 位版本号，并注入 CSS、入口脚本、ES module import 与数据请求 URL。GitHub Pages 的十分钟静态缓存不会再让新 HTML 组合旧 JavaScript。
+- 新增 `tests/browser/persistence-reopen.test.mjs`：创建两台台风后彻底结束浏览器，再用同一浏览器配置重开，验证两条历史、两个勾选与三系统同屏演示均保留。
+
 ## 快手内网副本 · 2026-11-09
 
 - 内网地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/
 - 首次版本：https://typhoonlab-9ec8893f.frontend-cloud.corp.kuaishou.com/ ；v2.2.0 版本：https://typhoonlab-50a2007e.frontend-cloud.corp.kuaishou.com/
-- 当前与公网 v2.2.0 使用相同的28个运行文件；新增本浏览器历史保存与多选演示，气象规则不变。公网地址和 `npm run deploy` 保持不变。
+- 内网 v2.2.1 版本 `7cbcdcfd`：https://typhoonlab-7cbcdcfd.frontend-cloud.corp.kuaishou.com/ 。当前版本包含本浏览器历史保存、多选演示、主界面快捷入口与缓存版本参数；气象规则不变。公网地址和 `npm run deploy` 保持不变。
 - 通过 `pde-agent` 的 frontend-cloud CLI 发布；登录使用 `appwrite-cf whoami` / `appwrite-cf login-ks`，禁止使用官方 `appwrite` CLI。无需给应用新增 SDK 或依赖。
 - 更新内网：运行 `npm test`、`npm run build`，审查其输出目录后执行 `npx -y --registry https://npm.corp.kuaishou.com/ @codeflicker/frontend-cloud-cli@latest deploy --dir <本次构建目录>`。CLI 自动读取本地 `.static-site-deploy.json`，不要打包整个工作目录。
 - 默认 SSO 与白名单访问。管理入口：https://myflicker.corp.kuaishou.com/web-artifacts ，本项目权限：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl 。本次未更改访问权限。

@@ -29,6 +29,8 @@ try{
   check('history and selected systems restore after reload',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.history.length===1&&document.querySelector('#historyList input').checked));
   await page.click('#forgeButton');await page.select('#forgePreset','60');await page.click('#forgeSubmit');
   check('multiple saved systems demo together',await page.evaluate(()=>window.typhoonLab.frame.storms.length===3&&window.typhoonLab.state.activeHistory.size===2&&[...document.querySelectorAll('#historyList input')].every(input=>input.checked)));
+  check('quick history action exposes the saved/demo count',await page.evaluate(()=>{const button=document.getElementById('historyButton');return !button.hidden&&button.textContent.includes('2/2');}));
+  await page.click('#historyButton');check('quick history action opens the multi-select list',await page.evaluate(()=>document.getElementById('workspaceDrawer').open&&document.getElementById('historyDetails').open&&document.querySelectorAll('#historyList input:checked').length===2));await page.click('#drawerClose');
   await page.$eval('#historyList input',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
   check('history can remove one system from the demo without deleting it',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.history.length===2&&document.querySelectorAll('#historyList input:checked').length===1));
   await page.$eval('#historyList input',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});

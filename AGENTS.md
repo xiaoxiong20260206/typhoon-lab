@@ -48,3 +48,12 @@
 - 历史列表位于实验抽屉/左侧实验面板，可折叠：沉浸布局默认展开，classic 默认收起以保护「创造台风」入口首屏可见。勾选多个历史系统只是加入同一模拟 frame，不实现吞并、复活或相互作用。
 - 坏数据、隐私模式、容量不足必须安全降级并提示，不得阻断模拟。历史最多读取500条。
 - 维护 `tests/history.test.mjs`；`tests/browser/refinement.test.mjs` 必须覆盖创建即时保存、刷新恢复、多选演示、移出和重新加入。发布前继续跑经典 51 项、三维 26 项与性能预算。
+
+## v2.2.1 自动保存与缓存维护
+
+- GitHub Pages 返回 `Cache-Control: max-age=600`。构建必须为 CSS、入口脚本、本地 ES module import 和 JSON 数据请求注入内容哈希版本；不得退回无版本资源 URL。
+- 主界面的 `historyButton` 必须只在存在历史时显示，并直接打开/滚动到历史勾选列表；顶部 `buildTag` 是用户识别新旧页面的版本标记。
+- `storageAvailable()` 必须真实探测 `localStorage`；保存失败时列表只能显示“未持久保存”，不得声称自动保存已生效。
+- 发布前必须运行 `tests/browser/persistence-reopen.test.mjs`。该测试使用固定 `userDataDir` 创建两台台风、彻底关闭浏览器、再启动同一配置验证历史与多选；仅 `page.reload()` 不算通过。
+- 发布后若用户仍见旧版，先检查页面顶部是否有 `v2.2.1`，并核对 HTML 引用的资源版本；不要仅凭上传成功或 CDN 返回 200 宣布生效。
+- 当前公网提交 `f2e3c56d952bec9202c5d504bd2f516d56382a32`，资源版本 `da7166334ba9`；内网最新版本 `7cbcdcfd`。内网匿名访问仍是 SSO 302，应用渲染验收未完成。

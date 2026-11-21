@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {loadSession,saveSession} from '../js/history.js';
+import {loadSession,saveSession,storageAvailable} from '../js/history.js';
 
 function storage(){
   const map=new Map();
@@ -30,4 +30,10 @@ test('malformed or unavailable storage degrades safely',()=>{
 test('storage quota failures do not throw',()=>{
   const store={getItem(){return '{}'},setItem(){throw Error('quota')}};
   assert.equal(saveSession({version:1},store),false);
+});
+
+test('storage availability distinguishes writable and blocked browsers',()=>{
+  assert.equal(storageAvailable(storage()),true);
+  assert.equal(storageAvailable({setItem(){throw Error('blocked')},removeItem(){}}),false);
+  assert.equal(storageAvailable(null),false);
 });

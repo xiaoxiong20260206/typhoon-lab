@@ -16,7 +16,8 @@ const isRuntime=path=>path==='.nojekyll'||['index.html','guide.html','favicon.sv
   ||['assets','js','styles'].some(p=>path===p||path.startsWith(`${p}/`));
 
 execFileSync('npm',['test'],{cwd:root,stdio:'inherit'});
-const directory=execFileSync(process.execPath,['scripts/build-site.mjs'],{cwd:root,encoding:'utf8'}).trim();
+const buildOutput=execFileSync(process.execPath,['scripts/build-site.mjs'],{cwd:root,encoding:'utf8'});
+const directory=buildOutput.trim().split(/\r?\n/).filter(Boolean).at(-1);
 
 const built=[];
 async function collect(dir,prefix=''){
