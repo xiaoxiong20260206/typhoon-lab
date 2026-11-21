@@ -1,5 +1,5 @@
-import {beaufort,describe,ringRadii,weatherAt} from './rules.js';
-import {PLACES} from './geo.js';
+import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=da7166334ba9';
+import {PLACES} from './geo.js?v=da7166334ba9';
 
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -54,7 +54,7 @@ function updateChart(run,hour,s){
   set('peakLabel',`当前峰值 ${s.peak.toFixed(1)} m/s`);
   $('intensityChart').setAttribute('aria-label',`已回放 ${hour} 小时，风速峰值 ${s.peak.toFixed(1)} 米每秒`);
 }
-export function updateHistory(history,active,getStorm,onToggle){
+export function updateHistory(history,active,getStorm,onToggle,storageReady=true){
   const list=$('historyList'),scroll=list.scrollTop;
   list.replaceChildren();
   for(const entry of history){
@@ -69,7 +69,12 @@ export function updateHistory(history,active,getStorm,onToggle){
   }
   list.scrollTop=scroll;
   const count=history.filter(entry=>active.has(entry.id)).length;
-  $('historyCount').textContent=`自动保存 · ${history.length} 个${count?` · 演示 ${count}`:''}`;
+  $('historyCount').textContent=storageReady?`已保存 · ${history.length} 个${count?` · 演示 ${count}`:' · 未演示'}`:`未持久保存 · ${history.length} 个 · 演示 ${count}`;
+  $('historySaveHint').textContent=storageReady?'创建后自动保存在本浏览器，关闭页面再打开仍可找到。':'本浏览器禁止或无法持久保存；当前记录只在本页有效，请检查隐私模式或站点存储权限。';
+  $('historySaveHint').classList.toggle('warning',!storageReady);
+  const quick=$('historyButton'),quickCount=$('historyButtonCount');
+  quick.hidden=!history.length;quickCount.textContent=`${count}/${history.length}`;
+  quick.setAttribute('aria-label',`打开历史创建；${history.length} 个已保存，${count} 个正在演示`);
   list.hidden=!history.length;
   document.querySelector('#historyDetails .fineprint').hidden=!history.length;
 }

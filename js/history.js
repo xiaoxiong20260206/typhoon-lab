@@ -43,3 +43,8 @@ export function saveSession(session,storage=defaultStorage()){
   if(!storage)return false;
   try{storage.setItem(KEY,JSON.stringify(session));return true;}catch{return false;}
 }
+export function storageAvailable(storage=defaultStorage()){
+  if(!storage)return false;
+  const probe=`${KEY}-probe`;
+  try{storage.setItem(probe,'1');storage.removeItem(probe);return true;}catch{return false;}
+}

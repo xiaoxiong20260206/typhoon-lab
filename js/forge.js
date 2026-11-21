@@ -1,5 +1,5 @@
-import {$} from './panels.js';
-import {describe,beaufort} from './rules.js';
+import {$} from './panels.js?v=da7166334ba9';
+import {describe,beaufort} from './rules.js?v=da7166334ba9';
 
 export function bindForge({create,onOpen,onPick}){
   const dialog=$('forgeDialog'),form=$('forgeForm');

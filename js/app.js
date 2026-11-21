@@ -1,14 +1,17 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js';
-import {makeLandTest} from './geo.js';
-import {localizeNames} from './names.js';
-import {PacificMap} from './map.js';
-import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js';
-import {bindForge} from './forge.js';
-import {StormSound} from './sound.js';
-import {initShell} from './shell.js';
-import {loadSession,saveSession} from './history.js';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=da7166334ba9';
+import {makeLandTest} from './geo.js?v=da7166334ba9';
+import {localizeNames} from './names.js?v=da7166334ba9';
+import {PacificMap} from './map.js?v=da7166334ba9';
+import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js?v=da7166334ba9';
+import {bindForge} from './forge.js?v=da7166334ba9';
+import {StormSound} from './sound.js?v=da7166334ba9';
+import {initShell} from './shell.js?v=da7166334ba9';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=da7166334ba9';
 
 const savedSession=loadSession();
+let storageReady=storageAvailable();
+const assetVersion=new URL(import.meta.url).searchParams.get('v')||'';
+if(assetVersion)$('buildTag').title=`资源缓存版本 ${assetVersion}`;
 const state={scenario:['recurve','landfall','ocean'].includes(savedSession?.scenario)?savedSession.scenario:'recurve',env:{...DEFAULT_ENV,...savedSession?.env},seeds:[],history:savedSession?.history||[],activeHistory:new Set(savedSession?.activeHistory||[]),hour:savedSession?.hour??48,selected:1,playing:false,speed:4};
 let map,run,names,isLand,forge,last=0,animationTime=0,lastPaint=0;
 let theater=null,shell;const sound=new StormSound();
@@ -19,6 +22,7 @@ function applySeeds(){
 }
 function persist(quiet=false){
   const saved=saveSession({version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory]});
+  storageReady=saved;
   if(!saved&&!quiet)toast('当前浏览器无法自动保存历史创建，模拟仍可继续使用。');
   return saved;
 }
@@ -27,7 +31,7 @@ function schedulePersist(){clearTimeout(persistTimer);persistTimer=setTimeout(()
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function init(){
   shell=initShell({select:selectStorm});
-  const get=async path=>{const response=await fetch(path);if(!response.ok)throw Error(`${path} 加载失败：${response.status}`);return response.json();};
+  const get=async path=>{const request=assetVersion?`${path}?v=${encodeURIComponent(assetVersion)}`:path,response=await fetch(request);if(!response.ok)throw Error(`${path} 加载失败：${response.status}`);return response.json();};
   const [land,nameData]=await Promise.all([get('assets/land.json'),get('assets/names.json')]);
   if(nameData.names.length!==140||!land.polygons.length)throw Error('本地数据不完整');
   names=localizeNames(nameData);isLand=makeLandTest(land.polygons);
@@ -44,7 +48,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers}};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=da7166334ba9');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -76,7 +80,7 @@ function refresh(){
   updateHistory(state.history,state.activeHistory,entry=>{
     const index=state.seeds.indexOf(entry.seed);
     return index>=0?map.frame.storms.find(storm=>storm.id===index+1):null;
-  },toggleHistory);
+  },toggleHistory,storageReady);
 }
 function selectStorm(id){state.selected=id;sound.cue();refresh();}
 function toggleHistory(id,active){
@@ -151,6 +155,14 @@ function bind(){
     if(index<0)return;
     const [entry]=state.history.splice(index,1);state.activeHistory.delete(entry.id);applySeeds();
     state.selected=Math.min(state.selected,state.seeds.length);rebuild();persist();toast('已撤销最后创建的系统，并同步更新本浏览器历史。');
+  });
+  $('historyButton').addEventListener('click',()=>{
+    if(!state.history.length)return;
+    $('experimentButton').click();
+    requestAnimationFrame(()=>{
+      const details=$('historyDetails');details.open=true;
+      details.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
+    });
   });
   $('namesButton').addEventListener('click',()=>{const used=run.frames[Math.floor(state.hour)].storms.filter(s=>s.name).map(s=>s.name.en);renderNames(names,used);$('namesDialog').showModal();});
   $('closeNames').addEventListener('click',()=>$('namesDialog').close());

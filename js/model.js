@@ -1,5 +1,5 @@
-import {clamp,describe} from './rules.js';
-import {DEFAULT_NAMES} from './names.js';
+import {clamp,describe} from './rules.js?v=da7166334ba9';
+import {DEFAULT_NAMES} from './names.js?v=da7166334ba9';
 
 export const DEFAULT_ENV=Object.freeze({sst:29.5,shear:9,cold:65,size:1.2});
 export const SCENARIOS=Object.freeze({
