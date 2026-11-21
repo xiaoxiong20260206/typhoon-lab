@@ -1,5 +1,14 @@
 # 部署记录
 
+## 2026-11-21 17:36（任务时间） · v2.7.0 内网同步
+
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/
+- 内网版本 `6773b108`：https://typhoonlab-6773b108.frontend-cloud.corp.kuaishou.com/
+- 使用 `pde-agent` 的 frontend-cloud CLI 发布，仅上传 `.publish/site-1795256063597` 中 34 个运行文件，平台打包 1.48 MB；不包含源码、测试、Output 原始数据、配置或本地截图。
+- 本版本与公网 v2.7.0 构建一致：官方台风显示「中文 · 英文」，仍按 IBTrACS 最佳路径只读重放；2D/3D 地图采用更自然的蓝绿配色与更圆润构图。
+- 白屏回归：**未完成，不计通过**。固定地址未登录请求返回 HTTP 302 跳转快手 SSO；`myflicker-browser new_tab` 在 20 秒 `EXECUTION_TIMEOUT`，未获得可检查的应用 DOM。上传成功不等于渲染验收通过，需已授权浏览器复验。
+- 权限管理：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
+
 ## 2026-11-21 · v2.7.0 · 官方中英文名与自然蓝绿地图
 
 - 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/

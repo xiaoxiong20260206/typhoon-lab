@@ -66,3 +66,5 @@ GitHub Pages 资源有十分钟 CDN/浏览器缓存。自 v2.2.1 起，构建会
 - 34 个公网运行文件 HTTP 成功并逐字节匹配本地包；运行文件新增 `assets/official-name-translations.json`。
 - 发布前 44 项模型测试通过；线上 55 项沉浸、13 项完整关闭重开、26 项三维/声音、51 项经典回归及性能预算通过，无 JS/shader 错误，无失败资源。
 - 2D 地图与 3D 场景升级为自然蓝绿视觉，官方台风在库、地图、3D 与观测摘要中同时显示中英文名；气象规则与官方重放数据不变。
+- 内网 v2.7.0 版本 `6773b108`：https://typhoonlab-6773b108.frontend-cloud.corp.kuaishou.com/ 。仅上传 `.publish/site-1795256063597` 的 34 个运行文件，平台打包 1.48 MB。
+- 内网验证：固定地址未登录 HTTP 302 跳转快手 SSO，`myflicker-browser new_tab` 20 秒 `EXECUTION_TIMEOUT`；上传成功不等于渲染验收通过，仍需已授权浏览器复验应用 DOM 与交互。
