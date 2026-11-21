@@ -3,10 +3,11 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url),puppeteer=require(process.env.PUPPETEER_MODULE||'puppeteer');
 const browser=await puppeteer.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
+const siteUrl=new URL(process.env.SITE_URL||'http://127.0.0.1:8770/');
 const page=await browser.newPage(),checks=[],errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);console.log('PASS',name);};
 try{
-  await page.setViewport({width:1440,height:960});await page.goto(process.env.SITE_URL||'http://127.0.0.1:8770/',{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
+  await page.setViewport({width:1440,height:960});await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});await page.evaluate(()=>localStorage.removeItem('typhoon-lab-session-v1'));await page.goto(siteUrl.href,{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
   check('immersive layout is the default',await page.evaluate(()=>document.body.classList.contains('immersive')));
   check('map uses full viewport width',await page.$eval('#mapStage',e=>e.getBoundingClientRect().width>=innerWidth-2));
   check('advanced tools start closed',await page.$eval('#workspaceDrawer',e=>!e.open));
@@ -23,6 +24,15 @@ try{
   await page.select('#cameraSelect','eye');await page.evaluate(()=>new Promise(r=>{let n=0;function f(){if(++n===100)r();else requestAnimationFrame(f);}f();}));await page.screenshot({path:'Output/immersive-eye.png'});
   await page.click('#forgeButton');check('creation is one click away',await page.$eval('#forgeDialog',e=>e.open));await page.select('#forgePreset','60');await page.click('#forgeSubmit');
   check('created system immediately selected and listed',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&document.getElementById('stormSwitcher').options.length===2&&Number(document.getElementById('stormSwitcher').value)===window.typhoonLab.state.selected));
+  check('creation writes local history immediately',await page.evaluate(()=>window.typhoonLab.state.history.length===1&&window.typhoonLab.state.activeHistory.size===1&&document.querySelectorAll('#historyList .history-item').length===1));
+  await page.reload({waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
+  check('history and selected systems restore after reload',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.history.length===1&&document.querySelector('#historyList input').checked));
+  await page.click('#forgeButton');await page.select('#forgePreset','60');await page.click('#forgeSubmit');
+  check('multiple saved systems demo together',await page.evaluate(()=>window.typhoonLab.frame.storms.length===3&&window.typhoonLab.state.activeHistory.size===2&&[...document.querySelectorAll('#historyList input')].every(input=>input.checked)));
+  await page.$eval('#historyList input',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
+  check('history can remove one system from the demo without deleting it',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.history.length===2&&document.querySelectorAll('#historyList input:checked').length===1));
+  await page.$eval('#historyList input',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
+  check('history can rejoin the demo',await page.evaluate(()=>window.typhoonLab.frame.storms.length===3&&document.querySelectorAll('#historyList input:checked').length===2));
   await page.select('#stormSwitcher','1');check('compact switcher changes selection',await page.evaluate(()=>window.typhoonLab.state.selected===1));
   const chartBefore=await page.$eval('#intensityChart',e=>e.innerHTML);
   const before=await page.evaluate(()=>window.typhoonLab.theater);await page.click('#playButton');

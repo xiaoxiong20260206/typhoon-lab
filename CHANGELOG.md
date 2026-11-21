@@ -1,5 +1,15 @@
 # 部署记录
 
+## 2026-11-21 13:39（任务时间） · v2.2.0 · 历史创建与多选演示
+
+- 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交：`1eb05037992fc333f8a7861c7fa0d2aabaa9e152`；Pages 工作流 `44872802830` 成功，状态 built。
+- 新增本浏览器自动保存与恢复：创建成功立即写入 localStorage，重新打开可找到历史；历史列表可勾选多个系统加入同一地图/3D演示。气象规则、命名表和地图数据不变。
+- 28 个公网运行文件逐一 HTTP 成功，内容与本地发布包逐字节一致。
+- 公网线上回归：沉浸布局 29 项、三维/声音 26 项、经典模式 51 项全部通过，无 JS/shader 错误，无失败资源。本地 36 项单元测试通过。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；版本 `50a2007e`：https://typhoonlab-50a2007e.frontend-cloud.corp.kuaishou.com/ 。平台查询确认最新版本 `50a2007e`、访问配置 ready，未修改白名单权限。
+- 内网白屏回归：**未完成，不计通过**。未登录首页和版本地址均 HTTP 302 跳转快手 SSO；MyFlicker 内置浏览器 20 秒打开超时。不能把登录页或平台版本确认当作应用渲染通过，需已授权浏览器复验。
+
 ## 2026-11-09 · 完整源码上传 GitHub
 
 - 仓库：https://github.com/xiaoxiong20260206/typhoon-lab （Public）

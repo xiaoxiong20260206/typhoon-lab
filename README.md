@@ -78,15 +78,23 @@ npm test
 - 同一桌面 Chrome 样本：32→12 个首屏控件；8 系统全域、自动画质为 174200→32344 个三角形（约降低 81%），draw calls 仍为 33。两次帧间隔中位数均约 16.7ms；不代表 FPS 提高 81%，不作设备无关帧率保证。
 - 新增 `tests/browser/refinement.test.mjs`（默认布局与操作）和 `tests/browser/performance.mjs`（8 系统预算与采样）；旧回归脚本使用 classic 布局。所有脚本支持 `SITE_URL`。
 
+## v2.2 · 历史创建与多选演示
+
+- 创建成功后立即写入浏览器 `localStorage`（key：`typhoon-lab-session-v1`）。刷新或重新打开同一站点，会恢复实验情景、环境、回放时刻、历史系统和演示选择。
+- 「实验中的系统」下方新增可折叠「历史创建」列表：勾选即加入当前演示，取消勾选仅移出演示、不删除历史；多个勾选系统会在同一地图/3D frame 中同时演化。
+- 切换情景会保留历史列表，但清空当前演示选择，保证新实验从对应基础扰动开始；撤销会同步删除最后一条历史。
+- 历史只保存在本浏览器，不上传服务器或账号，不跨设备同步；清除浏览器数据会删除历史。保存模块做输入清洗，坏数据、存储不可用或容量不足时自动降级，不影响模拟运行。
+- 单元测试新增 `tests/history.test.mjs`；沉浸浏览器回归新增创建即时保存、刷新恢复、多系统同时演示、移出/重新加入演示等检查。
+
 ## 快手内网副本 · 2026-11-09
 
 - 内网地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/
-- 首次版本：https://typhoonlab-9ec8893f.frontend-cloud.corp.kuaishou.com/
-- 当前与公网 v2.1.0 使用相同的27个运行文件，不修改应用或气象规则。公网地址和 `npm run deploy` 保持不变。
+- 首次版本：https://typhoonlab-9ec8893f.frontend-cloud.corp.kuaishou.com/ ；v2.2.0 版本：https://typhoonlab-50a2007e.frontend-cloud.corp.kuaishou.com/
+- 当前与公网 v2.2.0 使用相同的28个运行文件；新增本浏览器历史保存与多选演示，气象规则不变。公网地址和 `npm run deploy` 保持不变。
 - 通过 `pde-agent` 的 frontend-cloud CLI 发布；登录使用 `appwrite-cf whoami` / `appwrite-cf login-ks`，禁止使用官方 `appwrite` CLI。无需给应用新增 SDK 或依赖。
 - 更新内网：运行 `npm test`、`npm run build`，审查其输出目录后执行 `npx -y --registry https://npm.corp.kuaishou.com/ @codeflicker/frontend-cloud-cli@latest deploy --dir <本次构建目录>`。CLI 自动读取本地 `.static-site-deploy.json`，不要打包整个工作目录。
 - 默认 SSO 与白名单访问。管理入口：https://myflicker.corp.kuaishou.com/web-artifacts ，本项目权限：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl 。本次未更改访问权限。
-- 验证状态：平台已确认版本；本地33项模型与101项浏览器检查通过。内网未登录请求 HTTP 302 跳转 SSO；独立 Chrome 无登录态，内置浏览器超时，**内网白屏/完整交互回归待已授权浏览器复验**，不视为通过。
+- 验证状态：平台已确认 v2.2.0；本地36项模型与线上106项浏览器检查通过。内网未登录请求 HTTP 302 跳转 SSO；内置浏览器超时，**内网白屏/完整交互回归待已授权浏览器复验**，不视为通过。
 - 浏览器脚本仍复用上述三套，指定 `SITE_URL=https://typhoonlab.frontend-cloud.corp.kuaishou.com/` 即切换目标；独立 Chrome 不继承用户登录态，不能仅靠设置地址完成 SSO 后的验证。详见 `docs/deployment.md`。
 
 ## 源码仓库 · 2026-11-09
