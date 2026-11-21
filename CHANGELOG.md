@@ -1,5 +1,20 @@
 # 部署记录
 
+## 2026-11-21 22:43（任务时间） · v2.8.1 公网与内网发布
+
+- 公网固定地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交 `7d588eec9625c7a61df4f343c1838f1b7e1e4561`，Pages 工作流 `44913923967` 成功；34 个运行文件逐字节匹配，页面标记 `v2.8.1`、资源版本 `f105babb07bd`。
+- 公网回归：模型 48 项、旧版迁移 8 项、完整关闭重开 14 项、沉浸布局 55 项、三维/声音 26 项、经典模式 51 项及性能预算全部通过。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；新版本 `21cb9426`：https://typhoonlab-21cb9426.frontend-cloud.corp.kuaishou.com/ 。仅上传 34 个运行文件，平台打包 1.74 MB。
+- 内网白屏回归：**未完成，不计通过**。固定地址与版本地址未登录均 HTTP 302 跳转快手 SSO；`myflicker-browser new_tab` 90 秒 `EXECUTION_TIMEOUT`，未获得应用 DOM。上传成功不等于渲染验收通过。
+- 权限未改：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
+
+## 2026-11-21 · v2.8.1 · 旧版用户数据兼容与自动镜像
+
+- 沿用旧版本 `typhoon-lab-session-v1` 数据键，完整兼容自建台风、自定义名称、情景、环境、回放时刻、自建选择、官方台风选择和地图展示集合。
+- 增加 `typhoon-lab-session-v1-backup` 自动镜像；主记录缺失、损坏或为空壳时回退到镜像，删除操作同步覆盖两份记录。
+- 新增旧版数据迁入与主记录损坏恢复的完整关闭浏览器回归。
+
 ## 2026-11-21 18:58（任务时间） · v2.8.0 公网与内网发布
 
 - 公网固定地址：https://xiaoxiong20260206.github.io/typhoon-lab/

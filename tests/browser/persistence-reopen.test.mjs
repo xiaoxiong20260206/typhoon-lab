@@ -45,7 +45,7 @@ async function createStorm(page,{lon,lat,customName=''}){
 try{
   let page=await openPage(true);
   await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});
-  await page.evaluate(()=>localStorage.removeItem('typhoon-lab-session-v1'));
+  await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});
   await page.goto(siteUrl.href,{waitUntil:'networkidle0'});
   await page.waitForFunction(()=>!!window.typhoonLab);
 
@@ -64,6 +64,7 @@ try{
   check('edited and custom names plus map visibility are saved before close',await page.evaluate(()=>window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')&&window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.visibleStorms.size===3&&window.typhoonLab.map.visibleStorms===3));
   check('two history selections are visible before close',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
   check('session is written to localStorage before close',await page.evaluate(()=>{const data=JSON.parse(localStorage.getItem('typhoon-lab-session-v1'));return data.history.length===2&&data.activeHistory.length===2&&data.activeOfficial.length===1;}));
+  check('the mirror keeps the same complete session',await page.evaluate(()=>localStorage.getItem('typhoon-lab-session-v1-backup')===localStorage.getItem('typhoon-lab-session-v1')));
   await page.click('#historyButton');
   check('unified history entry opens both saved selections directly',await page.evaluate(()=>document.getElementById('stormLibraryDialog').open&&document.getElementById('libraryHistoryTab').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#libraryHistoryList input:checked').length===2));
   await page.click('#closeStormLibrary');

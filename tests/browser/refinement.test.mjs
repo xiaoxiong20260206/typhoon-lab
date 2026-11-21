@@ -7,7 +7,7 @@ const siteUrl=new URL(process.env.SITE_URL||'http://127.0.0.1:8770/');
 const page=await browser.newPage(),checks=[],errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);console.log('PASS',name);};
 try{
-  await page.setViewport({width:1440,height:960});await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});await page.evaluate(()=>localStorage.removeItem('typhoon-lab-session-v1'));await page.goto(siteUrl.href,{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
+  await page.setViewport({width:1440,height:960});await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});await page.goto(siteUrl.href,{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
   check('immersive layout is the default',await page.evaluate(()=>document.body.classList.contains('immersive')));
   check('map uses full viewport width',await page.$eval('#mapStage',e=>e.getBoundingClientRect().width>=innerWidth-2));
   check('advanced tools start closed',await page.$eval('#workspaceDrawer',e=>!e.open));

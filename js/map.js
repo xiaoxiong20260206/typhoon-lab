@@ -1,6 +1,6 @@
-import {BOUNDS,PLACES} from './geo.js?v=49c5a791b041';
-import {clamp,describe,weatherAt} from './rules.js?v=49c5a791b041';
-import {WeatherRenderer} from './weather.js?v=49c5a791b041';
+import {BOUNDS,PLACES} from './geo.js?v=f105babb07bd';
+import {clamp,describe,weatherAt} from './rules.js?v=f105babb07bd';
+import {WeatherRenderer} from './weather.js?v=f105babb07bd';
 
 export class PacificMap{
   constructor(canvas,polygons,isLand){

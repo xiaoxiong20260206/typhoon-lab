@@ -1,6 +1,6 @@
-import {$} from './panels.js?v=49c5a791b041';
-import {describe,displayName} from './rules.js?v=49c5a791b041';
-import {cleanCustomName} from './naming.js?v=49c5a791b041';
+import {$} from './panels.js?v=f105babb07bd';
+import {describe,displayName} from './rules.js?v=f105babb07bd';
+import {cleanCustomName} from './naming.js?v=f105babb07bd';
 
 const stormLabel=storm=>displayName(storm);
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {loadSession,saveSession,storageAvailable} from '../js/history.js';
+import {BACKUP_KEY,loadSession,saveSession,storageAvailable,SESSION_KEY} from '../js/history.js';
 
 function storage(){
   const map=new Map();
@@ -20,6 +20,41 @@ test('saved history survives reload and ignores inactive ids',()=>{
   assert.deepEqual(loaded.activeOfficial,['2022268N25154']);
   assert.equal(loaded.history[0].seed.customName,'海棠');
   assert.deepEqual(loaded.visibleStorms,['a','missing']);
+  assert.equal(store.getItem(BACKUP_KEY),store.getItem(SESSION_KEY));
+});
+
+test('the automatic mirror restores a missing or malformed primary record',()=>{
+  const store=storage();
+  const session={version:1,scenario:'landfall',env:{sst:27,shear:8,cold:40,size:1.1},hour:36,history:[{id:'legacy',createdAt:1,seed:{lon:140,lat:16,wind:28,size:1.1,bornAt:12}}],activeHistory:['legacy'],activeOfficial:[],visibleStorms:['base','legacy']};
+  assert.equal(saveSession(session,store),true);
+  assert.ok(store.getItem(BACKUP_KEY));
+  store.removeItem(SESSION_KEY);
+  assert.equal(loadSession(store).history[0].id,'legacy');
+  store.setItem(SESSION_KEY,'{bad');
+  assert.equal(loadSession(store).history[0].id,'legacy');
+  assert.equal(store.getItem(SESSION_KEY),store.getItem(BACKUP_KEY));
+  store.setItem(SESSION_KEY,'{bad');store.setItem(BACKUP_KEY,'{bad');
+  assert.equal(loadSession(store),null);
+});
+
+test('older session fields migrate without dropping saved creations',()=>{
+  const store=storage();
+  store.setItem(SESSION_KEY,JSON.stringify({version:1,scenario:'ocean',env:{sst:30,shear:5,cold:10,size:1.4},hour:30,history:[{id:'old-a',createdAt:1,seed:{lon:142,lat:16,wind:24,size:1.4,bornAt:12,customName:'旧版一号'}},{id:'old-b',createdAt:2,seed:{lon:151,lat:20,wind:40,size:1.3,bornAt:18}}],activeHistory:['old-a','old-b']}));
+  const loaded=loadSession(store);
+  assert.equal(loaded.history.length,2);
+  assert.deepEqual(loaded.activeHistory,['old-a','old-b']);
+  assert.deepEqual(loaded.activeOfficial,[]);
+  assert.equal(loaded.visibleStorms,null);
+  assert.equal(loaded.history[0].seed.customName,'旧版一号');
+});
+
+test('the mirror follows deletions instead of resurrecting removed storms',()=>{
+  const store=storage();
+  const first={version:1,history:[{id:'a',seed:{lon:145,lat:15,wind:18,size:1.2,bornAt:20}},{id:'b',seed:{lon:150,lat:18,wind:22,size:1.2,bornAt:24}}],activeHistory:['a','b']};
+  saveSession(first,store);
+  saveSession({...first,history:[first.history[0]],activeHistory:['a']},store);
+  store.removeItem(SESSION_KEY);
+  assert.deepEqual(loadSession(store).history.map(entry=>entry.id),['a']);
 });
 
 test('malformed or unavailable storage degrades safely',()=>{

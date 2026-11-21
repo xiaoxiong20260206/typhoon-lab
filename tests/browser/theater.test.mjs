@@ -54,7 +54,7 @@ try{
   await page.$eval('#sceneCanvas',c=>c.dispatchEvent(new Event('webglcontextlost',{cancelable:true})));
   check('WebGL context loss falls back without deleting systems',await page.evaluate(()=>!window.typhoonLab.theater.active&&window.typhoonLab.frame.storms.length===8&&!document.getElementById('mapStage').classList.contains('three-active')));
   const fallback=await browser.newPage();await fallback.setRequestInterception(true);fallback.on('request',r=>new URL(r.url()).pathname.endsWith('/assets/vendor/three.min.js')?r.abort():r.continue());
-  await fallback.goto(new URL('guide.html',url).href,{waitUntil:'domcontentloaded'});await fallback.evaluate(()=>localStorage.removeItem('typhoon-lab-session-v1'));
+  await fallback.goto(new URL('guide.html',url).href,{waitUntil:'domcontentloaded'});await fallback.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});
   await fallback.goto(url,{waitUntil:'networkidle0'});await fallback.waitForFunction(()=>!!window.typhoonLab);check('missing 3D dependency keeps 2D app working',await fallback.evaluate(()=>!window.typhoonLab.theater.active&&window.typhoonLab.frame.storms.length===1));await fallback.close();
   check('no JS or shader errors',errors.length===0);
   const diagnostics=await page.evaluate(()=>window.typhoonLab.theater);

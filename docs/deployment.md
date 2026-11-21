@@ -76,4 +76,12 @@ GitHub Pages 资源有十分钟 CDN/浏览器缓存。自 v2.2.1 起，构建会
 - 公网发布提交 `6494125f8503e68fffab31e048671e8429ec3b0a`，Pages 工作流 `44896389380` 成功；资源版本 `49c5a791b041`，34 个运行文件与本地包逐字节一致，公网完整浏览器回归通过。
 - 内网版本 `ffd815a6`：https://typhoonlab-ffd815a6.frontend-cloud.corp.kuaishou.com/ ；上传 `.publish/site-1795258339406` 的 34 个运行文件，平台打包 1.74 MB。
 - 内网固定地址与版本地址未登录仍返回 SSO 302，`myflicker-browser new_tab` 在 90 秒 `EXECUTION_TIMEOUT`；**内网应用渲染验收未完成，不计通过**。
+
+## v2.8.1 · 旧版用户数据兼容与自动镜像 · 2026-11-21
+
+- 主数据键继续使用 `typhoon-lab-session-v1`，同时镜像到 `typhoon-lab-session-v1-backup`；旧版缺少新增字段不会丢历史。
+- 主记录缺失、损坏或仅剩空壳时自动使用镜像；删除操作同时写两份，避免复活已删除记录。
+- `tests/browser/legacy-migration.test.mjs` 覆盖旧数据结构迁入、新版本新增、完整关闭重开、主记录损坏与镜像恢复。
+- 公网发布提交 `7d588eec9625c7a61df4f343c1838f1b7e1e4561`，Pages 工作流 `44913923967` 成功；资源版本 `f105babb07bd`，34 个运行文件与本地包逐字节一致，公网完整回归通过。
+- 内网版本 `21cb9426`：https://typhoonlab-21cb9426.frontend-cloud.corp.kuaishou.com/ ；上传 34 个运行文件，平台打包 1.74 MB。固定地址与版本地址未登录仍 HTTP 302，内置浏览器 90 秒超时；**内网应用渲染验收未完成，不计通过**。
 - 内网验证：固定地址未登录 HTTP 302 跳转快手 SSO，`myflicker-browser new_tab` 20 秒 `EXECUTION_TIMEOUT`；上传成功不等于渲染验收通过，仍需已授权浏览器复验应用 DOM 与交互。

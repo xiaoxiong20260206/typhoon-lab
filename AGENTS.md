@@ -121,3 +121,13 @@
 - `tests/official-storms.test.mjs` 固化 CMA 数量、年份、来源名称和 URL；发布前继续运行完整模型、持久化、沉浸布局、三维/声音、经典模式与性能回归。
 - 当前公网 v2.8.0 提交 `6494125f8503e68fffab31e048671e8429ec3b0a`，资源版本 `49c5a791b041`；Pages 工作流 `44896389380` 成功，34 个运行文件逐字节一致，公网完整浏览器回归通过。
 - 当前内网版本 `ffd815a6`，上传 `.publish/site-1795258339406` 中 34 个运行文件，平台打包 1.74 MB；固定地址与版本地址未登录均返回 SSO 302，`myflicker-browser new_tab` 90 秒 `EXECUTION_TIMEOUT`，**内网应用渲染验收仍未完成，不计通过**。
+
+## v2.8.1 旧版用户数据兼容与自动镜像维护
+
+- 不得修改 `typhoon-lab-session-v1` 主键；`js/history.js` 同时维护 `${SESSION_KEY}-backup`，但读取时以有效主记录为准，避免旧备份复活已删除系统。
+- 主键只有 JSON 对象且至少包含 `history`、`scenario` 或 `hour` 之一才视为有效；空壳 `{}`、损坏 JSON 或缺失主键时读取备份。保存时两份记录写同一序列化字符串。
+- 旧版缺少 `activeOfficial`、`visibleStorms` 或 `customName` 时按既有默认值迁移；不得因字段缺失丢弃自建历史。
+- `tests/browser/legacy-migration.test.mjs` 必须覆盖旧版数据启动、新增记录、备份同步、彻底关闭浏览器、主记录损坏与镜像恢复；`persistence-reopen.test.mjs` 必须断言主备份一致。
+- 本地数据不能跨浏览器、公网/内网域名或固定/版本域名自动同步；需要迁移时不得声称已经实现云同步。
+- 当前公网 v2.8.1 提交 `7d588eec9625c7a61df4f343c1838f1b7e1e4561`，资源版本 `f105babb07bd`；Pages 工作流 `44913923967` 成功，34 个运行文件逐字节一致，公网完整浏览器回归通过。
+- 当前内网版本 `21cb9426`，上传 34 个运行文件，平台打包 1.74 MB；固定地址与版本地址未登录均返回 SSO 302，`myflicker-browser new_tab` 90 秒 `EXECUTION_TIMEOUT`，**内网应用渲染验收仍未完成，不计通过**。
