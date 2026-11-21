@@ -54,7 +54,7 @@ try{
   await page.click('#stormLibraryButton');
   await page.$eval('#libraryCurrentList input[type=checkbox]',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.click('#libraryOfficialTab');
-  await page.$eval('#libraryOfficialSearch',input=>{input.value='HINNAMNOR';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.$eval('#libraryOfficialSearch',input=>{input.value='轩岚诺';input.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.click('#libraryOfficialList .library-check input');
   await page.waitForFunction(()=>window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4);
   await page.click('#libraryHistoryTab');
@@ -75,7 +75,7 @@ try{
   await page.click('#historyButton');check('history survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&document.querySelectorAll('#libraryHistoryList .library-history-row').length===2));
   check('edited and custom names survive a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')));
   check('multi-system selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.activeHistory.size===2&&window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4));
-  check('official selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(storm=>storm.name?.en==='HINNAMNOR'&&storm.official?.season===2022)));
+  check('official selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(storm=>storm.name?.en==='HINNAMNOR'&&storm.name?.cn==='轩岚诺'&&storm.official?.season===2022)));
   await page.click('#libraryCurrentTab');check('map visibility choice survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.visibleStorms.size===3&&window.typhoonLab.map.visibleStorms===3&&[...document.querySelectorAll('#libraryCurrentList input[type=checkbox]')].filter(i=>i.checked).length===3));
   check('restored history selections remain checked in the UI',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
   await page.click('#libraryHistoryTab');const deleted=await page.$('#libraryHistoryList .library-delete-button');await deleted.click();await deleted.click();

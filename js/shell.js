@@ -1,4 +1,4 @@
-import {describe,beaufort} from './rules.js?v=aced45d83ba1';
+import {describe,beaufort,displayName,summaryName} from './rules.js?v=92ed7ac2270e';
 
 // Reuse the original controls: one ID, one handler and one simulation frame.
 export function initShell({select}){
@@ -44,11 +44,11 @@ export function initShell({select}){
   return {close,update(frame,selected){
     const s=frame.storms.find(s=>s.id===selected)||frame.storms[0],c=describe(s);
     $('summaryCategory').textContent=`${c.name} / ${s.number||s.invest}${s.retired?' · 已停编':''}`;
-    $('summaryCategory').style.color=c.color;$('summaryName').textContent=s.name?.cn||'未命名';
+    $('summaryCategory').style.color=c.color;$('summaryName').textContent=summaryName(s);
     $('summaryNumbers').textContent=`${s.status==='dissipated'?'—':beaufort(s.wind)} 级　${s.wind.toFixed(1)} m/s　${s.pressure} hPa`;
     $('summaryStatus').textContent=s.status==='dissipated'?'已消散 · 可回放它的一生':s.onLand?'中心在陆地 · 正在减弱':s.retired?'温带气旋 · 风雨仍在持续':'西北太平洋 · 海上活动';
     const signature=frame.storms.map(s=>`${s.id}:${s.name?.cn||s.number||s.invest}`).join('|');
-    if(signature!==listSignature){$('stormSwitcher').replaceChildren(...frame.storms.map(s=>new Option(`${s.name?.cn||s.number||s.invest}${s.name?'':' · 未命名'}`,s.id)));listSignature=signature;}
+    if(signature!==listSignature){$('stormSwitcher').replaceChildren(...frame.storms.map(s=>new Option(displayName(s)+(s.name?'':' · 未命名'),s.id)));listSignature=signature;}
     $('stormSwitcher').value=selected;
   }};
 }

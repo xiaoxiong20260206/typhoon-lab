@@ -42,3 +42,19 @@ export function describe(s){
   if(s.number&&s.wind<10.8)return {name:'残余低压',code:'L',color:'#9baba5'};
   return classify(s.wind);
 }
+
+export function displayName(storm){
+  if(storm?.official&&storm.name){
+    const cn=storm.name.cn||storm.name.en;
+    return cn&&cn!==storm.name.en?cn+' · '+storm.name.en:storm.name.en;
+  }
+  return storm?.name?.cn||storm?.number||storm?.invest||'未命名';
+}
+
+export function summaryName(storm){
+  if(storm?.official&&storm.name){
+    const cn=storm.name.cn||storm.name.en;
+    return cn&&cn!==storm.name.en?cn+' · '+storm.name.en:storm.name.en;
+  }
+  return storm?.name?.cn||'未命名';
+}

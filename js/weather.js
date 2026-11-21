@@ -1,4 +1,4 @@
-import {clamp,weatherAt,radiusAt,windRings,describe} from './rules.js?v=aced45d83ba1';
+import {clamp,weatherAt,radiusAt,windRings,describe,displayName} from './rules.js?v=92ed7ac2270e';
 
 const TAU=Math.PI*2;
 function random(seed){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};}
@@ -128,7 +128,7 @@ export class WeatherRenderer{
     ctx.restore();
   }
   marker(ctx,map,s,selected){
-    const [x,y]=map.project(s.lon,s.lat),c=describe(s),rawName=s.name?.cn||s.number||s.invest,name=rawName.length>14?`${rawName.slice(0,13)}…`:rawName;
+    const [x,y]=map.project(s.lon,s.lat),c=describe(s),rawName=displayName(s),name=rawName.length>18?`${rawName.slice(0,17)}…`:rawName;
     ctx.save();ctx.strokeStyle=c.color;ctx.lineWidth=1.4;
     if(selected){ctx.beginPath();ctx.arc(x,y,13,0,TAU);ctx.stroke();}
     ctx.fillStyle='#102329';ctx.beginPath();ctx.arc(x,y,5,0,TAU);ctx.fill();ctx.stroke();

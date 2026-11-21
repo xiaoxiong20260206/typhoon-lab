@@ -1,6 +1,6 @@
-import {clamp,describe,radiusAt,windRings} from './rules.js?v=aced45d83ba1';
-import {surfacePoint,geographicPoint,cloudProfile,cloudDetail} from './scene-math.js?v=aced45d83ba1';
-import {PLACES} from './geo.js?v=aced45d83ba1';
+import {clamp,describe,displayName,radiusAt,windRings} from './rules.js?v=92ed7ac2270e';
+import {surfacePoint,geographicPoint,cloudProfile,cloudDetail} from './scene-math.js?v=92ed7ac2270e';
+import {PLACES} from './geo.js?v=92ed7ac2270e';
 
 const TAU=Math.PI*2;
 const seeded=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
@@ -11,13 +11,13 @@ export class StormTheater{
   constructor(canvas,map,polygons,onFallback){
     const T=window.THREE;if(!T)throw Error('3D 引擎未加载');this.T=T;this.canvas=canvas;this.map=map;this.onFallback=onFallback;
     this.renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
-    this.renderer.setClearColor('#081621');this.renderer.outputEncoding=T.sRGBEncoding;
-    this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=.95;
+    this.renderer.setClearColor('#0b2844');this.renderer.outputEncoding=T.sRGBEncoding;
+    this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.02;
     this.renderer.localClippingEnabled=true;
     this.bounds=[new T.Plane(new T.Vector3(1,0,0),31.5),new T.Plane(new T.Vector3(-1,0,0),31.5),new T.Plane(new T.Vector3(0,0,1),27.5),new T.Plane(new T.Vector3(0,0,-1),27.5)];
-    this.scene=new T.Scene();this.scene.fog=new T.FogExp2('#0d2234',.0055);
-    this.camera=new T.PerspectiveCamera(43,1,.1,240);this.target=new T.Vector3();this.desiredTarget=new T.Vector3();
-    this.scene.add(new T.HemisphereLight('#b5cfe0','#162633',.62));
+    this.scene=new T.Scene();this.scene.fog=new T.FogExp2('#0b2844',.0055);
+    this.camera=new T.PerspectiveCamera(41,1,.1,240);this.target=new T.Vector3();this.desiredTarget=new T.Vector3();
+    this.scene.add(new T.HemisphereLight('#bfe3f3','#143b4b',.68));
     const sun=new T.DirectionalLight('#ffe9cd',1.7);sun.position.set(-40,24,-22);this.scene.add(sun);
     this.active=true;this.mode='follow';this.quality='auto';this.ratio=Math.min(devicePixelRatio,1.6);this.distance=1;this.yaw=0;this.pitch=.87;this.dirty=true;this.visualTime=0;this.frameCount=0;
     this.storms=new Map();this.overlays=new T.Group();this.scene.add(this.overlays);
@@ -35,11 +35,11 @@ export class StormTheater{
   buildWorld(polygons){
     const T=this.T;
     const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=1536;const ctx=canvas.getContext('2d');
-    ctx.fillStyle='#243b3b';ctx.strokeStyle='#6d8686';ctx.lineWidth=1.2;ctx.beginPath();
+    ctx.fillStyle='#2f7a48';ctx.strokeStyle='#c7e4cf';ctx.lineWidth=1.3;ctx.beginPath();
     for(const rings of polygons)for(const ring of rings){ring.forEach(([lon,lat],i)=>{const x=(lon-100)/75*2048,y=(55-lat)/55*1536;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();}
     ctx.fill('evenodd');ctx.stroke();
     ctx.save();ctx.clip('evenodd');const rng=seeded(141);
-    for(let i=0;i<22000;i++){ctx.fillStyle=i%3?'#acc4a20c':'#091f2911';ctx.beginPath();ctx.ellipse(rng()*2048,rng()*1536,2+rng()*12,1+rng()*5,-.6,0,TAU);ctx.fill();}ctx.restore();
+    for(let i=0;i<22000;i++){ctx.fillStyle=i%3?'#7cbe6a16':'#0b3a2418';ctx.beginPath();ctx.ellipse(rng()*2048,rng()*1536,2+rng()*12,1+rng()*5,-.6,0,TAU);ctx.fill();}ctx.restore();
     const texture=new T.CanvasTexture(canvas);texture.encoding=T.sRGBEncoding;texture.anisotropy=Math.min(8,this.renderer.capabilities.getMaxAnisotropy());
     const land=new T.Mesh(this.geometry(),new T.MeshStandardMaterial({map:texture,transparent:true,alphaTest:.3,roughness:.95,metalness:0}));land.position.y=.025;this.scene.add(land);
     this.water=new T.Mesh(this.geometry(),new T.ShaderMaterial({uniforms:{time:{value:0}},vertexShader:`varying vec3 vP; varying vec3 vN; void main(){vP=position;vN=normal;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,fragmentShader:`
@@ -52,8 +52,8 @@ export class StormTheater{
         vec3 v=normalize(cameraPosition-vP),l=normalize(vec3(-.55,1.,-.35));
         float spec=pow(max(dot(n,normalize(l+v)),0.),110.);
         float fres=pow(1.-max(dot(n,v),0.),3.);
-        vec3 color=mix(vec3(.017,.075,.11),vec3(.027,.20,.26),.45+.25*sin(p.y*.07));
-        color+=vec3(.42,.40,.32)*spec*.6+vec3(.08,.14,.19)*fres+vec3(.005,.009,.012)*(a+b);
+        vec3 color=mix(vec3(.02,.12,.22),vec3(.04,.24,.36),.45+.25*sin(p.y*.07));
+        color+=vec3(.42,.40,.32)*spec*.6+vec3(.10,.16,.22)*fres+vec3(.006,.012,.016)*(a+b);
         gl_FragColor=vec4(color,1.);
       }` }));this.scene.add(this.water);
     const grid=[];
@@ -155,7 +155,7 @@ export class StormTheater{
       const p=surfacePoint(s.lon,s.lat);item.group.position.set(p.x,p.y,p.z);item.storm=s;
       item.group.visible=this.map.layers.clouds&&cloudProfile(s).opacity>0;
       item.cloud.material.uniforms.opacity.value=cloudProfile(s).opacity;item.sheet.material.opacity=cloudProfile(s).opacity*.86;
-      const text=`${s.name?.cn||s.number||s.invest} · ${describe(s).name}`;if(item.label.textContent!==text){item.label.textContent=text;item.labelWidth=0;}item.label.classList.toggle('selected',s.id===this.map.selected);item.label.style.setProperty('--storm-color',describe(s).color);
+      const text=displayName(s)+' · '+describe(s).name;if(item.label.textContent!==text){item.label.textContent=text;item.labelWidth=0;}item.label.classList.toggle('selected',s.id===this.map.selected);item.label.style.setProperty('--storm-color',describe(s).color);
     }
     this.usedLines=new Set();
     if(this.trackRun!==this.map.run){this.trackRun=this.map.run;this.tracks=new Map();for(const f of this.trackRun.frames)for(const s of f.storms)if((f.hour-s.bornAt)%2===0){if(!this.tracks.has(s.id))this.tracks.set(s.id,[]);this.tracks.get(s.id).push(vec(T,surfacePoint(s.lon,s.lat,.08)));}}

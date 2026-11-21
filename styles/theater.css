@@ -1,6 +1,7 @@
 :root{--bg:#0f172a;--panel:#142333;--panel-raised:#1e293b;--text:#f1f5f9;--muted:#cbd5e1;--faint:#94a3b8;--line:#334155}
 .masthead{background:#101e2c}.experiment-panel,.observation-panel{background:var(--panel)}
-.map-stage{isolation:isolate;background:#081621}
+.map-stage{isolation:isolate;background:#07223a}
+.map-stage canvas{border-radius:18px}
 #sceneCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 .three-active #mapCanvas{visibility:hidden;pointer-events:none}
 .three-active .map-coordinate{display:none}

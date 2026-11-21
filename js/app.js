@@ -1,14 +1,15 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=aced45d83ba1';
-import {makeLandTest} from './geo.js?v=aced45d83ba1';
-import {localizeNames} from './names.js?v=aced45d83ba1';
-import {PacificMap} from './map.js?v=aced45d83ba1';
-import {$,updatePanels,renderNames,toast} from './panels.js?v=aced45d83ba1';
-import {bindForge} from './forge.js?v=aced45d83ba1';
-import {bindStormLibrary} from './library.js?v=aced45d83ba1';
-import {StormSound} from './sound.js?v=aced45d83ba1';
-import {initShell} from './shell.js?v=aced45d83ba1';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=aced45d83ba1';
-import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=aced45d83ba1';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=92ed7ac2270e';
+import {summaryName} from './rules.js?v=92ed7ac2270e';
+import {makeLandTest} from './geo.js?v=92ed7ac2270e';
+import {localizeNames} from './names.js?v=92ed7ac2270e';
+import {PacificMap} from './map.js?v=92ed7ac2270e';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=92ed7ac2270e';
+import {bindForge} from './forge.js?v=92ed7ac2270e';
+import {bindStormLibrary} from './library.js?v=92ed7ac2270e';
+import {StormSound} from './sound.js?v=92ed7ac2270e';
+import {initShell} from './shell.js?v=92ed7ac2270e';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=92ed7ac2270e';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=92ed7ac2270e';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
@@ -41,10 +42,10 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 async function init(){
   shell=initShell({select:selectStorm});
   const get=async path=>{const request=assetVersion?`${path}?v=${encodeURIComponent(assetVersion)}`:path,response=await fetch(request);if(!response.ok)throw Error(`${path} 加载失败：${response.status}`);return response.json();};
-  const [land,nameData,officialData]=await Promise.all([get('assets/land.json'),get('assets/names.json'),get('assets/official-storms.json')]);
-  if(nameData.names.length!==140||!land.polygons.length||officialData?.version!==1||!Array.isArray(officialData.storms)||officialData.count!==officialData.storms.length)throw Error('本地数据不完整');
+  const [land,nameData,officialData,translations]=await Promise.all([get('assets/land.json'),get('assets/names.json'),get('assets/official-storms.json'),get('assets/official-name-translations.json')]);
+  if(nameData.names.length!==140||!land.polygons.length||officialData?.version!==1||!Array.isArray(officialData.storms)||officialData.count!==officialData.storms.length||translations?.version!==1||translations.count!==Object.keys(translations.names).length)throw Error('本地数据不完整');
   names=localizeNames(nameData);isLand=makeLandTest(land.polygons);
-  officialStorms=officialData.storms;
+  officialStorms=officialData.storms.map(storm=>({...storm,nameZh:translations.names[storm.name]||storm.name}));
   const officialIds=new Set(officialStorms.map(storm=>storm.id));
   for(const id of state.activeOfficial)if(!officialIds.has(id))state.activeOfficial.delete(id);
   map=new PacificMap($('mapCanvas'),land.polygons,isLand);
@@ -60,7 +61,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=aced45d83ba1');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=92ed7ac2270e');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -92,7 +93,7 @@ function refresh(){
   $('nextName').textContent=`下一名：${names[count%names.length].cn} · 第 ${Math.floor(count/names.length)+1} 轮`;
   $('undoButton').hidden=!state.history.some(entry=>state.activeHistory.has(entry.id));
   const selected=map.frame.storms.find(s=>s.id===state.selected);
-  $('cinemaReadout').textContent=`${selected.name?.cn||'未命名'} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
+  $('cinemaReadout').textContent=`${summaryName(selected)} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
   $('theaterCaption').querySelector('strong').textContent=selected.status==='dissipated'?'风暴终将归于平静。':selected.status==='extratropical'?'在北方，成为另一种风暴。':'走近风暴的中心。';
   map.draw();updatePlayback();
   updateLibrary();
@@ -143,7 +144,7 @@ function toggleOfficial(id,active){
   if(active)state.activeOfficial.add(id);else state.activeOfficial.delete(id);
   if(state.visibleStorms){if(active)state.visibleStorms.add('official:'+id);else state.visibleStorms.delete('official:'+id);}
   applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
-  toast(active?'已加入官方台风「'+storm.name+'」：按 '+storm.season+' 年 IBTrACS 历史最佳路径重放。':'已移出官方台风；官方资料仍保留在台风库。');
+  toast(active?'已加入官方台风「'+(storm.nameZh||storm.name)+' / '+storm.name+'」：按 '+storm.season+' 年 IBTrACS 历史最佳路径重放。':'已移出官方台风；官方资料仍保留在台风库。');
   return true;
 }
 function renameHistory(id,value){

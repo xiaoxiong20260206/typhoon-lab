@@ -1,5 +1,5 @@
-import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=aced45d83ba1';
-import {PLACES} from './geo.js?v=aced45d83ba1';
+import {beaufort,describe,summaryName,ringRadii,weatherAt} from './rules.js?v=92ed7ac2270e';
+import {PLACES} from './geo.js?v=92ed7ac2270e';
 
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,7 +8,7 @@ let timelineRun,timelineSelection;
 export function updatePanels(run,hour,selected,onSelect){
   const frame=run.frames[hour],s=frame.storms.find(s=>s.id===selected)||frame.storms[0],cat=describe(s);
   const details=!document.body.classList.contains('immersive')||$('workspaceDrawer').open;
-  set('stormName',s.name?.cn||'未命名');
+  set('stormName',summaryName(s));
   set('stormEnglish',s.name?.en.toUpperCase()||(s.number?'TROPICAL DEPRESSION':'TROPICAL DISTURBANCE'));
   set('stormCategory',cat.name);$('stormCategory').style.color=cat.color;
   set('stormNumber',`${s.number||s.invest}${s.retired?' · 停编':''}`);

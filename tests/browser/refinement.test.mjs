@@ -48,11 +48,14 @@ try{
   check('a saved seed can be reconstructed into the experiment',await page.evaluate(()=>window.typhoonLab.frame.storms.length===3&&document.querySelectorAll('#libraryHistoryList input:checked').length===2));
   await page.click('#libraryOfficialTab');
   check('official library opens with a bounded first page and source summary',await page.evaluate(()=>document.getElementById('libraryOfficialTab').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#libraryOfficialList .library-official-row').length===80&&document.getElementById('libraryOfficialCount').textContent==='0/1965'&&document.getElementById('libraryOfficialSummary').textContent.includes('IBTrACS')));
-  await page.$eval('#libraryOfficialSearch',input=>{input.value='HINNAMNOR';input.dispatchEvent(new Event('input',{bubbles:true}));});
-  check('official storms can be searched by name and year',await page.evaluate(()=>document.querySelectorAll('#libraryOfficialList .library-official-row').length===1&&document.querySelector('#libraryOfficialList .library-official-title strong').textContent==='HINNAMNOR'));
+  await page.$eval('#libraryOfficialSearch',input=>{input.value='轩岚诺';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  check('official storms can be searched by bilingual name and year',await page.evaluate(()=>document.querySelectorAll('#libraryOfficialList .library-official-row').length===1&&document.querySelector('#libraryOfficialList .library-official-title strong').textContent==='轩岚诺'&&document.querySelector('#libraryOfficialList .library-official-title small').textContent==='HINNAMNOR'));
   await page.click('#libraryOfficialList .library-check input');
   await page.waitForFunction(()=>window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4);
   check('an official historical storm joins the same simulation frame',await page.evaluate(()=>window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4));
+  await page.click('#libraryOfficialList .library-view-button');
+  check('official storm identity is bilingual in immersive summary',await page.evaluate(()=>document.getElementById('summaryName').textContent==='轩岚诺 · HINNAMNOR'));
+  await page.click('#stormLibraryButton');
   check('official replay keeps the naming list separate',await page.evaluate(()=>window.typhoonLab.frame.storms.some(storm=>storm.name?.en==='HINNAMNOR'&&storm.official?.season===2022&&storm.custom===false)&&window.typhoonLab.frame.storms.some(storm=>storm.name?.en==='Damrey'&&storm.custom===false)));
   check('official library is read-only and cannot delete or rename source records',await page.evaluate(()=>document.querySelector('#libraryOfficialList .library-official-row')&&!document.querySelector('#libraryOfficialList .library-name-input')&&!document.querySelector('#libraryOfficialList .library-delete-button')));
   await page.click('#libraryCurrentTab');

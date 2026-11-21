@@ -6,23 +6,23 @@
   <meta name="theme-color" content="#122329">
   <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
   <title>风暴实验室 · 西北太平洋台风模拟器</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/base.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/layout.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/compact.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/forge.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/theater.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/immersive.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/library.css?v=aced45d83ba1">
-  <link rel="stylesheet" href="styles/polish.css?v=aced45d83ba1">
-  <script defer src="assets/vendor/three.min.js?v=aced45d83ba1"></script>
-  <script type="module" src="js/app.js?v=aced45d83ba1"></script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/base.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/layout.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/compact.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/forge.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/theater.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/immersive.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/library.css?v=92ed7ac2270e">
+  <link rel="stylesheet" href="styles/polish.css?v=92ed7ac2270e">
+  <script defer src="assets/vendor/three.min.js?v=92ed7ac2270e"></script>
+  <script type="module" src="js/app.js?v=92ed7ac2270e"></script>
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=aced45d83ba1" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=92ed7ac2270e" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><span id="buildTag" class="build-tag">v2.6.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><span id="buildTag" class="build-tag">v2.7.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -144,10 +144,10 @@
         <div class="library-panel-heading">
           <div><h3>真实历史官方台风</h3><p id="libraryOfficialSummary">共 0 个官方台风，0 个正在实验中</p></div>
         </div>
-        <label class="library-search" for="libraryOfficialSearch"><span>搜索</span><input id="libraryOfficialSearch" type="search" placeholder="名称、编号、年份" autocomplete="off"><small>IBTrACS 最佳路径重放，不随环境参数重算</small></label>
+        <label class="library-search" for="libraryOfficialSearch"><span>搜索</span><input id="libraryOfficialSearch" type="search" placeholder="中文名、英文名、编号、年份" autocomplete="off"><small>IBTrACS 最佳路径重放，不随环境参数重算</small></label>
         <p class="library-help">官方台风来自 NOAA IBTrACS v04r01 西北太平洋数据；勾选即加入当前实验，取消勾选只移出演示，不可删除或改名。</p>
         <div id="libraryOfficialList" class="library-list official-list" role="list"></div>
-        <div id="libraryOfficialEmpty" class="library-empty" hidden><strong>没有匹配的官方台风</strong><p>试试名称、编号或年份，例如 Hinnamnor、2022、11W。</p></div>
+        <div id="libraryOfficialEmpty" class="library-empty" hidden><strong>没有匹配的官方台风</strong><p>试试中文名、英文名、编号或年份，例如 轩岚诺、Hinnamnor、2022、11W。</p></div>
         <button id="libraryOfficialMore" class="library-more-button" type="button" hidden>显示更多官方台风</button>
       </section>
       <section id="libraryHistoryPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryHistoryTab" hidden>

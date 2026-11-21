@@ -1,8 +1,8 @@
-import {$} from './panels.js?v=aced45d83ba1';
-import {describe} from './rules.js?v=aced45d83ba1';
-import {cleanCustomName} from './naming.js?v=aced45d83ba1';
+import {$} from './panels.js?v=92ed7ac2270e';
+import {describe,displayName} from './rules.js?v=92ed7ac2270e';
+import {cleanCustomName} from './naming.js?v=92ed7ac2270e';
 
-const stormLabel=storm=>storm?.name?.cn||storm?.name?.en||storm?.number||storm?.invest||'未命名';
+const stormLabel=storm=>displayName(storm);
 
 export function bindStormLibrary(callbacks){
   const dialog=$('stormLibraryDialog'),tabs=[
@@ -120,7 +120,7 @@ export function bindStormLibrary(callbacks){
   function matchingOfficial(){
     const query=officialSearch.value.trim().toLocaleLowerCase();
     const storms=view?.officialStorms||[];
-    const filtered=query?storms.filter(storm=>[storm.name,storm.season,storm.number||'',storm.id].join(' ').toLocaleLowerCase().includes(query)):storms;
+    const filtered=query?storms.filter(storm=>[storm.nameZh||storm.name,storm.name,storm.season,storm.number||'',storm.id].join(' ').toLocaleLowerCase().includes(query)):storms;
     return filtered.slice().sort((a,b)=>b.season-a.season||a.name.localeCompare(b.name));
   }
   function renderOfficial(force=false){
@@ -139,9 +139,10 @@ export function bindStormLibrary(callbacks){
       label.append(input,document.createElement('span'));
       const body=document.createElement('div');body.className='library-official-body';
       const title=document.createElement('span');title.className='library-official-title';
-      const name=document.createElement('strong');name.textContent=catalogStorm.name;
+      const name=document.createElement('strong');name.textContent=catalogStorm.nameZh||catalogStorm.name;
+      const english=document.createElement('small');english.textContent=catalogStorm.name;
       const kind=document.createElement('i');kind.className='library-kind official';kind.textContent='官方';
-      title.append(name,kind);
+      title.append(name,english,kind);
       const detail=document.createElement('small');
       detail.textContent=catalogStorm.season+' 年'+(catalogStorm.number?' · '+catalogStorm.number:'')+' · 峰值 '+meta.peak.toFixed(1)+' m/s · 历时 '+meta.days+' 天 · '+catalogStorm.start.slice(0,10);
       body.append(title,detail);

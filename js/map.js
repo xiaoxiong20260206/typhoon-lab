@@ -1,6 +1,6 @@
-import {BOUNDS,PLACES} from './geo.js?v=aced45d83ba1';
-import {clamp,describe,weatherAt} from './rules.js?v=aced45d83ba1';
-import {WeatherRenderer} from './weather.js?v=aced45d83ba1';
+import {BOUNDS,PLACES} from './geo.js?v=92ed7ac2270e';
+import {clamp,describe,weatherAt} from './rules.js?v=92ed7ac2270e';
+import {WeatherRenderer} from './weather.js?v=92ed7ac2270e';
 
 export class PacificMap{
   constructor(canvas,polygons,isLand){
@@ -21,7 +21,7 @@ export class PacificMap{
     this.transform();
   }
   transform(){
-    this.scale=Math.min(this.width/(75*this.cos),this.height/55)*this.zoom;
+    this.scale=Math.min(this.width/(75*this.cos),this.height/55)*this.zoom*1.06;
     const w=75*this.scale*this.cos,h=55*this.scale;
     this.pan.x=clamp(this.pan.x,-Math.max(0,(w-this.width)/2),Math.max(0,(w-this.width)/2));
     this.pan.y=clamp(this.pan.y,-Math.max(0,(h-this.height)/2),Math.max(0,(h-this.height)/2));
@@ -39,35 +39,35 @@ export class PacificMap{
   }
   drawBase(){
     const ctx=this.base.getContext('2d');ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
-    ctx.fillStyle='#0e232b';ctx.fillRect(0,0,this.width,this.height);
-    const g=ctx.createRadialGradient(this.width*.58,this.height*.5,0,this.width*.55,this.height*.5,this.width*.8);
-    g.addColorStop(0,'#17343d');g.addColorStop(1,'#0c1e26');ctx.fillStyle=g;ctx.fillRect(0,0,this.width,this.height);
+    ctx.fillStyle='#072032';ctx.fillRect(0,0,this.width,this.height);
+    const g=ctx.createRadialGradient(this.width*.58,this.height*.48,0,this.width*.55,this.height*.52,this.width*.86);
+    g.addColorStop(0,'#174f72');g.addColorStop(1,'#0b3350');ctx.fillStyle=g;ctx.fillRect(0,0,this.width,this.height);
     ctx.save();this.clipRegion(ctx);
     ctx.strokeStyle='#51717022';ctx.lineWidth=.5;ctx.font='9px "Avenir Next",sans-serif';ctx.fillStyle='#678780';
     for(let lon=100;lon<=175;lon+=5){const a=this.project(lon,0),b=this.project(lon,55);ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();if(lon%10===0)ctx.fillText(`${lon}°E`,a[0]+4,this.height-89);}
     for(let lat=0;lat<=55;lat+=5){const a=this.project(100,lat),b=this.project(175,lat);ctx.beginPath();ctx.moveTo(...a);ctx.lineTo(...b);ctx.stroke();if(lat%10===0)ctx.fillText(`${lat}°N`,this.width-35,a[1]-5);}
-    this.geography(ctx);ctx.fillStyle='#2b403e';ctx.fill('evenodd');ctx.strokeStyle='#668173';ctx.lineWidth=.8;ctx.stroke();
+    this.geography(ctx);ctx.fillStyle='#356b4b';ctx.fill('evenodd');ctx.strokeStyle='#c7e4cf';ctx.lineWidth=.9;ctx.stroke();
     ctx.save();this.geography(ctx);ctx.clip('evenodd');
     // Tonal land texture is illustrative, not an elevation dataset.
     for(let i=0;i<1000;i++){
       const lon=99+(Math.sin(i*127.1)*.5+.5)*78,lat=(Math.sin(i*311.7)*.5+.5)*57;
-      const [x,y]=this.project(lon,lat);ctx.fillStyle=i%3?'#75907709':'#0b262512';
+      const [x,y]=this.project(lon,lat);ctx.fillStyle=i%3?'#7dbd7414':'#0b3a2418';
       ctx.beginPath();ctx.ellipse(x,y,8+i%20,3+i%10,-.6,0,Math.PI*2);ctx.fill();
     }ctx.restore();
     const seaLabels=[['南 海',115,14],['菲 律 宾 海',134,19],['西 北 太 平 洋',155,28],['东 海',125,28],['日 本 海',135,40]];
-    ctx.textAlign='center';ctx.fillStyle='#83a39c70';ctx.font='12px "PingFang SC",sans-serif';
+    ctx.textAlign='center';ctx.fillStyle='#c9e7ef85';ctx.font='12px "PingFang SC",sans-serif';
     for(const [name,lon,lat] of seaLabels){ctx.fillText(name,...this.project(lon,lat));}
     const landLabels=[['中 国',110,34],['日本',138,37],['菲律宾',123,11],['越南',106,17],['朝鲜半岛',127,39],['俄罗斯',145,51]];
-    ctx.fillStyle='#b0b9a8aa';ctx.font='11px "PingFang SC",sans-serif';for(const [name,lon,lat] of landLabels)ctx.fillText(name,...this.project(lon,lat));
+    ctx.fillStyle='#e7f6ea';ctx.font='11px "PingFang SC",sans-serif';for(const [name,lon,lat] of landLabels)ctx.fillText(name,...this.project(lon,lat));
     ctx.textAlign='left';
     for(const [name,lon,lat] of PLACES){
       if(this.width<650&&['大阪','首尔','海口'].includes(name))continue;
-      const [x,y]=this.project(lon,lat);ctx.fillStyle='#c8cdb299';ctx.beginPath();ctx.arc(x,y,1.7,0,Math.PI*2);ctx.fill();
-      ctx.font='9px "PingFang SC",sans-serif';ctx.fillStyle='#bac6b4';ctx.fillText(name,x+5,y-3);
+      const [x,y]=this.project(lon,lat);ctx.fillStyle='#dff5e0';ctx.beginPath();ctx.arc(x,y,1.7,0,Math.PI*2);ctx.fill();
+      ctx.font='9px "PingFang SC",sans-serif';ctx.fillStyle='#e5f6e4';ctx.fillText(name,x+5,y-3);
     }
     ctx.restore();
   }
-  clipRegion(ctx){const [x,y]=this.project(100,55);ctx.beginPath();ctx.rect(x,y,75*this.scale*this.cos,55*this.scale);ctx.clip();}
+  clipRegion(ctx){const [x,y]=this.project(100,55);ctx.beginPath();ctx.roundRect(x,y,75*this.scale*this.cos,55*this.scale,18);ctx.clip();}
   drawCold(ctx){
     const lat=40-this.run.env.cold*.075,p=this.project(100,lat),right=this.project(175,lat);
     const g=ctx.createLinearGradient(0,Math.max(0,p[1]-130),0,p[1]+45);g.addColorStop(0,'#8897b00f');g.addColorStop(1,'#8897b000');

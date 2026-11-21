@@ -1,6 +1,6 @@
-import {clamp,describe} from './rules.js?v=aced45d83ba1';
-import {DEFAULT_NAMES} from './names.js?v=aced45d83ba1';
-import {cleanCustomName} from './naming.js?v=aced45d83ba1';
+import {clamp,describe} from './rules.js?v=92ed7ac2270e';
+import {DEFAULT_NAMES} from './names.js?v=92ed7ac2270e';
+import {cleanCustomName} from './naming.js?v=92ed7ac2270e';
 
 export const DEFAULT_ENV=Object.freeze({sst:29.5,shear:9,cold:65,size:1.2});
 export const SCENARIOS=Object.freeze({
@@ -85,7 +85,7 @@ export function simulate(options={}){
     return {
       id:i+1,sourceId:typeof seed.sourceId==='string'?seed.sourceId:null,
       invest:official?null:`${90+i%10}W`,number:official?.number||null,
-      name:official?{cn:official.name,en:official.name}:customName?{cn:customName,en:customName}:null,
+      name:official?{cn:official.nameZh||official.name,en:official.name}:customName?{cn:customName,en:customName}:null,
       custom:!!customName&&!official,namedAt:official||customName?bornAt:null,
       bornAt,scenario:seed.scenario||scenario,
       lon:official?official.points[0][1]/10:clamp(seed.lon,102,172),lat:official?official.points[0][2]/10:clamp(seed.lat,3,53),
@@ -102,7 +102,7 @@ export function simulate(options={}){
       if(hour<s.bornAt)continue;
       if(hour===s.bornAt){
         s.onLand=isLand(s.lon,s.lat);
-        if(s.official){replayOfficial(s,hour,events);event(events,hour,s,'官方台风 '+s.name.en+'（'+(s.official.season||'')+(s.number?' · '+s.number:'')+'）加入实验，按真实历史路径重放');continue;}
+        if(s.official){replayOfficial(s,hour,events);event(events,hour,s,'官方台风 '+s.name.cn+' / '+s.name.en+'（'+(s.official.season||'')+(s.number?' · '+s.number:'')+'）加入实验，按真实历史路径重放');continue;}
         event(events,hour,s,'系统 #'+s.id+' 生成，监测编号 '+s.invest);
         if(s.custom)event(events,hour,s,`使用自定义名称「${s.name.cn}」；不占用官方命名表`);
         identify(s,counters,names,hour,events);continue;

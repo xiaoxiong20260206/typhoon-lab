@@ -46,6 +46,7 @@
 .library-official-body{display:flex;min-width:0;flex-direction:column;gap:3px}
 .library-official-title{display:flex;align-items:center;gap:8px;min-width:0;color:#f2f2e9;font-size:.88rem;font-weight:500}
 .library-official-title strong{overflow-wrap:anywhere}
+.library-official-title small{color:#a6c2cd;font-size:.68rem;font-weight:400;opacity:.88}
 .library-official-body small{color:#9fb4b9;font-size:.66rem;font-variant-numeric:tabular-nums}
 .library-official-actions{display:flex;gap:6px}
 .library-more-button{flex:none;min-height:42px;margin:8px 0 2px;border:1px solid #425e67;border-radius:7px;color:#d8e5e4;background:#15303a;font-size:.76rem}

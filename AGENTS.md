@@ -101,3 +101,10 @@
 - `tests/official-storms.test.mjs` 必须覆盖目录完整性、ID 唯一性、坐标强度范围、历史轨迹重放与命名表隔离；沉浸回归覆盖官方搜索、加入、只读约束、2D/3D 同步与移动端；彻底关闭浏览器测试覆盖官方选择恢复。
 - 当前公网 v2.6.0 提交 `e6baf408f97dede54ed0b5c4325bdad0ca545d78`，资源版本 `aced45d83ba1`；Pages 工作流 `44886909892` 成功，33 个运行文件与本地发布包一致，公网完整浏览器回归通过。
 - 当前内网版本 `aa06d5df`，上传 33 个运行文件；固定地址和版本地址未登录仍返回 SSO 302，`myflicker-browser` 45 秒超时，**内网应用渲染验收仍未完成，不计通过**。
+
+## v2.7.0 官方中英文名与自然蓝绿地图维护
+
+- `assets/official-name-translations.json` 保存 1965 个官方台风的 555 个唯一英文名对应中文名；`scripts/prepare-official-name-translations.mjs` 负责 JMA/HKWW/中文维基/OpenCC 数据合成与繁转简。不要手工改写 `assets/names.json` 的 140 名动态命名表。
+- 官方台风在台风库、当前实验、2D 地图标签、3D 标签和观测摘要中同时显示「中文 · 英文」；官方资料仍只读，不能改名、删除或写回 `assets/names.json`。
+- 官方台风必须保持 IBTrACS 历史最佳路径重放，不得受海温、风切变、环流规模或冷空气参数重算；`tests/official-storms.test.mjs` 需验证不同实验环境参数下官方重放帧完全一致。
+- 2D 地图使用 `js/map.js` 的深蓝海洋、鲜绿陆地、圆角裁切和 1.06 倍构图；3D 场景使用 `js/theater.js` 的自然蓝绿地球色与更亮海洋高光。本轮只改表现层，不改变气象规则、风圈地理半径或模拟 frame。
