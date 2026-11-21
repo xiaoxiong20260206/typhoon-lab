@@ -1,5 +1,17 @@
 # 部署记录
 
+## 2026-11-21 16:17（任务时间） · v2.5.0 · 统一台风实验台
+
+- 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交：`0e140dd809de2bf8b4bda848804d04e3dcc6cc01`；Pages 工作流 `44883679151` 成功。资源版本 `c6e80bca356e`，页面版本标记 `v2.5.0`。
+- 新增统一「台风实验台」：顶部「台风库 n/n」管理实验系统与地图展示，风暴卡「我的台风 n/n」打开全部本地创建；两个分类分别勾选，共享同一个模拟 frame。
+- 我的创建支持按名称、编号、经纬度搜索；勾选使用保存的 seed 重新加入/还原实验，取消只暂时移出。名称可直接修改；每条记录可二次确认后单独删除。
+- 台风工坊和地图直接落点默认生成「实验台风 01」式可编辑名称；工坊仍可显式选择官方自动命名。自定义名称不写入、不消耗也不重排 140 名官方表。
+- 公网 32 个运行文件逐一 HTTP 成功并与本地发布包 SHA-256 完全一致。真实公网浏览器回归：沉浸交互 48 项、彻底关闭重开 12 项、3D/声音 26 项、经典模式 51 项及性能预算全部通过；无 JS/shader 错误或失败资源。8 系统全域为 32344 个三角形、33 draw calls。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；版本 `9fd2ea13`：https://typhoonlab-9fd2ea13.frontend-cloud.corp.kuaishou.com/ 。平台项目 `typhoonlab`（28596）确认最新版本 `9fd2ea13`、访问配置 `amc/ready`；上传目录 `.publish/site-1795248894577`，32 个运行文件、315.6 KB，未修改 SSO 与白名单。
+- 内网白屏回归：**未完成，不计通过**。固定地址与版本地址的未登录 HTTP 请求均返回 302 跳转快手 SSO；`myflicker-browser` 以 45 秒超时结束，没有可检查的应用 DOM。需已授权浏览器复验。
+- 权限管理：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
+
 ## 2026-11-21 15:34（任务时间） · v2.4.0 · 自定义命名与地图展示多选
 
 - 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/

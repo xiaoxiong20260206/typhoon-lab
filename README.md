@@ -110,6 +110,7 @@ npm test
 - 首次版本：https://typhoonlab-9ec8893f.frontend-cloud.corp.kuaishou.com/ ；v2.2.0 版本：https://typhoonlab-50a2007e.frontend-cloud.corp.kuaishou.com/
 - 内网 v2.2.1 版本 `7cbcdcfd`：https://typhoonlab-7cbcdcfd.frontend-cloud.corp.kuaishou.com/ 。当前版本包含本浏览器历史保存、多选演示、主界面快捷入口与缓存版本参数；气象规则不变。公网地址和 `npm run deploy` 保持不变。
 - 内网 v2.3.0 版本 `cdef1d71`：https://typhoonlab-cdef1d71.frontend-cloud.corp.kuaishou.com/ 。该版本加入深海仪表控件视觉与移动端可读性修正，运行文件与公网 v2.3.0 构建包一致。
+- 内网 v2.5.0 版本 `9fd2ea13`：https://typhoonlab-9fd2ea13.frontend-cloud.corp.kuaishou.com/ 。该版本加入统一台风实验台、自建台风默认命名、搜索/恢复/改名/逐项删除；32 个运行文件与本次构建一致。
 - 通过 `pde-agent` 的 frontend-cloud CLI 发布；登录使用 `appwrite-cf whoami` / `appwrite-cf login-ks`，禁止使用官方 `appwrite` CLI。无需给应用新增 SDK 或依赖。
 - 更新内网：运行 `npm test`、`npm run build`，审查其输出目录后执行 `npx -y --registry https://npm.corp.kuaishou.com/ @codeflicker/frontend-cloud-cli@latest deploy --dir <本次构建目录>`。CLI 自动读取本地 `.static-site-deploy.json`，不要打包整个工作目录。
 - 默认 SSO 与白名单访问。管理入口：https://myflicker.corp.kuaishou.com/web-artifacts ，本项目权限：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl 。本次未更改访问权限。
