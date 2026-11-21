@@ -1,0 +1,289 @@
+/* v2.3.0 · Precision ocean instrument polish. Visual layer only. */
+body.immersive{
+  --instrument-surface:#102832;
+  --instrument-surface-raised:#17313b;
+  --instrument-border:#3b535c;
+  --instrument-border-hover:#5a747c;
+  --instrument-highlight:#ffffff09;
+  --instrument-shadow:0 16px 40px #020b10a8;
+}
+
+/* One control language: calm surfaces, warm focus, unmistakable state. */
+body.immersive select{
+  appearance:none;
+  -webkit-appearance:none;
+  min-height:42px;
+  padding:9px 34px 9px 12px;
+  color:#eef2ed;
+  background-color:var(--instrument-surface);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23a6bcc1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:12px 8px;
+  border:1px solid var(--instrument-border);
+  border-radius:7px;
+  box-shadow:inset 0 1px 0 var(--instrument-highlight);
+  font-variant-numeric:tabular-nums;
+  cursor:pointer;
+  transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease,color .16s ease;
+}
+body.immersive select:hover:not(:disabled){border-color:var(--instrument-border-hover);background-color:var(--instrument-surface-raised)}
+body.immersive select:focus-visible{outline:none;border-color:#efb57f;box-shadow:0 0 0 3px #edb17d2e,inset 0 1px 0 #ffffff12}
+body.immersive select:disabled{opacity:.42;cursor:not-allowed;background-color:#15252b;color:#aebbb9}
+body.immersive select option{background:#142b34;color:#eef2ed}
+body.immersive input[type=number]{transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease}
+body.immersive input[type=number]:hover:not(:disabled){border-color:var(--instrument-border-hover);background-color:var(--instrument-surface-raised)}
+body.immersive input[type=number]:focus-visible{outline:none;border-color:#efb57f;box-shadow:0 0 0 3px #edb17d2e}
+
+/* Header: a single, quiet navigation instrument. */
+body.immersive .masthead nav{
+  gap:2px;
+  padding:3px;
+  border:1px solid #31495299;
+  border-radius:11px;
+  background:#091c24b8;
+  box-shadow:0 8px 26px #020d12a1,inset 0 1px 0 #ffffff09;
+}
+body.immersive .masthead nav button,
+body.immersive .masthead nav a{
+  min-height:38px;
+  padding:7px 12px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  color:#dce7e6;
+  transition:color .16s ease,background-color .16s ease,border-color .16s ease;
+}
+body.immersive .masthead nav button:hover,
+body.immersive .masthead nav a:hover{background:#1b343e;border-color:#3e5962;color:#fff}
+body.immersive .masthead nav button[aria-expanded=true]{background:#203b44;border-color:#59727a;color:#f5cc9f}
+body.immersive .build-tag{padding:0 8px;color:#95aab0;font-size:.64rem;font-variant-numeric:tabular-nums}
+
+/* Primary actions around the storm form one compact control rail. */
+body.immersive .scene-actions{
+  top:96px;
+  right:28px;
+  gap:2px;
+  padding:4px;
+  border:1px solid #3b555e;
+  border-radius:11px;
+  background:#091f28e8;
+  box-shadow:var(--instrument-shadow),inset 0 1px 0 #ffffff0b;
+}
+body.immersive .scene-actions button,
+body.immersive .camera-control{
+  min-height:40px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  box-shadow:none;
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+body.immersive .scene-actions button{padding:7px 12px}
+body.immersive .scene-actions button:hover,
+body.immersive .camera-control:hover,
+body.immersive .camera-control:focus-within{background:#19343e;border-color:#3e5962}
+body.immersive .scene-actions #forgeButton{
+  padding:8px 15px;
+  border-color:#f0bd8a;
+  background:linear-gradient(180deg,#f2c397,#e6a96e);
+  color:#16272c;
+  font-weight:600;
+  box-shadow:inset 0 1px 0 #fff8e8a8,0 2px 9px #bc79483d;
+}
+body.immersive .scene-actions #forgeButton:hover{background:linear-gradient(180deg,#f8ceaa,#eeaf75);border-color:#ffd0a3}
+body.immersive .scene-actions #soundButton{color:#d8e5e5}
+body.immersive .camera-control{gap:2px;padding:0 3px 0 8px;color:#9fb4ba;font-size:.72rem;letter-spacing:.03em}
+body.immersive .camera-control select{
+  min-height:40px;
+  max-width:142px;
+  padding:7px 31px 7px 8px;
+  border-color:transparent;
+  background-color:transparent;
+  background-position:right 9px center;
+  box-shadow:none;
+  color:#eef2ed;
+  font-size:.84rem;
+}
+body.immersive .camera-control select:hover:not(:disabled){background-color:#122a33;border-color:#3d5660}
+
+/* The selected storm reads as a proper observation card, not text on raw scenery. */
+body.immersive .storm-summary{
+  left:30px;
+  bottom:36px;
+  width:min(420px,calc(100% - 60px));
+  min-width:0;
+  padding:17px 20px 18px;
+  overflow:hidden;
+  border:1px solid #3b555e;
+  border-radius:13px;
+  background:linear-gradient(145deg,#102a34f2,#0b2028e8 72%);
+  box-shadow:0 22px 54px #020d12b8,inset 0 1px 0 #ffffff0b;
+  text-shadow:0 1px 8px #020c11;
+}
+body.immersive .storm-summary:before{
+  content:'';
+  position:absolute;
+  inset:0 auto auto 20px;
+  width:48px;
+  height:2px;
+  border-radius:0 0 2px 2px;
+  background:linear-gradient(90deg,#efb47e,#efb47e00);
+}
+body.immersive #summaryCategory{font-size:.76rem;letter-spacing:.075em;font-weight:500}
+body.immersive #summaryName{font-size:clamp(2.3rem,3.2vw,3.25rem);letter-spacing:.035em;line-height:1.12;margin:7px 0 9px;text-wrap:balance}
+body.immersive #summaryNumbers{font-size:.96rem;letter-spacing:.015em;color:#f3f2ea}
+body.immersive #summaryStatus{font-size:.75rem;color:#b9cbd0;margin-top:7px}
+body.immersive .summary-actions{margin-top:15px;gap:7px}
+body.immersive .summary-actions select{max-width:160px;min-height:40px;font-size:.78rem}
+body.immersive #detailsButton,
+body.immersive #historyButton{
+  min-height:40px;
+  padding:7px 12px;
+  border:1px solid #415b64;
+  border-radius:7px;
+  background:#142c35;
+  box-shadow:inset 0 1px 0 #ffffff08;
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+body.immersive #detailsButton:hover{background:#1b3741;border-color:#5b737b;color:#fff}
+body.immersive #historyButton{border-color:#876a54;color:#f0c398;background:#2a2926}
+body.immersive #historyButton:hover{background:#35302b;border-color:#b78a66;color:#ffd7ae}
+body.immersive #historyButton span{color:#fff6e9}
+
+/* Playback and timeline share the same instrument surface. */
+body.immersive .timeline-panel{
+  height:88px;
+  padding:14px 28px;
+  gap:22px;
+  background:linear-gradient(180deg,#10252e,#0b1e27);
+  border-top-color:#304851;
+  box-shadow:0 -12px 34px #020b1066,inset 0 1px 0 #ffffff07;
+}
+body.immersive .playback-buttons{
+  gap:6px;
+  padding:3px;
+  border:1px solid #304a53;
+  border-radius:11px;
+  background:#0b2029;
+  box-shadow:inset 0 1px 0 #ffffff08;
+}
+body.immersive .play-button{width:38px;height:38px;min-height:38px;border:1px solid #f3c597;background:#edb17d;box-shadow:inset 0 1px 0 #fff8e9a3,0 2px 10px #c07e4730}
+body.immersive .play-button:hover{background:#f7c89d;border-color:#ffd1a5}
+body.immersive .reset-button{width:34px;height:36px;min-height:36px;color:#b8c9cc;border-radius:7px}
+body.immersive .reset-button:hover{background:#19343e;color:#fff}
+body.immersive .playback-buttons select{min-height:40px;max-width:112px;padding:7px 30px 7px 9px;border-color:transparent;background-color:transparent;box-shadow:none;font-size:.76rem}
+body.immersive .playback-buttons select:hover:not(:disabled){background-color:#17323c;border-color:#3e5962}
+body.immersive .time-display{min-width:118px;padding-left:17px;border-left:1px solid #304851}
+body.immersive .time-display>span{color:#92a9ae;letter-spacing:.04em}
+body.immersive .time-display strong{font-size:.92rem;color:#eff2ec}
+body.immersive .time-display em{color:#b8c8c9}
+body.immersive .timeline-caption{letter-spacing:.025em}
+body.immersive #timeline{
+  height:22px;
+  margin:6px 0 4px;
+  background:transparent;
+}
+body.immersive #timeline::-webkit-slider-runnable-track{
+  height:4px;
+  border-radius:4px;
+  background:linear-gradient(90deg,#edb17d 0 var(--timeline-progress,0%),#344b53 var(--timeline-progress,0%) 100%);
+  box-shadow:inset 0 1px 1px #0000004d;
+}
+body.immersive #timeline::-webkit-slider-thumb{
+  width:15px;
+  height:15px;
+  margin-top:-5.5px;
+  border:3px solid #10262f;
+  border-radius:50%;
+  background:#f4c396;
+  box-shadow:0 0 0 1px #edb17d,0 3px 9px #00000066;
+}
+body.immersive #timeline::-moz-range-track{height:4px;border-radius:4px;background:#344b53}
+body.immersive #timeline::-moz-range-progress{height:4px;border-radius:4px;background:#edb17d}
+body.immersive #timeline::-moz-range-thumb{width:11px;height:11px;border:3px solid #10262f;border-radius:50%;background:#f4c396;box-shadow:0 0 0 1px #edb17d}
+
+/* Environment sliders and card controls stay tactile without adding visual noise. */
+body.immersive input[type=range]{height:20px}
+body.immersive input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:#344a50;box-shadow:inset 0 1px 1px #0000004d}
+body.immersive input[type=range]::-webkit-slider-thumb{width:14px;height:14px;margin-top:-5px;border:3px solid #10262f;border-radius:50%;background:#eeb37f;box-shadow:0 0 0 1px #edb17d,0 2px 6px #00000055}
+body.immersive input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:#344a50}
+body.immersive input[type=range]::-moz-range-thumb{width:9px;height:9px;border:3px solid #10262f;border-radius:50%;background:#eeb37f;box-shadow:0 0 0 1px #edb17d}
+body.immersive .scenario{border:1px solid transparent;border-radius:9px;transition:background-color .16s ease,border-color .16s ease}
+body.immersive .scenario:hover{border-color:#385159;background:#172e37}
+body.immersive .scenario.active{border-color:#627970;background:linear-gradient(90deg,#293c37,#1c302f);box-shadow:inset 2px 0 0 #edb17d}
+body.immersive .create-button{border:1px solid #4f6a72;border-radius:8px;background:#142c35;color:#e9c39b;transition:background-color .16s ease,border-color .16s ease,color .16s ease}
+body.immersive .create-button:hover{background:#1a3741;border-color:#728a90;color:#ffd3a7}
+body.immersive .history-item{border-radius:8px;background:#102731;transition:background-color .16s ease,border-color .16s ease}
+body.immersive .history-item:hover{border-color:#506a72;background:#17313a}
+body.immersive .history-item:has(input:checked){background:#213a35;border-color:#637c6d;box-shadow:inset 2px 0 0 #edb17d}
+body.immersive .history-section summary{border-radius:6px}
+body.immersive .map-legend{padding:8px 10px;border:1px solid #314b545c;border-radius:8px;background:#091d25ad;box-shadow:inset 0 1px 0 #ffffff07}
+body.immersive .storm-label{border-radius:7px;box-shadow:0 5px 16px #020b1080;background:#0c232ceb}
+
+/* Drawers and dialogs use the same border, radius and surface hierarchy. */
+body.immersive #workspaceDrawer{border-color:#3c5862;background:linear-gradient(160deg,#132d37,#0e222b);box-shadow:-24px 0 70px #020a0ebd,inset 0 1px 0 #ffffff08}
+body.immersive .drawer-heading{border-bottom-color:#34505a;background:#112933}
+body.immersive #forgeDialog,
+body.immersive #namesDialog{border-color:#47616a;background:linear-gradient(160deg,#152e38,#10242d);box-shadow:0 28px 90px #020a10c7,inset 0 1px 0 #ffffff0a}
+body.immersive .dialog-heading button{border-radius:50%;color:#b8c9cc}
+body.immersive .dialog-heading button:hover{background:#233e48;color:#fff}
+body.immersive .forge-grid label{color:#b9c8c9}
+body.immersive .forge-grid input,
+body.immersive .forge-grid select{min-height:42px;border-color:#3f5962;border-radius:7px;background:#10262f;box-shadow:inset 0 1px 0 #ffffff08}
+body.immersive .forge-grid input[type=number]{appearance:textfield;-moz-appearance:textfield;padding:9px 11px}
+body.immersive .forge-grid input[type=number]::-webkit-inner-spin-button,
+body.immersive .forge-grid input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+body.immersive .forge-preview{border-left-color:#edb17d;border-radius:0 7px 7px 0;background:#b8c9a312;color:#d6e0dc}
+body.immersive .forge-actions button{border-color:#526b73;border-radius:7px;background:#172f38;color:#e4eceb}
+body.immersive .forge-actions button:hover{background:#1e3a44;border-color:#70878d;color:#fff}
+body.immersive #forgeSubmit{border-color:#f0bd8a;background:#edb17d;color:#16272c;font-weight:600}
+body.immersive #forgeSubmit:hover{background:#f7c89d;border-color:#ffd1a5}
+body.immersive .forge-advanced{border-top-color:#39535c}
+
+@media(max-height:520px){
+  body.immersive .storm-summary{width:min(360px,calc(100% - 40px));padding:12px 15px 13px;bottom:18px}
+  body.immersive #summaryName{font-size:1.9rem;margin:3px 0 5px}
+  body.immersive #summaryStatus{display:none}
+  body.immersive .summary-actions{margin-top:7px}
+  body.immersive .summary-actions select,
+  body.immersive #detailsButton,
+  body.immersive #historyButton{min-height:36px}
+  body.immersive .scene-actions{top:76px}
+}
+
+@media(max-width:600px){
+  body.immersive .masthead nav{padding:2px}
+  body.immersive .masthead nav button,
+  body.immersive .masthead nav a{min-height:38px;padding:6px 9px}
+  body.immersive .build-tag{padding:0 4px;font-size:.58rem}
+  body.immersive .scene-actions,
+  body.immersive.cinema .scene-actions{top:82px;left:16px;right:16px;justify-content:space-between;gap:2px;padding:3px}
+  body.immersive .scene-actions button{min-height:44px;padding:7px 9px}
+  body.immersive .scene-actions #forgeButton{padding:8px 11px;white-space:nowrap}
+  body.immersive .camera-control{padding:0 1px 0 4px}
+  body.immersive .camera-control select{min-height:44px;max-width:126px;padding:8px 28px 8px 6px;font-size:16px;background-position:right 8px center}
+  body.immersive select{font-size:16px}
+  body.immersive #summaryCategory{font-size:.72rem}
+  body.immersive .storm-summary{left:16px;bottom:24px;width:calc(100% - 32px);max-width:none;padding:15px 16px 16px}
+  body.immersive #summaryName{font-size:2.25rem;margin:6px 0 7px}
+  body.immersive #summaryNumbers{font-size:.88rem}
+  body.immersive .summary-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:12px}
+  body.immersive .summary-actions select{width:100%;max-width:none;min-height:44px;font-size:16px}
+  body.immersive #detailsButton,
+  body.immersive #historyButton{min-height:44px;padding:7px 11px;font-size:.8rem}
+  body.immersive #historyButton{grid-column:1/-1}
+  body.immersive .timeline-panel{padding:11px 14px max(11px,env(safe-area-inset-bottom));gap:9px}
+  body.immersive .playback-buttons{padding:2px}
+  body.immersive .playback-buttons select{font-size:16px;max-width:88px;min-height:44px;padding-right:26px}
+  body.immersive #timeline{margin:0;height:14px}
+  body.immersive .map-legend{padding:6px 8px;background:#091d25c2}
+  body.immersive #workspaceDrawer{border-color:#3c5862}
+  body.immersive .forge-grid input,
+  body.immersive .forge-grid select{min-height:44px;font-size:16px}
+}
+
+@media(pointer:coarse){
+  body.immersive select{min-height:44px}
+  body.immersive button{min-height:44px}
+}

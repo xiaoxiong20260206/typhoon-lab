@@ -1,5 +1,5 @@
-import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=da7166334ba9';
-import {PLACES} from './geo.js?v=da7166334ba9';
+import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=0ec2d7169093';
+import {PLACES} from './geo.js?v=0ec2d7169093';
 
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -1,4 +1,4 @@
-import {clamp} from './rules.js?v=da7166334ba9';
+import {clamp} from './rules.js?v=0ec2d7169093';
 export function surfacePoint(lon,lat,height=0){
   const x=(lon-137.5)*.84,z=27.5-lat;
   return {x,y:-.0025*(x*x+z*z)+height,z};

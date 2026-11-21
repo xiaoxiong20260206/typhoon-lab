@@ -1,12 +1,12 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=da7166334ba9';
-import {makeLandTest} from './geo.js?v=da7166334ba9';
-import {localizeNames} from './names.js?v=da7166334ba9';
-import {PacificMap} from './map.js?v=da7166334ba9';
-import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js?v=da7166334ba9';
-import {bindForge} from './forge.js?v=da7166334ba9';
-import {StormSound} from './sound.js?v=da7166334ba9';
-import {initShell} from './shell.js?v=da7166334ba9';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=da7166334ba9';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=0ec2d7169093';
+import {makeLandTest} from './geo.js?v=0ec2d7169093';
+import {localizeNames} from './names.js?v=0ec2d7169093';
+import {PacificMap} from './map.js?v=0ec2d7169093';
+import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js?v=0ec2d7169093';
+import {bindForge} from './forge.js?v=0ec2d7169093';
+import {StormSound} from './sound.js?v=0ec2d7169093';
+import {initShell} from './shell.js?v=0ec2d7169093';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=0ec2d7169093';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
@@ -48,7 +48,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers}};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=da7166334ba9');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=0ec2d7169093');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -90,6 +90,8 @@ function toggleHistory(id,active){
   toast(active?`已加入演示：+${entry.seed.bornAt}h 创建的系统。${map.frame.storms.length>1?'多个系统会同时演化。':''}`:'已移出演示，历史创建仍保留在本浏览器。');
 }
 function updatePlayback(){
+  const timeline=$('timeline'),span=Math.max(1,endHour());
+  timeline.style.setProperty('--timeline-progress',`${Math.min(100,Math.max(0,state.hour/span*100))}%`);
   $('playButton').textContent=state.playing?'Ⅱ':'▶';
   $('playButton').setAttribute('aria-label',state.playing?'暂停模拟':'播放模拟');
   $('mapStatus').textContent=state.playing?'正在演化':state.hour===0?'等待生成':'暂停 · 可自由探索';
