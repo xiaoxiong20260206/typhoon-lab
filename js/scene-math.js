@@ -1,9 +1,21 @@
-import {clamp} from './rules.js?v=92ed7ac2270e';
+import {clamp} from './rules.js?v=49c5a791b041';
+export const GLOBE_RADIUS=32;
+export const GLOBE_CENTER={lon:137.5,lat:27.5};
+const DEG=Math.PI/180;
 export function surfacePoint(lon,lat,height=0){
-  const x=(lon-137.5)*.84,z=27.5-lat;
-  return {x,y:-.0025*(x*x+z*z)+height,z};
+  const radius=GLOBE_RADIUS+height;
+  const lonRad=(lon-GLOBE_CENTER.lon)*DEG,latRad=lat*DEG,cosLat=Math.cos(latRad);
+  return {
+    x:radius*cosLat*Math.sin(lonRad),
+    y:radius*Math.sin(latRad),
+    z:radius*cosLat*Math.cos(lonRad)
+  };
 }
-export function geographicPoint(x,z){return {lon:x/.84+137.5,lat:27.5-z};}
+export function geographicPoint(x,z,y=0){
+  const lon=GLOBE_CENTER.lon+Math.atan2(x,z)/DEG;
+  const lat=Math.atan2(y,Math.hypot(x,z))/DEG;
+  return {lon:lon>180?lon-360:lon,lat};
+}
 export function cloudDetail(quality,selected,mode,count=1){
   if(quality==='low')return selected?{segments:28,particles:450}:{segments:12,particles:160};
   if(!selected)return {segments:count>12?12:18,particles:count>12?160:260};

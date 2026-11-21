@@ -67,4 +67,13 @@ GitHub Pages 资源有十分钟 CDN/浏览器缓存。自 v2.2.1 起，构建会
 - 发布前 44 项模型测试通过；线上 55 项沉浸、13 项完整关闭重开、26 项三维/声音、51 项经典回归及性能预算通过，无 JS/shader 错误，无失败资源。
 - 2D 地图与 3D 场景升级为自然蓝绿视觉，官方台风在库、地图、3D 与观测摘要中同时显示中英文名；气象规则与官方重放数据不变。
 - 内网 v2.7.0 版本 `6773b108`：https://typhoonlab-6773b108.frontend-cloud.corp.kuaishou.com/ 。仅上传 `.publish/site-1795256063597` 的 34 个运行文件，平台打包 1.48 MB。
+
+## v2.8.0 · 中央气象台轨迹与完整地球 · 2026-11-21
+
+- 官方目录现为 1979 个历史风暴、111,009 个路径点：CMA 614 个、IBTrACS 1365 个。2000 年后同名同年记录优先中央气象台，旧年份保持 IBTrACS，界面逐条显示来源。
+- 复核方法：对 `source.agency=CMA` 的 614 条记录逐条请求 `https://typhoon.nmc.cn/weatherservice/typhoon/jsons/view_<id>`，重新计算起始时刻和整点序列，与 `assets/official-storms.json` 比较；结果为 614/614 完全一致。
+- 2D 扩大视野并载入全球 Natural Earth 轮廓；3D 改为完整球面地球，修复风暴、轨迹、风圈及标签越出球面的问题。模拟仍限制在西北太平洋。
+- 公网发布提交 `6494125f8503e68fffab31e048671e8429ec3b0a`，Pages 工作流 `44896389380` 成功；资源版本 `49c5a791b041`，34 个运行文件与本地包逐字节一致，公网完整浏览器回归通过。
+- 内网版本 `ffd815a6`：https://typhoonlab-ffd815a6.frontend-cloud.corp.kuaishou.com/ ；上传 `.publish/site-1795258339406` 的 34 个运行文件，平台打包 1.74 MB。
+- 内网固定地址与版本地址未登录仍返回 SSO 302，`myflicker-browser new_tab` 在 90 秒 `EXECUTION_TIMEOUT`；**内网应用渲染验收未完成，不计通过**。
 - 内网验证：固定地址未登录 HTTP 302 跳转快手 SSO，`myflicker-browser new_tab` 20 秒 `EXECUTION_TIMEOUT`；上传成功不等于渲染验收通过，仍需已授权浏览器复验应用 DOM 与交互。

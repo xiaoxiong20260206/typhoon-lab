@@ -1,5 +1,21 @@
 # 部署记录
 
+## 2026-11-21 18:58（任务时间） · v2.8.0 公网与内网发布
+
+- 公网固定地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交 `6494125f8503e68fffab31e048671e8429ec3b0a`，Pages 工作流 `44896389380` 成功；34 个运行文件逐字节匹配，页面标记 `v2.8.0`、资源版本 `49c5a791b041`。
+- 公网完整回归：沉浸布局 55 项、完整关闭重开 13 项、三维/声音 26 项、经典模式 51 项、性能预算通过；8 系统 61,912 个三角形、36 draw calls。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；新版本 `ffd815a6`：https://typhoonlab-ffd815a6.frontend-cloud.corp.kuaishou.com/ 。按 `pde-agent` 只上传 `.publish/site-1795258339406` 的 34 个运行文件，平台打包 1.74 MB。
+- 内网白屏回归：**未完成，不计通过**。固定地址与版本地址未登录均 HTTP 302 跳转快手 SSO；`myflicker-browser new_tab` 90 秒 `EXECUTION_TIMEOUT`，未获得应用 DOM。上传成功不等于渲染验收通过。
+- 权限未改：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
+
+## 2026-11-21 · v2.8.0 · 中央气象台轨迹与完整地球
+
+- 官方台风目录更新为 1979 个西北太平洋历史风暴、111,009 个路径点；2000–2026 年 614 个有名称系统优先采用中央气象台台风网最佳路径，早期归档保留 IBTrACS。
+- 逐条请求中央气象台公开接口复核 614/614 个 CMA 记录，时间、位置、风速、气压与状态全部一致；白海豚、轩岚诺、摩羯、山竹逐点样例匹配。
+- 2D 视口扩展为 `80°E–180°E / 20°S–60°N`，载入完整全球陆地轮廓并扩充城市标签；3D 使用完整球体地球、全球贴图、大气边缘与星空，修复风暴和标签超出球面的问题。
+- 模拟边界、风圈地理半径、官方历史重放规则与 140 名动态命名表均未改变。
+
 ## 2026-11-21 17:36（任务时间） · v2.7.0 内网同步
 
 - 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/

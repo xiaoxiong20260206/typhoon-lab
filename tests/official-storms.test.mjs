@@ -10,11 +10,12 @@ const translations=JSON.parse(await readFile(new URL('../assets/official-name-tr
 test('official IBTrACS catalog is complete, unique, and stays in the WNP domain',()=>{
   assert.equal(catalog.version,1);
   assert.equal(catalog.count,catalog.storms.length);
-  assert.equal(catalog.storms.length,1965);
+  assert.equal(catalog.storms.length,1979);
   const ids=new Set();
   for(const storm of catalog.storms){
-    assert.match(storm.id,/^[0-9A-Z]+$/);
+    assert.match(storm.id,/^[0-9A-Z-]+$/);
     assert.ok(storm.name&&storm.season>=1945&&storm.season<=2026);
+    assert.match(storm.source?.agency||'',/^(CMA|IBTrACS)$/);
     assert.ok(storm.points.length>=2);
     ids.add(storm.id);
     for(const point of storm.points){
@@ -32,13 +33,27 @@ test('official IBTrACS catalog is complete, unique, and stays in the WNP domain'
 test('official storms carry bilingual names without changing IBTrACS records',()=>{
   assert.equal(translations.version,1);
   assert.equal(translations.count,Object.keys(translations.names).length);
-  assert.equal(translations.count,new Set(catalog.storms.map(storm=>storm.name)).size);
   for(const storm of catalog.storms){
-    const zh=translations.names[storm.name];
+    const zh=storm.nameZh||translations.names[storm.name];
     assert.ok(zh,'official storm should have a Chinese name');
     assert.match(zh,/[㐀-鿿]/);
   }
   assert.equal(translations.names.HINNAMNOR,'轩岚诺');
+
+});
+
+test('CMA official-site records override IBTrACS where available',()=>{
+  const cmaStorms=catalog.storms.filter(storm=>storm.source?.agency==='CMA');
+  assert.equal(cmaStorms.length,614);
+  assert.ok(cmaStorms.every(storm=>storm.season>=2000));
+  assert.ok(cmaStorms.every(storm=>storm.source?.name==='中央气象台 · 台风网'));
+  assert.ok(cmaStorms.every(storm=>/^https:\/\/typhoon\.nmc\.cn\/web\.html\?tid=\d+$/.test(storm.source?.url||'')));
+  const dolphin=catalog.storms.find(storm=>storm.name==='DOLPHIN'&&storm.season===2020);
+  assert.equal(dolphin.source.agency,'CMA');
+  assert.equal(dolphin.start,'2020-09-20T00:00:00Z');
+  assert.deepEqual(dolphin.points[0],[0,1342,235,130,1002,1]);
+  assert.ok(dolphin.source.url.includes('typhoon.nmc.cn'));
+  assert.ok(catalog.storms.filter(storm=>storm.season>=2000).every(storm=>['CMA','IBTrACS'].includes(storm.source?.agency)));
 });
 
 test('official storms replay their historical track without consuming the naming list',()=>{

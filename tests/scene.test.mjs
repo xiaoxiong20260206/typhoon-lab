@@ -11,7 +11,7 @@ test('cloud detail budget prioritizes selected storms without hiding others',()=
   assert.ok((near.segments**2+7*far.segments**2)*4<50000);
 });
 test('3D geography round trips inside northwest Pacific',()=>{
-  for(const [lon,lat] of [[100,0],[175,55],[121,24],[143,16]]){const p=surfacePoint(lon,lat);const restored=geographicPoint(p.x,p.z);assert.ok(Math.abs(restored.lon-lon)<1e-8);assert.ok(Math.abs(restored.lat-lat)<1e-8);assert.ok(Number.isFinite(p.y));}
+  for(const [lon,lat] of [[100,0],[175,55],[121,24],[143,16],[-170,-30]]){const p=surfacePoint(lon,lat);const restored=geographicPoint(p.x,p.z,p.y);assert.ok(Math.abs(restored.lon-lon)<1e-8);assert.ok(Math.abs(restored.lat-lat)<1e-8);assert.ok(Number.isFinite(p.y));}
 });
 test('visual eye and cloud profile follow intensity and tropical status',()=>{
   assert.equal(cloudProfile({wind:20,status:'tropical'}).eye,false);

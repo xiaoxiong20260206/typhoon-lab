@@ -1,6 +1,6 @@
-import {$} from './panels.js?v=92ed7ac2270e';
-import {describe,displayName} from './rules.js?v=92ed7ac2270e';
-import {cleanCustomName} from './naming.js?v=92ed7ac2270e';
+import {$} from './panels.js?v=49c5a791b041';
+import {describe,displayName} from './rules.js?v=49c5a791b041';
+import {cleanCustomName} from './naming.js?v=49c5a791b041';
 
 const stormLabel=storm=>displayName(storm);
 
@@ -31,7 +31,7 @@ export function bindStormLibrary(callbacks){
     kindLabel.textContent=kind==='mine'?'我的':kind==='official'?'官方':'实验';
     title.append(kindLabel);
     const category=describe(storm);
-    meta.textContent=[category.name,storm.id===view.selectedId?'当前观测':'点击查看',storm.official?'IBTrACS 重放':(storm.number||storm.invest)].filter(Boolean).join(' · ');
+    meta.textContent=[category.name,storm.id===view.selectedId?'当前观测':'点击查看',storm.official?(storm.official.source?.agency==='CMA'?'中央气象台重放':'IBTrACS 重放'):(storm.number||storm.invest)].filter(Boolean).join(' · ');
     container.append(title,meta);
   }
 
@@ -115,7 +115,7 @@ export function bindStormLibrary(callbacks){
   function officialMeta(storm){
     const peak=Math.max(...storm.points.map(point=>point[3]/10));
     const hours=storm.points.at(-1)[0]/10;
-    return {peak,days:Math.round(hours/24*10)/10};
+    return {peak,days:Math.round(hours/24*10)/10,source:storm.source?.agency==='CMA'?'中央气象台':'IBTrACS'};
   }
   function matchingOfficial(){
     const query=officialSearch.value.trim().toLocaleLowerCase();
@@ -144,7 +144,7 @@ export function bindStormLibrary(callbacks){
       const kind=document.createElement('i');kind.className='library-kind official';kind.textContent='官方';
       title.append(name,english,kind);
       const detail=document.createElement('small');
-      detail.textContent=catalogStorm.season+' 年'+(catalogStorm.number?' · '+catalogStorm.number:'')+' · 峰值 '+meta.peak.toFixed(1)+' m/s · 历时 '+meta.days+' 天 · '+catalogStorm.start.slice(0,10);
+      detail.textContent=catalogStorm.season+' 年'+(catalogStorm.number?' · '+catalogStorm.number:'')+' · '+meta.source+' · 峰值 '+meta.peak.toFixed(1)+' m/s · 历时 '+meta.days+' 天 · '+catalogStorm.start.slice(0,10);
       body.append(title,detail);
       const actions=document.createElement('div');actions.className='library-official-actions';
       const viewButton=document.createElement('button');viewButton.type='button';viewButton.className='library-view-button';viewButton.textContent='查看';viewButton.disabled=!active;
@@ -169,7 +169,7 @@ export function bindStormLibrary(callbacks){
     $('libraryOfficialCount').textContent=next.activeOfficial.size+'/'+officialTotal;
     $('libraryVisibleSummary').textContent='地图展示 '+shown+' 个，共 '+total+' 个';
     $('libraryHistorySummary').textContent=next.history.length+' 个已保存，'+next.activeHistory.size+' 个正在实验中';
-    $('libraryOfficialSummary').textContent='共 '+officialTotal+' 个官方台风（IBTrACS），'+next.activeOfficial.size+' 个正在实验中';
+    $('libraryOfficialSummary').textContent='共 '+officialTotal+' 个官方台风（2000 年后优先中央气象台，早期为 IBTrACS），'+next.activeOfficial.size+' 个正在实验中';
     $('libraryShowAll').disabled=shown===total;
     const current=next.storms.find(storm=>storm.id===next.selectedId);
     $('libraryShowCurrent').disabled=shown===1&&current&&next.visibleIds.has(current.sourceId);
