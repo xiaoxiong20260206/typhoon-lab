@@ -99,3 +99,5 @@
 - `state.activeOfficial` 保存官方资料 id，`sourceId` 必须为 `official:<IBTrACS_SID>`，并随 `typhoon-lab-session-v1` 清洗和持久化。官方资料只读：只能加入、查看、移出，不得改名、删除或写回 `assets/names.json`。
 - 统计“下一名”和官方命名事件必须排除 `official=true` 的系统。官方台风真实名称与编号不消耗 140 名动态命名表。
 - `tests/official-storms.test.mjs` 必须覆盖目录完整性、ID 唯一性、坐标强度范围、历史轨迹重放与命名表隔离；沉浸回归覆盖官方搜索、加入、只读约束、2D/3D 同步与移动端；彻底关闭浏览器测试覆盖官方选择恢复。
+- 当前公网 v2.6.0 提交 `e6baf408f97dede54ed0b5c4325bdad0ca545d78`，资源版本 `aced45d83ba1`；Pages 工作流 `44886909892` 成功，33 个运行文件与本地发布包一致，公网完整浏览器回归通过。
+- 当前内网版本 `aa06d5df`，上传 33 个运行文件；固定地址和版本地址未登录仍返回 SSO 302，`myflicker-browser` 45 秒超时，**内网应用渲染验收仍未完成，不计通过**。

@@ -114,6 +114,7 @@ npm test
 - 内网 v2.2.1 版本 `7cbcdcfd`：https://typhoonlab-7cbcdcfd.frontend-cloud.corp.kuaishou.com/ 。当前版本包含本浏览器历史保存、多选演示、主界面快捷入口与缓存版本参数；气象规则不变。公网地址和 `npm run deploy` 保持不变。
 - 内网 v2.3.0 版本 `cdef1d71`：https://typhoonlab-cdef1d71.frontend-cloud.corp.kuaishou.com/ 。该版本加入深海仪表控件视觉与移动端可读性修正，运行文件与公网 v2.3.0 构建包一致。
 - 内网 v2.5.0 版本 `9fd2ea13`：https://typhoonlab-9fd2ea13.frontend-cloud.corp.kuaishou.com/ 。该版本加入统一台风实验台、自建台风默认命名、搜索/恢复/改名/逐项删除；32 个运行文件与本次构建一致。
+- 内网 v2.6.0 版本 `aa06d5df`：https://typhoonlab-aa06d5df.frontend-cloud.corp.kuaishou.com/ 。该版本加入 IBTrACS 官方真实台风库，上传 33 个运行文件；内网未登录访问仍按 SSO 门禁处理。
 - 通过 `pde-agent` 的 frontend-cloud CLI 发布；登录使用 `appwrite-cf whoami` / `appwrite-cf login-ks`，禁止使用官方 `appwrite` CLI。无需给应用新增 SDK 或依赖。
 - 更新内网：运行 `npm test`、`npm run build`，审查其输出目录后执行 `npx -y --registry https://npm.corp.kuaishou.com/ @codeflicker/frontend-cloud-cli@latest deploy --dir <本次构建目录>`。CLI 自动读取本地 `.static-site-deploy.json`，不要打包整个工作目录。
 - 默认 SSO 与白名单访问。管理入口：https://myflicker.corp.kuaishou.com/web-artifacts ，本项目权限：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl 。本次未更改访问权限。
@@ -150,3 +151,5 @@ npm test
 - 官方台风与自建台风可同时加入同一个二维/三维模拟 frame；官方台风只读，只能加入、查看或移出，不能改名或删除。自建台风仍保留搜索、改名、恢复与二次确认删除。
 - 官方台风自带真实名称与编号，不写入、不消耗、不重排 JMA 140 名动态命名表。完整轨迹越出 100°E–180°E、0°N–60°N 域外的系统不收录，保持本项目只在西北太平洋活动的边界。
 - `tests/official-storms.test.mjs` 验证数据完整性、ID 唯一性、坐标强度范围、历史路径重放与命名表隔离；沉浸回归覆盖官方搜索、加入、只读约束、2D/3D 同步与移动端；彻底关闭浏览器测试覆盖官方选择恢复。
+- 公网 v2.6.0 提交 `e6baf408f97dede54ed0b5c4325bdad0ca545d78`，资源版本 `aced45d83ba1`，Pages 工作流 `44886909892` 成功；33 个运行文件与本地发布包一致，公网完整浏览器回归通过。
+- 内网版本 `aa06d5df`，上传 33 个运行文件。固定地址和版本地址未登录均返回 SSO 302，内置浏览器 45 秒超时，**内网应用渲染验收仍未完成**。

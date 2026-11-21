@@ -2,11 +2,16 @@
 
 ## 2026-11-21 · v2.6.0 · 官方真实台风库
 
+- 公网地址：https://xiaoxiong20260206.github.io/typhoon-lab/
+- 公网提交：\`e6baf408f97dede54ed0b5c4325bdad0ca545d78\`；Pages 工作流 \`44886909892\` 成功。资源版本 \`aced45d83ba1\`，页面版本标记 \`v2.6.0\`。
 - 新增「官方台风」分类：来自 NOAA NCEI IBTrACS v04r01 西北太平洋最佳路径数据，收录 1945–2026 年 1965 个有名称且强度可用的风暴、129,604 个路径点，压缩为本地 3.3MB JSON。
 - 官方台风按历史最佳路径插值重放位置、风速、气压与温带变性标记，不受当前环境参数重算；与自建台风可同场演示。为保持西北太平洋边界，完整轨迹越出 100°E–180°E、0°N–60°N 的系统不收录。
 - 台风库形成「实验中的台风 / 官方台风 / 我的创建」三类：官方资料只读，只能加入、查看、移出；自建台风继续支持搜索、恢复、改名和二次确认删除。官方选择随 \`typhoon-lab-session-v1\` 持久化。
 - 官方台风真实名称与编号不写入、不消耗、不重排 JMA 140 名动态命名表；自建实验仍从达维按表序命名。
-- 本地验证：42 项单元测试、沉浸交互 54 项、彻底关闭重开 13 项、3D/声音 26 项、经典模式 51 项及性能预算全部通过；无 JS/shader 错误或失败资源。
+- 公网 33 个运行文件逐一与本地发布包 SHA-256 完全一致，包含 3.3MB \`assets/official-storms.json\`。公网真实浏览器回归：沉浸交互 54 项、彻底关闭重开 13 项、3D/声音 26 项、经典模式 51 项及性能预算全部通过；无 JS/shader 错误或失败资源。本地另有 42 项单元测试通过。
+- 内网固定地址：https://typhoonlab.frontend-cloud.corp.kuaishou.com/ ；版本 \`aa06d5df\`：https://typhoonlab-aa06d5df.frontend-cloud.corp.kuaishou.com/ 。上传目录 \`.publish/site-1795251092484\`，33 个运行文件、平台打包 1.48 MB，未修改 SSO 与白名单。
+- 内网白屏回归：**未完成，不计通过**。固定地址与版本地址的未登录请求均返回 302 跳转快手 SSO；\`myflicker-browser new_tab\` 以 \`EXECUTION_TIMEOUT\` 在 45 秒超时结束，没有可检查的应用 DOM。需已授权浏览器复验。
+- 权限管理：https://myflicker.corp.kuaishou.com/web-artifacts/detail?id=28596&tab=AccessControl
 
 ## 2026-11-21 16:17（任务时间） · v2.5.0 · 统一台风实验台
 
