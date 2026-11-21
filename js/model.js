@@ -1,6 +1,6 @@
-import {clamp,describe} from './rules.js?v=d79f98f758ed';
-import {DEFAULT_NAMES} from './names.js?v=d79f98f758ed';
-import {cleanCustomName} from './naming.js?v=d79f98f758ed';
+import {clamp,describe} from './rules.js?v=c6e80bca356e';
+import {DEFAULT_NAMES} from './names.js?v=c6e80bca356e';
+import {cleanCustomName} from './naming.js?v=c6e80bca356e';
 
 export const DEFAULT_ENV=Object.freeze({sst:29.5,shear:9,cold:65,size:1.2});
 export const SCENARIOS=Object.freeze({

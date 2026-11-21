@@ -6,22 +6,23 @@
   <meta name="theme-color" content="#122329">
   <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
   <title>风暴实验室 · 西北太平洋台风模拟器</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/base.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/layout.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/compact.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/forge.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/theater.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/immersive.css?v=d79f98f758ed">
-  <link rel="stylesheet" href="styles/polish.css?v=d79f98f758ed">
-  <script defer src="assets/vendor/three.min.js?v=d79f98f758ed"></script>
-  <script type="module" src="js/app.js?v=d79f98f758ed"></script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/base.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/layout.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/compact.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/forge.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/theater.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/immersive.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/library.css?v=c6e80bca356e">
+  <link rel="stylesheet" href="styles/polish.css?v=c6e80bca356e">
+  <script defer src="assets/vendor/three.min.js?v=c6e80bca356e"></script>
+  <script type="module" src="js/app.js?v=c6e80bca356e"></script>
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=d79f98f758ed" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=c6e80bca356e" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><span id="buildTag" class="build-tag">v2.4.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><span id="buildTag" class="build-tag">v2.5.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -57,11 +58,6 @@
         <div class="section-heading"><h3>实验中的系统</h3><span id="systemCount">1 个</span></div>
         <div id="systemList"></div>
         <small id="systemListHint" class="system-list-hint" hidden>↕ 滚动列表查看所有系统，地图不隐藏系统</small>
-        <details class="history-section" id="historyDetails">
-          <summary>历史创建 · <span id="historyCount">已保存 · 0 个</span></summary>
-          <div id="historyList"></div>
-          <p id="historySaveHint" class="fineprint">创建后自动保存在本浏览器，关闭页面再打开仍可找到。勾选多个系统，可同时加入地图演示。</p>
-        </details>
         <p id="nextName" class="next-name">下一名：达维 · 第 1 轮</p>
         <button id="forgeButton" class="create-button forge-button">＋ 台风工坊 · 自己创造</button>
         <button id="createButton" class="create-button">＋ 在海面生成扰动</button>
@@ -75,8 +71,8 @@
       <canvas id="sceneCanvas" aria-label="三维风暴：拖动旋转、滚轮缩放，点击海面查看风雨" tabindex="0" hidden></canvas>
       <div id="placeLabels" aria-hidden="true"></div>
       <div id="sceneLabels" aria-label="三维场景中的系统" hidden></div>
-      <div id="sceneActions" class="scene-actions immersive-only"><label class="camera-control" for="cameraSelect">镜头<select id="cameraSelect"><option value="overview">全域俯瞰</option><option value="follow" selected>追随风暴</option><option value="eye">风眼近景</option><option value="orbit">电影巡航</option></select></label><details id="visibilityDetails" class="visibility-control"><summary id="visibilitySummary" aria-label="选择地图上展示的台风"><span>展示</span><strong id="visibilityCount">1 / 1</strong></summary><div class="visibility-popover" aria-label="地图展示系统"><div class="visibility-heading"><span>地图展示</span><div><button id="visibilityAll" type="button">全部</button><button id="visibilityOnlySelected" type="button">仅当前</button></div></div><div id="visibilityList" class="visibility-list"></div><p>未勾选系统仍参与模拟、编号与命名顺序。</p></div></details></div>
-      <section id="stormSummary" class="storm-summary immersive-only" aria-label="当前风暴"><p id="summaryCategory"></p><h2 id="summaryName"></h2><p id="summaryNumbers"></p><p id="summaryStatus"></p><div class="summary-actions"><select id="stormSwitcher" aria-label="切换风暴"></select><button id="detailsButton" aria-controls="workspaceDrawer" aria-expanded="false">详细观测 ↗</button><button id="historyButton" aria-controls="workspaceDrawer" aria-expanded="false" hidden>历史与多台风 <span id="historyButtonCount">0/0</span></button></div></section>
+      <div id="sceneActions" class="scene-actions immersive-only"><button id="stormLibraryButton" type="button" aria-haspopup="dialog">台风库 <span id="stormLibraryButtonCount">1/1</span></button><label class="camera-control" for="cameraSelect">镜头<select id="cameraSelect"><option value="overview">全域俯瞰</option><option value="follow" selected>追随风暴</option><option value="eye">风眼近景</option><option value="orbit">电影巡航</option></select></label></div>
+      <section id="stormSummary" class="storm-summary immersive-only" aria-label="当前风暴"><p id="summaryCategory"></p><h2 id="summaryName"></h2><p id="summaryNumbers"></p><p id="summaryStatus"></p><div class="summary-actions"><select id="stormSwitcher" aria-label="切换风暴"></select><button id="detailsButton" aria-controls="workspaceDrawer" aria-expanded="false">详细观测 ↗</button><button id="historyButton" type="button" aria-haspopup="dialog">我的台风 <span id="historyButtonCount">0/0</span></button></div></section>
       <div class="view-toolbar" aria-label="观察镜头">
         <button data-view="overview" aria-pressed="false">全域</button><button data-view="follow" class="active" aria-pressed="true">追风</button><button data-view="eye" aria-pressed="false">风眼近景</button><button data-view="orbit" aria-pressed="false" class="orbit-option">巡航</button>
         <span></span><button id="renderToggle" aria-pressed="true">3D / 切换二维</button>
@@ -124,13 +120,44 @@
   </footer>
   <div id="toast" role="status" aria-live="polite"></div>
   <dialog id="workspaceDrawer" aria-labelledby="drawerTitle"><div class="drawer-heading"><h2 id="drawerTitle">实验</h2><button id="drawerClose" aria-label="关闭面板">×</button></div><div id="drawerBody"></div></dialog>
+  <dialog id="stormLibraryDialog" class="storm-library" aria-labelledby="libraryTitle">
+    <header class="library-heading">
+      <div><span class="section-kicker">STORM LIBRARY</span><h2 id="libraryTitle">台风实验台</h2><p>选择实验中的系统，或从自己的创建里恢复一场风暴。</p></div>
+      <button id="closeStormLibrary" type="button" aria-label="关闭台风实验台">×</button>
+    </header>
+    <div class="library-tabs" role="tablist">
+      <button id="libraryCurrentTab" type="button" role="tab" aria-selected="true" aria-controls="libraryCurrentPanel">实验中的台风 <span id="libraryCurrentCount">1</span></button>
+      <button id="libraryHistoryTab" type="button" role="tab" aria-selected="false" aria-controls="libraryHistoryPanel" tabindex="-1">我的创建 <span id="libraryHistoryCount">0</span></button>
+    </div>
+    <div class="library-panels">
+      <section id="libraryCurrentPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryCurrentTab">
+        <div class="library-panel-heading">
+          <div><h3>正在实验中的系统</h3><p id="libraryVisibleSummary">地图展示 1 个，共 1 个</p></div>
+          <div class="library-bulk-actions"><button id="libraryShowAll" type="button">全部展示</button><button id="libraryShowCurrent" type="button">仅当前</button></div>
+        </div>
+        <p class="library-help">取消勾选只会隐藏地图云系，系统仍继续演化、编号与命名。点击名称可切换观测对象。</p>
+        <div id="libraryCurrentList" class="library-list" role="list"></div>
+        <div id="libraryCurrentEmpty" class="library-empty" hidden><strong>当前没有可选择的系统</strong><p>先从「我的创建」加入一场风暴。</p></div>
+      </section>
+      <section id="libraryHistoryPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryHistoryTab" hidden>
+        <div class="library-panel-heading">
+          <div><h3>我的创建</h3><p id="libraryHistorySummary">0 个已保存，0 个正在实验中</p></div>
+        </div>
+        <label class="library-search" for="librarySearch"><span>搜索</span><input id="librarySearch" type="search" placeholder="名称、编号、经纬度" autocomplete="off"><small>名称可直接修改并自动保存</small></label>
+        <p class="library-help">勾选会把保存的生成参数重新加入本次实验；取消勾选只会暂时移出，历史记录仍保留。</p>
+        <div id="libraryHistoryList" class="library-list history-list" role="list"></div>
+        <div id="libraryHistoryEmpty" class="library-empty"><strong>还没有自己的台风</strong><p id="libraryHistoryEmptyText">创建一个系统后，会保存在这里，并可随时重新加入或还原实验。</p><button id="libraryEmptyCreate" type="button">创建第一个台风</button></div>
+      </section>
+    </div>
+    <footer class="library-footer"><p id="libraryStorageHint">创建、改名和删除都会自动保存在当前浏览器。</p><button id="libraryCreateButton" type="button">＋ 创建我的台风</button></footer>
+  </dialog>
   <dialog id="forgeDialog" aria-labelledby="forgeTitle">
     <div class="dialog-heading"><div><span class="section-kicker">STORM FORGE</span><h2 id="forgeTitle">创造你的风暴</h2></div><button id="closeForge" aria-label="关闭台风工坊">×</button></div>
     <p id="forgeTime"></p>
     <form id="forgeForm">
       <div class="forge-grid">
         <label>初始阶段<select id="forgePreset"><option value="9">热带扰动</option><option value="14">热带低压</option><option value="20">热带风暴</option><option value="28">强热带风暴</option><option value="35">台风</option><option value="45">强台风</option><option value="60">超强台风</option></select></label>
-        <label>命名方式<select id="forgeNameMode" aria-describedby="forgeNameHint"><option value="auto">官方自动命名</option><option value="custom">自定义名称</option></select></label>
+        <label>命名方式<select id="forgeNameMode" aria-describedby="forgeNameHint"><option value="custom">我的自定义名称</option><option value="auto">官方自动命名</option></select></label>
         <label id="forgeCustomNameLabel" hidden>自定义名称<input id="forgeCustomName" type="text" maxlength="20" placeholder="例如：海棠" autocomplete="off" aria-describedby="forgeNameHint"></label>
         <label>初始风速 · m/s<input id="forgeWind" type="number" min="1" max="75" step="0.1" value="9" required></label>
         <label>出生经度 · °E<input id="forgeLon" type="number" min="110" max="165" step="any" value="150" required></label>
@@ -138,7 +165,7 @@
         <label>环流规模 · 倍<input id="forgeSize" type="number" min="0.6" max="2" step="0.1" value="1.2" required></label>
         <label>引导路径<select id="forgeScenario"><option value="recurve">北上变性</option><option value="landfall">西行登陆</option><option value="ocean">海上生命周期</option></select></label>
       </div>
-      <p id="forgeNameHint" class="forge-name-hint">自定义名称仅用于自己创建的系统，立即显示且不占用官方 140 名命名表。</p>
+      <p id="forgeNameHint" class="forge-name-hint">已为你准备默认名称，可直接修改；自定义名称不占用官方 140 名命名表。</p>
       <p id="forgePreview" class="forge-preview" aria-live="polite"></p>
       <p class="forge-note">自动命名按固定命名表领取；未命名就消散不占用名字，140 名用完从达维开始下一轮。命名表本身不可编辑。气压随强度估算，不与风速固定对应。</p>
       <p id="forgeError" role="alert"></p>

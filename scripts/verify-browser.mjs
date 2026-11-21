@@ -47,7 +47,7 @@ try{
   await page.click('#fitMap');check('fit restores region',await page.evaluate(()=>window.typhoonLab.map.zoom===1));
   await page.click('#createButton');await page.focus('#mapCanvas');await page.keyboard.press('Enter');
   check('keyboard creates second ocean disturbance without rewinding',await page.evaluate(()=>window.typhoonLab.frame.storms.length===2&&window.typhoonLab.state.hour===35&&window.typhoonLab.frame.storms[1].bornAt===35));
-  await seek(48);check('second system gets next fixed name',await page.evaluate(()=>window.typhoonLab.frame.storms[1].name.en==='Tianma'));
+  await seek(48);check('direct creation receives an editable generated name',await page.evaluate(()=>window.typhoonLab.frame.storms[1].name.cn==='实验台风 01'&&window.typhoonLab.frame.storms[1].custom));
   await page.click('#undoButton');check('undo restores one system',await page.evaluate(()=>window.typhoonLab.frame.storms.length===1));
   const oldFrame=await frame();
   for(let i=0;i<7;i++){
@@ -60,10 +60,10 @@ try{
   }
   check('workshop creates eight systems without four-system cap',await page.evaluate(()=>window.typhoonLab.frame.storms.length===8&&document.querySelectorAll('.system-item').length===8&&!document.getElementById('createButton').disabled));
   check('creation preserves current time and original system',await page.evaluate(old=>window.typhoonLab.state.hour===48&&JSON.stringify(window.typhoonLab.frame.storms[0])===JSON.stringify(old),oldFrame));
-  check('first eight names are distinct and table ordered',await page.evaluate(()=>window.typhoonLab.frame.storms.every((s,i)=>s.name.en===window.typhoonLab.names[i].en)));
+  check('self-created systems receive distinct generated names',await page.evaluate(()=>{const created=window.typhoonLab.frame.storms.filter(s=>s.custom);return created.length===7&&new Set(created.map(s=>s.name.cn)).size===7&&created.every((s,i)=>s.name.cn===`实验台风 ${String(i+1).padStart(2,'0')}`);}));
   check('custom super typhoon has correct initial wind and pressure',await page.evaluate(()=>{const s=window.typhoonLab.frame.storms[7];return s.wind===60&&s.pressure<950&&s.age===0;}));
   check('newly selected system visible in scrollable list',await page.evaluate(()=>{const r=document.querySelector('.system-item.active').getBoundingClientRect(),l=document.getElementById('systemList').getBoundingClientRect();return r.top>=l.top&&r.bottom<=l.bottom+1&&!document.getElementById('systemListHint').hidden;}));
-  check('next name indicator advances by named systems',await page.evaluate(()=>document.getElementById('nextName').textContent===`下一名：${window.typhoonLab.names[8].cn} · 第 1 轮`));
+  check('custom names do not advance the official naming table',await page.evaluate(()=>document.getElementById('nextName').textContent===`下一名：${window.typhoonLab.names[1].cn} · 第 1 轮`));
   await page.screenshot({path:'Output/eight-systems.png',fullPage:false});
   await seek(47);check('future systems absent when rewinding',await page.evaluate(()=>window.typhoonLab.frame.storms.length===1&&window.typhoonLab.state.selected===1));
   await seek(48);check('future systems return at their birth hour',await page.evaluate(()=>window.typhoonLab.frame.storms.length===8));
@@ -84,7 +84,7 @@ try{
   for(const [id,value] of [['sst',24],['shear',30]])await page.$eval(`#${id}`,(el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));},value);
   await seek(288);
   check('failed embryo explicitly displays unnamed after dissipation',await page.evaluate(()=>window.typhoonLab.frame.storms[0].status==='dissipated'&&document.getElementById('stormName').textContent==='未命名'&&document.querySelector('.system-item').textContent.includes('未命名')));
-  await page.click('#forgeButton');await page.select('#forgePreset','20');
+  await page.click('#forgeButton');await page.select('#forgeNameMode','auto');await page.select('#forgePreset','20');
   await page.$eval('#forgeLon',el=>el.value=150);await page.$eval('#forgeLat',el=>el.value=15);
   await page.click('#forgeSubmit');
   check('next creation after failed embryo receives Damrey not Tianma',await page.evaluate(()=>window.typhoonLab.frame.storms[1].name.en==='Damrey'&&window.typhoonLab.state.hour===288));

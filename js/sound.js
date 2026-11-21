@@ -1,4 +1,4 @@
-import {soundMix} from './scene-math.js?v=d79f98f758ed';
+import {soundMix} from './scene-math.js?v=c6e80bca356e';
 
 export class StormSound{
   constructor(){this.enabled=false;this.volume=.4;this.eventCount=0;}

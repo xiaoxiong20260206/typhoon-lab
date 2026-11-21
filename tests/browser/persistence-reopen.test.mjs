@@ -34,7 +34,7 @@ async function openPage(run){
 
 async function createStorm(page,{lon,lat,customName=''}){
   await page.click('#forgeButton');
-  if(customName){await page.select('#forgeNameMode','custom');await page.type('#forgeCustomName',customName);}
+  if(customName)await page.$eval('#forgeCustomName',(input,value)=>input.value=value,customName);
   await page.select('#forgePreset','20');
   await page.$eval('#forgeLon',(input,value)=>input.value=String(value),lon);
   await page.$eval('#forgeLat',(input,value)=>input.value=String(value),lat);
@@ -51,28 +51,33 @@ try{
 
   await createStorm(page,{lon:145,lat:15});
   await createStorm(page,{lon:155,lat:18,customName:'海棠'});
-  await page.click('#visibilitySummary');
-  await page.$eval('#visibilityList input',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
-  await page.click('#visibilitySummary');
+  await page.click('#stormLibraryButton');
+  await page.$eval('#libraryCurrentList input[type=checkbox]',input=>{input.click();input.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.click('#libraryHistoryTab');
+  await page.$eval('#libraryHistoryList .library-name-input',input=>{input.value='实验一号';input.dispatchEvent(new Event('change',{bubbles:true}));});
+  await page.click('#closeStormLibrary');
   check('two creations are active before close',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&window.typhoonLab.state.activeHistory.size===2&&window.typhoonLab.frame.storms.length===3));
-  check('custom name and one-system map visibility are saved before close',await page.evaluate(()=>window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2));
-  check('two selections are visible before close',await page.evaluate(()=>document.querySelectorAll('#historyList input:checked').length===2&&document.getElementById('historyCount').textContent.includes('演示 2')));
+  check('edited and custom names plus one-system map visibility are saved before close',await page.evaluate(()=>window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')&&window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2));
+  check('two history selections are visible before close',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
   check('session is written to localStorage before close',await page.evaluate(()=>{const data=JSON.parse(localStorage.getItem('typhoon-lab-session-v1'));return data.history.length===2&&data.activeHistory.length===2;}));
-  check('visible multi-storm entry points to the saved selection',await page.evaluate(()=>{const button=document.getElementById('historyButton');return !button.hidden&&button.textContent.includes('2/2');}));
   await page.click('#historyButton');
-  check('history entry opens the multi-select list directly',await page.evaluate(()=>document.getElementById('workspaceDrawer').open&&document.getElementById('historyDetails').open&&document.querySelectorAll('#historyList input:checked').length===2));
-  await page.click('#drawerClose');
+  check('unified history entry opens both saved selections directly',await page.evaluate(()=>document.getElementById('stormLibraryDialog').open&&document.getElementById('libraryHistoryTab').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#libraryHistoryList input:checked').length===2));
+  await page.click('#closeStormLibrary');
 
   await browser.close();
   browser=null;
 
   page=await openPage(false);
-  check('history survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&document.querySelectorAll('#historyList .history-item').length===2));
-  check('custom name survives a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)));
+  await page.click('#historyButton');check('history survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&document.querySelectorAll('#libraryHistoryList .library-history-row').length===2));
+  check('edited and custom names survive a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')));
   check('multi-system selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.activeHistory.size===2&&window.typhoonLab.frame.storms.length===3));
-  check('map visibility choice survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2&&[...document.querySelectorAll('#visibilityList input')].filter(i=>i.checked).length===2));
-  check('restored selections remain checked in the UI',await page.evaluate(()=>document.querySelectorAll('#historyList input:checked').length===2&&document.getElementById('historyCount').textContent.includes('演示 2')));
-  check('restored history keeps the visible multi-storm entry',await page.evaluate(()=>{const button=document.getElementById('historyButton');return !button.hidden&&button.textContent.includes('2/2');}));
+  await page.click('#libraryCurrentTab');check('map visibility choice survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2&&[...document.querySelectorAll('#libraryCurrentList input[type=checkbox]')].filter(i=>i.checked).length===2));
+  check('restored history selections remain checked in the UI',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
+  await page.click('#libraryHistoryTab');const deleted=await page.$('#libraryHistoryList .library-delete-button');await deleted.click();await deleted.click();
+  await page.waitForFunction(()=>window.typhoonLab.state.history.length===1);check('an individual deletion is written before closing',await page.evaluate(()=>window.typhoonLab.state.history.length===1&&window.typhoonLab.state.activeHistory.size===1));
+  await browser.close();browser=null;
+  page=await openPage(false);
+  check('an individual deletion survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.history.length===1&&window.typhoonLab.frame.storms.length===2&&document.getElementById('historyButtonCount').textContent==='1/1'));
   console.log(JSON.stringify({passed:checks.length,userDataDir,url:siteUrl.href}));
 }catch(error){
   console.error(error);

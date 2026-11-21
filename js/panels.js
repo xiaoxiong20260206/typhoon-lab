@@ -1,5 +1,5 @@
-import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=d79f98f758ed';
-import {PLACES} from './geo.js?v=d79f98f758ed';
+import {beaufort,describe,ringRadii,weatherAt} from './rules.js?v=c6e80bca356e';
+import {PLACES} from './geo.js?v=c6e80bca356e';
 
 export const $=id=>document.getElementById(id);
 export const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -53,57 +53,6 @@ function updateChart(run,hour,s){
   $('intensityChart').innerHTML=`<defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${c}" stop-opacity=".18"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs><path d="M0 ${y(32.7)}H260" stroke="#46564d" stroke-dasharray="3 4"/><text x="259" y="${y(32.7)-5}" fill="#849388" font-size="8" text-anchor="end">台风 32.7</text><path d="${fill}" fill="url(#chartFill)"/><path d="${path}" stroke="${c}" stroke-width="1.7" fill="none"/><circle cx="${x(hour)}" cy="${y(s.wind)}" r="2.8" fill="${c}"/><path d="M0 80H260" stroke="#34453d"/>`;
   set('peakLabel',`当前峰值 ${s.peak.toFixed(1)} m/s`);
   $('intensityChart').setAttribute('aria-label',`已回放 ${hour} 小时，风速峰值 ${s.peak.toFixed(1)} 米每秒`);
-}
-export function updateHistory(history,active,getStorm,onToggle,storageReady=true){
-  const list=$('historyList'),scroll=list.scrollTop;
-  list.replaceChildren();
-  for(const entry of history){
-    const seed=entry.seed,storm=getStorm(entry),item=document.createElement('label');
-    item.className='history-item';
-    const input=document.createElement('input');input.type='checkbox';input.checked=active.has(entry.id);
-    input.setAttribute('aria-label',`将历史系统 ${seed.lon.toFixed(0)}°E ${seed.lat.toFixed(0)}°N 加入演示`);
-    input.addEventListener('change',()=>onToggle(entry.id,input.checked));
-    const text=document.createElement('span');
-    text.innerHTML=`<b>${escape(storm?.name?.cn||storm?.number||storm?.invest||'未命名')}</b><small>+${seed.bornAt}h · ${seed.lon.toFixed(1)}°E / ${seed.lat.toFixed(1)}°N · 初始 ${seed.wind} m/s</small>`;
-    item.append(input,text);list.append(item);
-  }
-  list.scrollTop=scroll;
-  const count=history.filter(entry=>active.has(entry.id)).length;
-  $('historyCount').textContent=storageReady?`已保存 · ${history.length} 个${count?` · 演示 ${count}`:' · 未演示'}`:`未持久保存 · ${history.length} 个 · 演示 ${count}`;
-  $('historySaveHint').textContent=storageReady?'创建后自动保存在本浏览器，关闭页面再打开仍可找到。':'本浏览器禁止或无法持久保存；当前记录只在本页有效，请检查隐私模式或站点存储权限。';
-  $('historySaveHint').classList.toggle('warning',!storageReady);
-  const quick=$('historyButton'),quickCount=$('historyButtonCount');
-  quick.hidden=!history.length;quickCount.textContent=`${count}/${history.length}`;
-  quick.setAttribute('aria-label',`打开历史创建；${history.length} 个已保存，${count} 个正在演示`);
-  list.hidden=!history.length;
-  document.querySelector('#historyDetails .fineprint').hidden=!history.length;
-}
-let visibilitySignature='';
-export function updateVisibilityControls(storms,visible,selected,onToggle){
-  const list=$('visibilityList'),count=$('visibilityCount'),summary=$('visibilitySummary');
-  const signature=storms.map(storm=>`${storm.sourceId}:${storm.name?.cn||storm.number||storm.invest}:${describe(storm).name}:${storm.custom?'custom':'official'}`).join('|');
-  if(signature!==visibilitySignature){
-    list.replaceChildren();
-    for(const storm of storms){
-      const category=describe(storm),item=document.createElement('label'),input=document.createElement('input');
-      item.className='visibility-item';input.type='checkbox';input.dataset.sourceId=storm.sourceId;
-      input.checked=visible.has(storm.sourceId);
-      input.setAttribute('aria-label',`在地图上展示 ${storm.name?.cn||storm.number||storm.invest}`);
-      input.addEventListener('change',()=>onToggle(storm.sourceId,input.checked));
-      const text=document.createElement('span'),name=document.createElement('b'),meta=document.createElement('small');
-      name.textContent=storm.name?.cn||storm.number||storm.invest;
-      meta.textContent=`#${storm.id} · ${category.name}${storm.custom?' · 自定义':''}`;
-      text.append(name,meta);item.append(input,text);list.append(item);
-    }
-    visibilitySignature=signature;
-  }else{
-    for(const input of list.querySelectorAll('input[data-source-id]'))input.checked=visible.has(input.dataset.sourceId);
-  }
-  const current=storms.find(storm=>storm.id===selected);
-  count.textContent=`${visible.size} / ${storms.length}`;
-  summary.setAttribute('aria-label',`地图上正在展示 ${visible.size} 个，共 ${storms.length} 个台风；打开多选列表`);
-  $('visibilityAll').disabled=visible.size===storms.length;
-  $('visibilityOnlySelected').disabled=visible.size===1&&current&&visible.has(current.sourceId);
 }
 function updateImpact(s,storms){
   if(s.status==='dissipated'){set('impactType','影响结束');set('impactText',s.cause);return;}

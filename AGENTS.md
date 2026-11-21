@@ -78,3 +78,13 @@
 - 维护 `tests/naming.test.mjs`；`tests/browser/refinement.test.mjs` 覆盖自定义创建、展示多选、地图/3D 同步过滤、“仅当前”“全部”和移动端浮层；`tests/browser/persistence-reopen.test.mjs` 必须彻底关闭并重开浏览器验证两者恢复。
 - 当前公网 v2.4.0 提交 `2e25cbb35999fa4eecfae53eec4d184a26211df3`，资源版本 `d79f98f758ed`，Pages 工作流 `44880437597` 成功；30 个运行文件与本地发布包一致，公网完整浏览器回归通过。
 - 当前内网版本 `edef2329`，上传 30 个运行文件；固定地址和版本地址仍未登录返回 SSO 302，Electron 内置浏览器 45 秒超时，**内网应用渲染验收仍未完成**。
+
+## v2.5.0 台风实验台维护
+
+- `js/library.js` 与 `styles/library.css` 承载统一「台风实验台」；顶部 `stormLibraryButton` 打开“实验中的台风”，风暴卡 `historyButton` 打开“我的创建”，两者复用同一个原生 dialog 与同一份模拟状态。
+- “实验中的台风”控制交给 `map.frame` 的展示对象；“我的创建”勾选调用原有 `toggleHistory`，用保存的 seed 重新加入/还原系统。取消展示或取消加入都不得删除历史。
+- 历史名称必须通过 `cleanCustomName` 与 `isCustomNameTaken` 清洗、限长和去重；默认名称由 `nextCustomName` 生成。改名只更新对应历史 seed 的自定义名称，官方 140 名表仍只由 `model.js` 按门槛和表序领取。
+- 删除必须保留二次确认，只移除点击的单条历史，并同步 active/visible 集合、回放选择与 localStorage；不得提供批量误删入口。
+- 台风工坊和地图直接落点创建默认使用可编辑的自定义名称；工坊显式选择“官方自动命名”时保持旧命名行为。`createAt` 接收 `nameMode`，不得用空字符串歧义区分两种模式。
+- `tests/browser/refinement.test.mjs` 覆盖双分类、默认名称、改名、搜索、移出/还原、二次确认删除、地图/3D 同步与移动端；`tests/browser/persistence-reopen.test.mjs` 必须验证名称、展示、加入选择和删除在彻底关闭浏览器后恢复。
+- README、guide 和旧版回归脚本中涉及官方命名顺序的用例，必须在工坊显式选择 `auto`；不能把默认自定义名称误判为官方命名表回归失败。

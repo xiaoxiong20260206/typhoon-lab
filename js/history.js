@@ -1,4 +1,4 @@
-import {cleanCustomName} from './naming.js?v=d79f98f758ed';
+import {cleanCustomName} from './naming.js?v=c6e80bca356e';
 
 const KEY='typhoon-lab-session-v1';
 

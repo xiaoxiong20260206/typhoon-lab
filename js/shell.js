@@ -1,4 +1,4 @@
-import {describe,beaufort} from './rules.js?v=d79f98f758ed';
+import {describe,beaufort} from './rules.js?v=c6e80bca356e';
 
 // Reuse the original controls: one ID, one handler and one simulation frame.
 export function initShell({select}){
@@ -6,7 +6,6 @@ export function initShell({select}){
   const $=id=>document.getElementById(id),drawer=$('workspaceDrawer'),body=$('drawerBody');
   document.body.classList.add('immersive');
   const experiment=document.querySelector('.experiment-panel'),observation=document.querySelector('.observation-panel'),display=document.createElement('section');
-  $('historyDetails').open=true;
   display.className='display-settings';
   for(const [title,selectors] of [['地图与图层',['.layer-toolbar']],['画质与声音',['.sound-controls']],['视图',['.view-toolbar','.map-navigation','#cinemaButton']],['资料',['#namesButton']]]){
     const section=document.createElement('section'),h=document.createElement('h3');h.textContent=title;section.append(h);
@@ -30,7 +29,7 @@ export function initShell({select}){
   // Close before another native dialog or map action is opened.
   for(const id of ['createButton','namesButton','cinemaButton'])$(id).addEventListener('click',close);
   $('namesDialog').addEventListener('close',()=>$('displayButton').focus());
-  const actions=$('sceneActions');actions.prepend($('forgeButton'));actions.append($('soundButton'),$('visibilityDetails'));
+  const actions=$('sceneActions');actions.prepend($('forgeButton'));actions.append($('soundButton'));
   const cinemaHome=$('cinemaButton').parentElement;
   document.addEventListener('lab:cinema-change',()=>{(document.body.classList.contains('cinema')?actions:cinemaHome).append($('cinemaButton'));});
   $('forgeButton').textContent='＋ 创造台风';

@@ -1,21 +1,21 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=d79f98f758ed';
-import {makeLandTest} from './geo.js?v=d79f98f758ed';
-import {localizeNames} from './names.js?v=d79f98f758ed';
-import {PacificMap} from './map.js?v=d79f98f758ed';
-import {$,updatePanels,renderNames,toast,updateHistory} from './panels.js?v=d79f98f758ed';
-import {updateVisibilityControls} from './panels.js?v=d79f98f758ed';
-import {bindForge} from './forge.js?v=d79f98f758ed';
-import {StormSound} from './sound.js?v=d79f98f758ed';
-import {initShell} from './shell.js?v=d79f98f758ed';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=d79f98f758ed';
-import {cleanCustomName} from './naming.js?v=d79f98f758ed';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=c6e80bca356e';
+import {makeLandTest} from './geo.js?v=c6e80bca356e';
+import {localizeNames} from './names.js?v=c6e80bca356e';
+import {PacificMap} from './map.js?v=c6e80bca356e';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=c6e80bca356e';
+import {bindForge} from './forge.js?v=c6e80bca356e';
+import {bindStormLibrary} from './library.js?v=c6e80bca356e';
+import {StormSound} from './sound.js?v=c6e80bca356e';
+import {initShell} from './shell.js?v=c6e80bca356e';
+import {loadSession,saveSession,storageAvailable} from './history.js?v=c6e80bca356e';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=c6e80bca356e';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
 const assetVersion=new URL(import.meta.url).searchParams.get('v')||'';
 if(assetVersion)$('buildTag').title=`资源缓存版本 ${assetVersion}`;
 const state={scenario:['recurve','landfall','ocean'].includes(savedSession?.scenario)?savedSession.scenario:'recurve',env:{...DEFAULT_ENV,...savedSession?.env},seeds:[],history:savedSession?.history||[],activeHistory:new Set(savedSession?.activeHistory||[]),visibleStorms:savedSession?.visibleStorms==null?null:new Set(savedSession.visibleStorms),hour:savedSession?.hour??48,selected:1,playing:false,speed:4};
-let map,run,names,isLand,forge,last=0,animationTime=0,lastPaint=0;
+let map,run,names,isLand,forge,library,last=0,animationTime=0,lastPaint=0;
 let theater=null,shell;const sound=new StormSound();
 const endHour=()=>run.frames.length-1;
 function applySeeds(){
@@ -55,7 +55,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=d79f98f758ed');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=c6e80bca356e');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -83,7 +83,6 @@ function refresh(){
   map.frame=visible.length===fullFrame.storms.length?fullFrame:{...fullFrame,storms:visible};map.selected=state.selected;
   updatePanels(run,hour,state.selected,selectStorm);
   shell?.update(map.frame,state.selected);
-  updateVisibilityControls(fullFrame.storms,new Set(visible.map(storm=>storm.sourceId)),state.selected,toggleStormVisibility);
   const count=fullFrame.storms.filter(s=>s.name&&!s.custom).length;
   $('nextName').textContent=`下一名：${names[count%names.length].cn} · 第 ${Math.floor(count/names.length)+1} 轮`;
   $('undoButton').hidden=state.seeds.length<2;
@@ -91,10 +90,23 @@ function refresh(){
   $('cinemaReadout').textContent=`${selected.name?.cn||'未命名'} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
   $('theaterCaption').querySelector('strong').textContent=selected.status==='dissipated'?'风暴终将归于平静。':selected.status==='extratropical'?'在北方，成为另一种风暴。':'走近风暴的中心。';
   map.draw();updatePlayback();
-  updateHistory(state.history,state.activeHistory,entry=>{
-    const index=state.seeds.findIndex(seed=>seed.sourceId===entry.id);
-    return index>=0?fullFrame.storms.find(storm=>storm.id===index+1):null;
-  },toggleHistory,storageReady);
+  updateLibrary();
+}
+function stormForHistory(historyId,frame=run.frames[Math.floor(state.hour)]){
+  const index=state.seeds.findIndex(seed=>seed.sourceId===historyId);
+  return index>=0?frame.storms.find(storm=>storm.id===index+1)||null:null;
+}
+function updateLibrary(){
+  if(!library)return;
+  const fullFrame=run.frames[Math.floor(state.hour)];
+  library.update({
+    storms:fullFrame.storms,
+    visibleIds:new Set(map.frame.storms.map(storm=>storm.sourceId)),
+    selectedId:state.selected,
+    history:state.history,
+    activeHistory:state.activeHistory,
+    storageReady
+  });
 }
 function selectStorm(id){
   const storm=run.frames[Math.floor(state.hour)].storms.find(item=>item.id===id);
@@ -102,23 +114,63 @@ function selectStorm(id){
   if(state.visibleStorms)state.visibleStorms.add(storm.sourceId);
   state.selected=id;sound.cue();refresh();
 }
+function selectedSourceId(){
+  return run.frames[Math.floor(state.hour)].storms.find(storm=>storm.id===state.selected)?.sourceId||null;
+}
+function restoreSelectedSource(sourceId){
+  const index=state.seeds.findIndex(seed=>seed.sourceId===sourceId);
+  state.selected=index>=0?index+1:1;
+}
 function toggleHistory(id,active){
+  const sourceId=selectedSourceId();
   if(active)state.activeHistory.add(id);else state.activeHistory.delete(id);
   if(state.visibleStorms){if(active)state.visibleStorms.add(id);else state.visibleStorms.delete(id);}
-  applySeeds();state.playing=false;rebuild();persist();
+  applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
   const entry=state.history.find(item=>item.id===id);
   toast(active?`已加入演示：+${entry.seed.bornAt}h 创建的系统。${map.frame.storms.length>1?'多个系统会同时演化。':''}`:'已移出演示，历史创建仍保留在本浏览器。');
+  return true;
+}
+function renameHistory(id,value){
+  const entry=state.history.find(item=>item.id===id),name=cleanCustomName(value);
+  if(!entry)return {ok:false,error:'这个台风已经不在历史中。'};
+  if(!name)return {ok:false,error:'名称不能为空，请填写 1–20 个字符。'};
+  if(isCustomNameTaken(name,state.history,id))return {ok:false,error:'这个名称已经被另一个自建台风使用。'};
+  const previous=cleanCustomName(entry.seed.customName);
+  if(previous===name)return {ok:true,name};
+  const sourceId=selectedSourceId();
+  entry.seed.customName=name;applySeeds();restoreSelectedSource(sourceId);
+  if(state.activeHistory.has(id)){state.playing=false;rebuild();}else refresh();
+  persist();toast(`名称已改为「${name}」，并自动保存。`);
+  return {ok:true,name};
+}
+function deleteHistory(id){
+  const index=state.history.findIndex(item=>item.id===id);
+  if(index<0)return false;
+  const sourceId=selectedSourceId(),[entry]=state.history.splice(index,1);
+  state.activeHistory.delete(id);state.visibleStorms?.delete(id);applySeeds();restoreSelectedSource(sourceId);
+  state.playing=false;rebuild();persist();
+  toast(`已删除自建台风「${cleanCustomName(entry.seed.customName)||'未命名'}」。历史记录已同步移除。`);
+  return true;
+}
+function showAllStorms(){
+  const frame=run.frames[Math.floor(state.hour)];
+  state.visibleStorms=new Set(frame.storms.map(storm=>storm.sourceId));refresh();persist();
+}
+function showCurrentStorm(){
+  const frame=run.frames[Math.floor(state.hour)],storm=frame.storms.find(item=>item.id===state.selected);
+  if(!storm)return;
+  state.visibleStorms=new Set([storm.sourceId]);refresh();persist();
 }
 function toggleStormVisibility(sourceId,visible){
   const frame=run.frames[Math.floor(state.hour)];
   if(!state.visibleStorms)state.visibleStorms=new Set(frame.storms.map(storm=>storm.sourceId));
-  if(!visible&&state.visibleStorms.size<=1){toast('地图至少保留一个展示系统；可切换当前系统后再隐藏它。');refresh();return;}
+  if(!visible&&state.visibleStorms.size<=1){toast('地图至少保留一个展示系统；可切换当前系统后再隐藏它。');refresh();return false;}
   if(visible)state.visibleStorms.add(sourceId);else state.visibleStorms.delete(sourceId);
   if(!visible&&!state.visibleStorms.has(frame.storms.find(storm=>storm.id===state.selected)?.sourceId)){
     const next=frame.storms.find(storm=>state.visibleStorms.has(storm.sourceId));
     if(next)state.selected=next.id;
   }
-  refresh();persist();
+  refresh();persist();return true;
 }
 function updatePlayback(){
   const timeline=$('timeline'),span=Math.max(1,endHour());
@@ -141,9 +193,13 @@ function setCreating(active){
 }
 function createAt(lon,lat,options={}){
   const wind=options.wind??9,size=options.size??state.env.size;
-  const customName=cleanCustomName(options.customName);
+  let customName=options.nameMode==='auto'?'':cleanCustomName(options.customName);
   if(![lon,lat,wind,size].every(Number.isFinite)||lon<110||lon>165||lat<5||lat>28||wind<1||wind>75||size<.6||size>2){toast('请填写有效的海洋位置、风速与环流规模。');return false;}
   if(isLand(lon,lat)){toast('系统需要在海面生成，请选择海洋位置。');return false;}
+  if(options.nameMode!=='auto'){
+    customName=customName||nextCustomName(state.history);
+    if(isCustomNameTaken(customName,state.history)){toast('这个名称已经属于另一个自建台风，请换一个名称。');return false;}
+  }
   state.hour=Math.floor(state.hour);
   const seed={lon,lat,wind,size,scenario:options.scenario||state.scenario,bornAt:state.hour,customName:customName||undefined};
   const entry={id:`h${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}`,seed,createdAt:Date.now()};
@@ -155,8 +211,19 @@ function createAt(lon,lat,options={}){
   return true;
 }
 function bind(){
+  library=bindStormLibrary({
+    onVisibility:toggleStormVisibility,
+    onSelect:selectStorm,
+    onHistory:toggleHistory,
+    onRename:renameHistory,
+    onDelete:deleteHistory,
+    onShowAll:showAllStorms,
+    onShowCurrent:showCurrentStorm,
+    onCreate:()=>$('forgeButton').click(),
+    getStorm:id=>stormForHistory(id)
+  });
   document.addEventListener('lab:panel-open',refresh);
-  forge=bindForge({create:createAt,onOpen:()=>{state.playing=false;setCreating(false);updatePlayback();return state;},onPick:()=>{setCreating(true);if(theater?.active)theater.setMode('overview');$(theater?.active?'sceneCanvas':'mapCanvas').focus();}});
+  forge=bindForge({create:createAt,onOpen:()=>{state.playing=false;setCreating(false);updatePlayback();return {scenario:state.scenario,env:state.env,hour:state.hour,history:state.history,nextName:nextCustomName(state.history)};},onPick:()=>{setCreating(true);if(theater?.active)theater.setMode('overview');$(theater?.active?'sceneCanvas':'mapCanvas').focus();}});
   $('renderToggle').addEventListener('click',async()=>{if(!theater)await initTheater();else set3D(!theater.active);});
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{theater?.setMode(button.dataset.view);document.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});sound.cue();updatePlayback();}));
   $('cinemaButton').addEventListener('click',()=>{const active=document.body.classList.toggle('cinema');$('cinemaButton').textContent=active?'退出影院':'影院模式';$('cinemaButton').setAttribute('aria-pressed',String(active));$('cinemaReadout').hidden=!active;document.dispatchEvent(new Event('lab:cinema-change'));});
@@ -190,37 +257,16 @@ function bind(){
     const [entry]=state.history.splice(index,1);state.activeHistory.delete(entry.id);state.visibleStorms?.delete(entry.id);applySeeds();
     state.selected=Math.min(state.selected,state.seeds.length);rebuild();persist();toast('已撤销最后创建的系统，并同步更新本浏览器历史。');
   });
-  $('historyButton').addEventListener('click',()=>{
-    if(!state.history.length)return;
-    $('experimentButton').click();
-    requestAnimationFrame(()=>{
-      const details=$('historyDetails');details.open=true;
-      details.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
-    });
-  });
-  $('visibilityAll').addEventListener('click',()=>{
-    const frame=run.frames[Math.floor(state.hour)];
-    state.visibleStorms=new Set(frame.storms.map(storm=>storm.sourceId));refresh();persist();
-  });
-  $('visibilityOnlySelected').addEventListener('click',()=>{
-    const frame=run.frames[Math.floor(state.hour)],storm=frame.storms.find(item=>item.id===state.selected);
-    if(!storm)return;
-    state.visibleStorms=new Set([storm.sourceId]);refresh();persist();
-  });
-  document.addEventListener('click',e=>{
-    const details=$('visibilityDetails');
-    if(details.open&&!details.contains(e.target))details.open=false;
-  });
+  $('stormLibraryButton').addEventListener('click',e=>library.open('current',e.currentTarget));
+  $('historyButton').addEventListener('click',e=>library.open('history',e.currentTarget));
   $('namesButton').addEventListener('click',()=>{const used=run.frames[Math.floor(state.hour)].storms.filter(s=>s.name&&!s.custom).map(s=>s.name.en);renderNames(names,used);$('namesDialog').showModal();});
   $('closeNames').addEventListener('click',()=>$('namesDialog').close());
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       setCreating(false);
-      const visibility=$('visibilityDetails');
-      if(visibility.open){visibility.open=false;visibility.querySelector('summary').focus();}
       if(document.body.classList.contains('cinema'))$('cinemaButton').click();
     }
-    if(['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement?.tagName)||$('namesDialog').open||$('forgeDialog').open)return;
+    if(['INPUT','SELECT','TEXTAREA','BUTTON','A'].includes(document.activeElement?.tagName)||$('namesDialog').open||$('forgeDialog').open||$('stormLibraryDialog').open)return;
     if(e.code==='Space'){e.preventDefault();togglePlay();}
     if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();state.playing=false;state.hour=Math.max(0,Math.min(endHour(),Math.floor(state.hour)+(e.key==='ArrowLeft'?-1:1)));refresh();}
   });

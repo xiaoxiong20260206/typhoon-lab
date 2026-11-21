@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {simulate} from '../js/model.js';
 import {localizeNames} from '../js/names.js';
-import {cleanCustomName,MAX_CUSTOM_NAME_LENGTH} from '../js/naming.js';
+import {cleanCustomName,isCustomNameTaken,MAX_CUSTOM_NAME_LENGTH,nextCustomName} from '../js/naming.js';
 
 const names=localizeNames(JSON.parse(await readFile(new URL('../assets/names.json',import.meta.url))));
 
@@ -25,4 +25,13 @@ test('custom names are cleaned, bounded, and never alter the fixed list',()=>{
   assert.equal(Array.from(cleanCustomName('风'.repeat(MAX_CUSTOM_NAME_LENGTH+5))).length,MAX_CUSTOM_NAME_LENGTH);
   simulate({names,hours:1,seeds:[{lon:145,lat:15,wind:20,customName:'海棠'}]});
   assert.deepEqual(names.map(name=>name.en),before);
+});
+
+test('new experiments receive distinct editable default names',()=>{
+  const history=[{id:'a',seed:{customName:'实验台风 01'}},{id:'b',seed:{customName:'海燕'}},{id:'c',seed:{customName:'实验台风 03'}}];
+  assert.equal(nextCustomName(history),'实验台风 02');
+  assert.equal(nextCustomName([]),'实验台风 01');
+  assert.equal(isCustomNameTaken('海燕',history),true);
+  assert.equal(isCustomNameTaken('海燕',history,'b'),false);
+  assert.equal(isCustomNameTaken('新名字',history),false);
 });
