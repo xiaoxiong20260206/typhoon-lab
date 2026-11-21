@@ -6,23 +6,23 @@
   <meta name="theme-color" content="#122329">
   <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
   <title>风暴实验室 · 西北太平洋台风模拟器</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/base.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/layout.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/compact.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/forge.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/theater.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/immersive.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/library.css?v=92ed7ac2270e">
-  <link rel="stylesheet" href="styles/polish.css?v=92ed7ac2270e">
-  <script defer src="assets/vendor/three.min.js?v=92ed7ac2270e"></script>
-  <script type="module" src="js/app.js?v=92ed7ac2270e"></script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/base.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/layout.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/compact.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/forge.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/theater.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/immersive.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/library.css?v=49c5a791b041">
+  <link rel="stylesheet" href="styles/polish.css?v=49c5a791b041">
+  <script defer src="assets/vendor/three.min.js?v=49c5a791b041"></script>
+  <script type="module" src="js/app.js?v=49c5a791b041"></script>
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=92ed7ac2270e" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=49c5a791b041" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><span id="buildTag" class="build-tag">v2.7.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><span id="buildTag" class="build-tag">v2.8.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -71,15 +71,15 @@
       <canvas id="sceneCanvas" aria-label="三维风暴：拖动旋转、滚轮缩放，点击海面查看风雨" tabindex="0" hidden></canvas>
       <div id="placeLabels" aria-hidden="true"></div>
       <div id="sceneLabels" aria-label="三维场景中的系统" hidden></div>
-      <div id="sceneActions" class="scene-actions immersive-only"><button id="stormLibraryButton" type="button" aria-haspopup="dialog">台风库 <span id="stormLibraryButtonCount">1/1</span></button><label class="camera-control" for="cameraSelect">镜头<select id="cameraSelect"><option value="overview">全域俯瞰</option><option value="follow" selected>追随风暴</option><option value="eye">风眼近景</option><option value="orbit">电影巡航</option></select></label></div>
+      <div id="sceneActions" class="scene-actions immersive-only"><button id="stormLibraryButton" type="button" aria-haspopup="dialog">台风库 <span id="stormLibraryButtonCount">1/1</span></button><label class="camera-control" for="cameraSelect">镜头<select id="cameraSelect"><option value="overview" selected>全域俯瞰</option><option value="follow">追随风暴</option><option value="eye">风眼近景</option><option value="orbit">电影巡航</option></select></label></div>
       <section id="stormSummary" class="storm-summary immersive-only" aria-label="当前风暴"><p id="summaryCategory"></p><h2 id="summaryName"></h2><p id="summaryNumbers"></p><p id="summaryStatus"></p><div class="summary-actions"><select id="stormSwitcher" aria-label="切换风暴"></select><button id="detailsButton" aria-controls="workspaceDrawer" aria-expanded="false">详细观测 ↗</button><button id="historyButton" type="button" aria-haspopup="dialog">我的台风 <span id="historyButtonCount">0/0</span></button></div></section>
       <div class="view-toolbar" aria-label="观察镜头">
-        <button data-view="overview" aria-pressed="false">全域</button><button data-view="follow" class="active" aria-pressed="true">追风</button><button data-view="eye" aria-pressed="false">风眼近景</button><button data-view="orbit" aria-pressed="false" class="orbit-option">巡航</button>
+        <button data-view="overview" class="active" aria-pressed="true">全域</button><button data-view="follow" aria-pressed="false">追风</button><button data-view="eye" aria-pressed="false">风眼近景</button><button data-view="orbit" aria-pressed="false" class="orbit-option">巡航</button>
         <span></span><button id="renderToggle" aria-pressed="true">3D / 切换二维</button>
       </div>
       <div class="experience-controls"><button id="cinemaButton" aria-pressed="false">影院模式</button><button id="soundButton" aria-pressed="false">开启声音</button></div>
       <div class="sound-controls"><label for="volume">音量</label><input id="volume" type="range" min="0" max="100" value="40" aria-label="声音音量"><select id="quality" aria-label="三维画质"><option value="auto">自动画质</option><option value="high">精细画质</option><option value="low">轻量画质</option></select></div>
-      <div id="theaterCaption" class="theater-caption"><span>STORM THEATER / 01</span><strong>走近风暴的中心。</strong><small>立体云高与海浪为视觉示意 · 声音为艺术化演绎</small></div>
+      <div id="theaterCaption" class="theater-caption"><span>STORM THEATER / 完整地球</span><strong>走近风暴的中心。</strong><small>西北太平洋实验域 · 立体云高与海浪为视觉示意</small></div>
       <div id="cinemaReadout" class="cinema-readout" hidden></div>
       <div class="map-heading"><div class="map-kicker">THE OCEAN IS YOUR LABORATORY</div><h2>西北太平洋<span>3D LAB</span></h2><p>100°E—175°E · 0°N—55°N</p></div>
       <div class="map-status"><span class="live-dot"></span><span id="mapStatus">模拟就绪</span></div>

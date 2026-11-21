@@ -1,4 +1,4 @@
-import {clamp,weatherAt,radiusAt,windRings,describe,displayName} from './rules.js?v=92ed7ac2270e';
+import {clamp,weatherAt,radiusAt,windRings,describe,displayName} from './rules.js?v=49c5a791b041';
 
 const TAU=Math.PI*2;
 function random(seed){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};}

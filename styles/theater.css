@@ -8,7 +8,9 @@
 .three-active #rainLegend{display:none}
 .map-stage.creating #sceneCanvas{cursor:crosshair}
 #sceneLabels,#placeLabels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-#placeLabels span{position:absolute;color:#d3e6dcaa;font-size:10px;transform:translate(-50%,-50%);white-space:nowrap}
+  #placeLabels span{position:absolute;color:#d3e6dc;font-size:10px;transform:translate(-50%,-50%);white-space:nowrap;text-shadow:0 1px 5px #03101b;pointer-events:none}
+  #placeLabels span.minor{color:#a9c6d1;font-size:9px;opacity:.82}
+  #placeLabels span.major{font-weight:500}
 .storm-label{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;color:var(--storm-color);background:#102334eb;border:1px solid #567083;max-width:210px;padding:5px 9px;font-size:11px;min-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .storm-label.selected{border-color:var(--storm-color);background:#182d40}
 .view-toolbar{position:absolute;top:105px;left:26px;display:flex;align-items:center;gap:3px;border:1px solid #425e72;background:#101f30ed;padding:4px;border-radius:6px}

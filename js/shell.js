@@ -1,4 +1,4 @@
-import {describe,beaufort,displayName,summaryName} from './rules.js?v=92ed7ac2270e';
+import {describe,beaufort,displayName,summaryName} from './rules.js?v=49c5a791b041';
 
 // Reuse the original controls: one ID, one handler and one simulation frame.
 export function initShell({select}){
