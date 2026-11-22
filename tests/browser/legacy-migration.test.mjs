@@ -53,7 +53,7 @@ const legacy={
 
 try{
   let page=await openOrigin();
-  await page.evaluate(value=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup');localStorage.setItem('typhoon-lab-session-v1',JSON.stringify(value))},legacy);
+  await page.evaluate(value=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup');localStorage.removeItem('typhoon-lab-session-v1-archive');localStorage.setItem('typhoon-lab-session-v1',JSON.stringify(value))},legacy);
   await page.goto(siteUrl.href,{waitUntil:'networkidle0',timeout:30000});
   await page.waitForFunction(()=>!!window.typhoonLab,{timeout:15000});
   check('older saved creations load in the new version',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&window.typhoonLab.state.history.some(entry=>entry.id==='legacy-a'&&entry.seed.customName==='旧版一号')&&window.typhoonLab.state.history.some(entry=>entry.id==='legacy-b')));
@@ -67,7 +67,7 @@ try{
   await page.click('#forgeSubmit');
   await page.waitForFunction(()=>!document.getElementById('forgeDialog').open);
   check('a new version creation keeps every older creation',await page.evaluate(()=>window.typhoonLab.state.history.length===3&&window.typhoonLab.state.history.filter(entry=>entry.id.startsWith('legacy-')).length===2));
-  check('the version upgrade writes a complete mirror',await page.evaluate(()=>{const primary=JSON.parse(localStorage.getItem('typhoon-lab-session-v1')),backup=JSON.parse(localStorage.getItem('typhoon-lab-session-v1-backup'));return primary.history.length===3&&backup.history.length===3&&backup.activeHistory.length===3&&JSON.stringify(primary)===JSON.stringify(backup)}));
+  check('the version upgrade writes complete mirror and archive copies',await page.evaluate(()=>{const keys=['typhoon-lab-session-v1','typhoon-lab-session-v1-backup','typhoon-lab-session-v1-archive'],values=keys.map(key=>localStorage.getItem(key));return values.every(raw=>raw&&JSON.parse(raw).history.length===3)&&new Set(values).size===1}));
   await closeBrowser();
 
   page=await openOrigin();
@@ -80,6 +80,13 @@ try{
 
   page=await openApp();
   check('the reopened primary and mirror still contain all creations',await page.evaluate(()=>window.typhoonLab.state.history.length===3&&JSON.parse(localStorage.getItem('typhoon-lab-session-v1')).history.length===3&&JSON.parse(localStorage.getItem('typhoon-lab-session-v1-backup')).history.length===3));
+  await page.evaluate(()=>{
+    const imported={format:'typhoon-lab-backup',version:1,exportedAt:'2026-11-22T00:00:00.000Z',session:{version:1,scenario:'ocean',env:{sst:30,shear:6,cold:10,size:1.3},hour:30,history:[{id:'imported-old',createdAt:1600000000000,seed:{lon:153,lat:19,wind:28,size:1.3,bornAt:12,customName:'导入的旧台风'}}],activeHistory:['imported-old'],activeOfficial:[],visibleStorms:['base','imported-old']}};
+    const input=document.getElementById('libraryImportFile'),transfer=new DataTransfer();
+    transfer.items.add(new File([JSON.stringify(imported)],'backup.json',{type:'application/json'}));input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  await page.waitForFunction(()=>window.typhoonLab.state.history.some(entry=>entry.id==='imported-old'));
+  check('importing an exported backup restores old creations without deleting current ones',await page.evaluate(()=>window.typhoonLab.state.history.length===4&&window.typhoonLab.state.history.some(entry=>entry.id==='legacy-a')&&window.typhoonLab.state.history.some(entry=>entry.id==='imported-old')&&JSON.parse(localStorage.getItem('typhoon-lab-session-v1')).history.length===4));
   console.log(JSON.stringify({passed:checks.length,userDataDir,url:siteUrl.href}));
 }catch(error){
   console.error(error);

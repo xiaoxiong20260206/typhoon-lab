@@ -6,8 +6,9 @@ const browser=await puppeteer.launch({headless:true,...(process.env.CHROME_PATH?
 const siteUrl=new URL(process.env.SITE_URL||'http://127.0.0.1:8770/');
 const page=await browser.newPage(),checks=[],errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name);console.log('PASS',name);};
+const seek=hour=>page.$eval('#timeline',(el,h)=>{el.value=h;el.dispatchEvent(new Event('input',{bubbles:true}));},hour);
 try{
-  await page.setViewport({width:1440,height:960});await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});await page.goto(siteUrl.href,{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
+  await page.setViewport({width:1440,height:960});await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup');localStorage.removeItem('typhoon-lab-session-v1-archive')});await page.goto(siteUrl.href,{waitUntil:'networkidle0'});await page.waitForFunction(()=>window.typhoonLab?.theater.frameCount>0);
   check('immersive layout is the default',await page.evaluate(()=>document.body.classList.contains('immersive')));
   check('map uses full viewport width',await page.$eval('#mapStage',e=>e.getBoundingClientRect().width>=innerWidth-2));
   check('advanced tools start closed',await page.$eval('#workspaceDrawer',e=>!e.open));
@@ -37,6 +38,7 @@ try{
   check('a user-created system can receive a custom name immediately',await page.evaluate(()=>window.typhoonLab.frame.storms.some(storm=>storm.name?.cn==='海棠'&&storm.custom)&&document.getElementById('summaryName').textContent==='海棠'));
   check('multiple saved systems demo together',await page.evaluate(()=>window.typhoonLab.frame.storms.length===3&&window.typhoonLab.state.activeHistory.size===2&&document.getElementById('historyButtonCount').textContent==='2/2'));
   await page.click('#historyButton');check('unified library opens on my creations',await page.evaluate(()=>document.getElementById('stormLibraryDialog').open&&document.getElementById('libraryHistoryTab').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#libraryHistoryList .library-history-row').length===2&&document.querySelectorAll('#libraryHistoryList input:checked').length===2));
+  check('library separates joining an experiment from choosing map display',await page.evaluate(()=>document.querySelector('.library-workflow-stage .library-stage-label').textContent.includes('选台风加入实验')&&document.querySelector('.library-workflow-display .library-stage-label').textContent.includes('决定地图展示')&&document.getElementById('libraryHeaderCreate').getBoundingClientRect().width>0));
   await page.$eval('#librarySearch',input=>{input.value='不存在';input.dispatchEvent(new Event('input',{bubbles:true}));});check('history search explains an empty result',await page.evaluate(()=>!document.getElementById('libraryHistoryEmpty').hidden&&document.getElementById('libraryHistoryEmptyText').textContent.includes('没有匹配')));
   await page.$eval('#librarySearch',input=>{input.value='03W';input.dispatchEvent(new Event('input',{bubbles:true}));});check('history can be searched by storm number',await page.evaluate(()=>document.querySelectorAll('#libraryHistoryList .library-history-row').length===1));
   await page.$eval('#librarySearch',input=>{input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -65,6 +67,18 @@ try{
   await page.click('#libraryShowCurrent');
   check('only-current reduces the visible set to one system',await page.evaluate(()=>window.typhoonLab.map.visibleStorms===1&&window.typhoonLab.theater.systems===1&&document.getElementById('stormSwitcher').options.length===1));
   await page.click('#libraryShowAll');check('all restores every map system',await page.evaluate(()=>window.typhoonLab.map.visibleStorms===4&&window.typhoonLab.theater.systems===4&&document.getElementById('stormLibraryButtonCount').textContent==='4/4'));
+  for(let i=0;i<2;i++)await page.$eval('#libraryCurrentList input[type=checkbox]:checked',input=>input.click());
+  check('display filter can keep exactly two systems on screen',await page.evaluate(()=>window.typhoonLab.map.visibleStorms===2&&window.typhoonLab.theater.systems===2&&document.getElementById('libraryCurrentCount').textContent==='2/4'));
+  await page.click('#closeStormLibrary');
+  await seek(0);await seek(36);await seek(96);
+  check('strict display allow-list survives timeline scrubbing',await page.evaluate(()=>window.typhoonLab.map.visibleStorms<=2&&window.typhoonLab.theater.systems<=2&&window.typhoonLab.state.visibleStorms.size===2));
+  await page.click('#stormLibraryButton');
+  await seek(0);
+  check('display roster stays complete and stable while replaying early hours',await page.evaluate(()=>document.querySelectorAll('#libraryCurrentList .library-storm-row').length===4&&document.querySelectorAll('#libraryCurrentList input:checked').length===2&&document.getElementById('libraryCurrentCount').textContent==='2/4'));
+  await page.click('#closeStormLibrary');
+  await seek(48);
+  check('two-system filter remains exact at their shared replay hour',await page.evaluate(()=>window.typhoonLab.map.visibleStorms===2&&window.typhoonLab.theater.systems===2));
+  await page.click('#stormLibraryButton');await page.click('#libraryShowAll');
   await page.click('#closeStormLibrary');
   await page.select('#stormSwitcher','1');check('compact switcher changes selection',await page.evaluate(()=>window.typhoonLab.state.selected===1));
   const chartBefore=await page.$eval('#intensityChart',e=>e.innerHTML);
@@ -96,6 +110,9 @@ try{
   await page.click('#displayButton');await page.click('#cinemaButton');check('immersive cinema has a visible exit',await page.$eval('#cinemaButton',e=>document.body.classList.contains('cinema')&&e.getBoundingClientRect().width>0));await page.click('#cinemaButton');
   await page.click('#forgeButton');check('advanced creation fields start collapsed',await page.$eval('.forge-advanced',e=>!e.open));await page.click('.forge-advanced summary');
   check('advanced creation fields can be revealed',await page.$eval('#forgeLon',e=>e.getBoundingClientRect().width>0));await page.click('#closeForge');
+  await page.click('#stormLibraryButton');await page.click('#libraryHeaderCreate');
+  await page.waitForFunction(()=>document.getElementById('forgeDialog').open);
+  check('library header launches creation without changing the display roster',await page.evaluate(()=>document.getElementById('forgeDialog').open&&!document.getElementById('stormLibraryDialog').open&&!!window.typhoonLab.state.visibleStorms));await page.click('#closeForge');
   await page.setViewport({width:844,height:390});check('landscape has no page overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight+1));
   check('no runtime or shader errors',errors.length===0);
   await mkdir('Output',{recursive:true});await writeFile('Output/refinement-verification.json',JSON.stringify({url:page.url(),checks,errors,before,after},null,2));console.log(JSON.stringify({passed:checks.length,errors}));

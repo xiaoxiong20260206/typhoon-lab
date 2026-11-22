@@ -45,7 +45,7 @@ async function createStorm(page,{lon,lat,customName=''}){
 try{
   let page=await openPage(true);
   await page.goto(new URL('guide.html',siteUrl).href,{waitUntil:'domcontentloaded'});
-  await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});
+  await page.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup');localStorage.removeItem('typhoon-lab-session-v1-archive')});
   await page.goto(siteUrl.href,{waitUntil:'networkidle0'});
   await page.waitForFunction(()=>!!window.typhoonLab);
 
@@ -61,10 +61,10 @@ try{
   await page.$eval('#libraryHistoryList .library-name-input',input=>{input.value='实验一号';input.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.click('#closeStormLibrary');
   check('two creations and one official storm are active before close',await page.evaluate(()=>window.typhoonLab.state.history.length===2&&window.typhoonLab.state.activeHistory.size===2&&window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4));
-  check('edited and custom names plus map visibility are saved before close',await page.evaluate(()=>window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')&&window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.visibleStorms.size===3&&window.typhoonLab.map.visibleStorms===3));
+  check('edited and custom names plus map visibility are saved before close',await page.evaluate(()=>window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')&&window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2));
   check('two history selections are visible before close',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
   check('session is written to localStorage before close',await page.evaluate(()=>{const data=JSON.parse(localStorage.getItem('typhoon-lab-session-v1'));return data.history.length===2&&data.activeHistory.length===2&&data.activeOfficial.length===1;}));
-  check('the mirror keeps the same complete session',await page.evaluate(()=>localStorage.getItem('typhoon-lab-session-v1-backup')===localStorage.getItem('typhoon-lab-session-v1')));
+  check('the mirror and archive keep the same complete session',await page.evaluate(()=>localStorage.getItem('typhoon-lab-session-v1-backup')===localStorage.getItem('typhoon-lab-session-v1')&&localStorage.getItem('typhoon-lab-session-v1-archive')===localStorage.getItem('typhoon-lab-session-v1')));
   await page.click('#historyButton');
   check('unified history entry opens both saved selections directly',await page.evaluate(()=>document.getElementById('stormLibraryDialog').open&&document.getElementById('libraryHistoryTab').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#libraryHistoryList input:checked').length===2));
   await page.click('#closeStormLibrary');
@@ -77,7 +77,7 @@ try{
   check('edited and custom names survive a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(s=>s.name?.cn==='海棠'&&s.custom)&&window.typhoonLab.state.history.some(entry=>entry.seed.customName==='实验一号')));
   check('multi-system selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.activeHistory.size===2&&window.typhoonLab.state.activeOfficial.size===1&&window.typhoonLab.frame.storms.length===4));
   check('official selection survives a full browser restart',await page.evaluate(()=>window.typhoonLab.frame.storms.some(storm=>storm.name?.en==='HINNAMNOR'&&storm.name?.cn==='轩岚诺'&&storm.official?.season===2022)));
-  await page.click('#libraryCurrentTab');check('map visibility choice survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.visibleStorms.size===3&&window.typhoonLab.map.visibleStorms===3&&[...document.querySelectorAll('#libraryCurrentList input[type=checkbox]')].filter(i=>i.checked).length===3));
+  await page.click('#libraryCurrentTab');check('map visibility choice survives a full browser restart',await page.evaluate(()=>window.typhoonLab.state.visibleStorms.size===2&&window.typhoonLab.map.visibleStorms===2&&[...document.querySelectorAll('#libraryCurrentList input[type=checkbox]')].filter(i=>i.checked).length===2));
   check('restored history selections remain checked in the UI',await page.evaluate(()=>document.getElementById('historyButtonCount').textContent==='2/2'));
   await page.click('#libraryHistoryTab');const deleted=await page.$('#libraryHistoryList .library-delete-button');await deleted.click();await deleted.click();
   await page.waitForFunction(()=>window.typhoonLab.state.history.length===1);check('an individual deletion is written before closing',await page.evaluate(()=>window.typhoonLab.state.history.length===1&&window.typhoonLab.state.activeHistory.size===1&&window.typhoonLab.state.activeOfficial.size===1));

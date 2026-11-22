@@ -21,6 +21,8 @@ try{
   await page.screenshot({path:'Output/3d-eye.png'});
   check('eye camera selectable',await page.evaluate(()=>window.typhoonLab.theater.mode==='eye'));
   await page.click('[data-view="overview"]');check('overview camera selectable',await page.evaluate(()=>window.typhoonLab.theater.mode==='overview'));
+  await page.evaluate(()=>new Promise(r=>{let n=0;function f(){if(++n===120)r();else requestAnimationFrame(f);}f();}));
+  check('overview globe uses the enlarged cinematic framing',await page.evaluate(()=>window.typhoonLab.theater.cameraDistance<=85));
   const original=await page.evaluate(()=>JSON.stringify(window.typhoonLab.frame));
   await page.click('#renderToggle');check('2D fallback preserves simulation',await page.evaluate(old=>!window.typhoonLab.theater.active&&JSON.stringify(window.typhoonLab.frame)===old,original));
   await page.click('#renderToggle');check('3D return preserves simulation',await page.evaluate(old=>window.typhoonLab.theater.active&&JSON.stringify(window.typhoonLab.frame)===old,original));
@@ -54,7 +56,7 @@ try{
   await page.$eval('#sceneCanvas',c=>c.dispatchEvent(new Event('webglcontextlost',{cancelable:true})));
   check('WebGL context loss falls back without deleting systems',await page.evaluate(()=>!window.typhoonLab.theater.active&&window.typhoonLab.frame.storms.length===8&&!document.getElementById('mapStage').classList.contains('three-active')));
   const fallback=await browser.newPage();await fallback.setRequestInterception(true);fallback.on('request',r=>new URL(r.url()).pathname.endsWith('/assets/vendor/three.min.js')?r.abort():r.continue());
-  await fallback.goto(new URL('guide.html',url).href,{waitUntil:'domcontentloaded'});await fallback.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup')});
+  await fallback.goto(new URL('guide.html',url).href,{waitUntil:'domcontentloaded'});await fallback.evaluate(()=>{localStorage.removeItem('typhoon-lab-session-v1');localStorage.removeItem('typhoon-lab-session-v1-backup');localStorage.removeItem('typhoon-lab-session-v1-archive')});
   await fallback.goto(url,{waitUntil:'networkidle0'});await fallback.waitForFunction(()=>!!window.typhoonLab);check('missing 3D dependency keeps 2D app working',await fallback.evaluate(()=>!window.typhoonLab.theater.active&&window.typhoonLab.frame.storms.length===1));await fallback.close();
   check('no JS or shader errors',errors.length===0);
   const diagnostics=await page.evaluate(()=>window.typhoonLab.theater);
