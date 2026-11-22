@@ -1,15 +1,15 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=6b87e2dea47f';
-import {summaryName} from './rules.js?v=6b87e2dea47f';
-import {makeLandTest} from './geo.js?v=6b87e2dea47f';
-import {localizeNames} from './names.js?v=6b87e2dea47f';
-import {PacificMap} from './map.js?v=6b87e2dea47f';
-import {$,updatePanels,renderNames,toast} from './panels.js?v=6b87e2dea47f';
-import {bindForge} from './forge.js?v=6b87e2dea47f';
-import {bindStormLibrary} from './library.js?v=6b87e2dea47f';
-import {StormSound} from './sound.js?v=6b87e2dea47f';
-import {initShell} from './shell.js?v=6b87e2dea47f';
-import {loadSession,saveSession,storageAvailable,serializeSession,mergeSession} from './history.js?v=6b87e2dea47f';
-import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=6b87e2dea47f';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=3f01d7f9280e';
+import {summaryName} from './rules.js?v=3f01d7f9280e';
+import {makeLandTest} from './geo.js?v=3f01d7f9280e';
+import {localizeNames} from './names.js?v=3f01d7f9280e';
+import {PacificMap} from './map.js?v=3f01d7f9280e';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=3f01d7f9280e';
+import {bindForge} from './forge.js?v=3f01d7f9280e';
+import {bindStormLibrary} from './library.js?v=3f01d7f9280e';
+import {StormSound} from './sound.js?v=3f01d7f9280e';
+import {initShell} from './shell.js?v=3f01d7f9280e';
+import {loadSession,saveSession,storageAvailable,serializeSession,mergeSession} from './history.js?v=3f01d7f9280e';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=3f01d7f9280e';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
@@ -64,7 +64,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=6b87e2dea47f');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=3f01d7f9280e');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -82,20 +82,18 @@ function rebuild(){
 }
 function refresh(){
   const hour=Math.floor(state.hour),fullFrame=run.frames[hour];
-  let visibleSet=state.visibleStorms||new Set(fullFrame.storms.map(storm=>storm.sourceId));
-  let visible=fullFrame.storms.filter(storm=>visibleSet.has(storm.sourceId));
-  if(!visible.length&&fullFrame.storms.length){
-    if(!state.visibleStorms)visibleSet=new Set();
-    visibleSet.add(fullFrame.storms[0].sourceId);visible=[fullFrame.storms[0]];
-  }
-  if(!visible.some(s=>s.id===state.selected))state.selected=visible[0]?.id??1;
+  const visibleSet=state.visibleStorms||new Set(fullFrame.storms.map(storm=>storm.sourceId));
+  const visible=fullFrame.storms.filter(storm=>visibleSet.has(storm.sourceId));
+  // A saved display selection is a strict allow-list. Never re-add another system
+  // just because the selected storm has not been born at the replayed hour.
+  if(visible.length&&!visible.some(s=>s.id===state.selected))state.selected=visible[0].id;
   map.frame=visible.length===fullFrame.storms.length?fullFrame:{...fullFrame,storms:visible};map.selected=state.selected;
   updatePanels(run,hour,state.selected,selectStorm);
   shell?.update(map.frame,state.selected);
   const count=fullFrame.storms.filter(s=>s.name&&!s.custom&&!s.official).length;
   $('nextName').textContent=`下一名：${names[count%names.length].cn} · 第 ${Math.floor(count/names.length)+1} 轮`;
   $('undoButton').hidden=!state.history.some(entry=>state.activeHistory.has(entry.id));
-  const selected=map.frame.storms.find(s=>s.id===state.selected);
+  const selected=fullFrame.storms.find(s=>s.id===state.selected)||fullFrame.storms[0];
   $('cinemaReadout').textContent=`${summaryName(selected)} · ${selected.wind.toFixed(1)} m/s · ${selected.pressure} hPa`;
   $('theaterCaption').querySelector('strong').textContent=selected.status==='dissipated'?'风暴终将归于平静。':selected.status==='extratropical'?'在北方，成为另一种风暴。':'走近风暴的中心。';
   map.draw();updatePlayback();
@@ -107,10 +105,12 @@ function stormForHistory(historyId,frame=run.frames[Math.floor(state.hour)]){
 }
 function updateLibrary(){
   if(!library)return;
-  const fullFrame=run.frames[Math.floor(state.hour)];
+  const fullFrame=run.frames[Math.floor(state.hour)],roster=run.frames[endHour()].storms;
   library.update({
-    storms:fullFrame.storms,
-    visibleIds:new Set(map.frame.storms.map(storm=>storm.sourceId)),
+    storms:roster,
+    activeNowIds:new Set(fullFrame.storms.map(storm=>storm.sourceId)),
+    hour:Math.floor(state.hour),
+    visibleIds:state.visibleStorms?new Set(state.visibleStorms):new Set(roster.map(storm=>storm.sourceId)),
     selectedId:state.selected,
     history:state.history,
     activeHistory:state.activeHistory,
@@ -120,9 +120,13 @@ function updateLibrary(){
   });
 }
 function selectStorm(id){
-  const storm=run.frames[Math.floor(state.hour)].storms.find(item=>item.id===id);
+  let storm=run.frames[Math.floor(state.hour)].storms.find(item=>item.id===id);
+  if(!storm){
+    const known=run.frames[endHour()].storms.find(item=>item.id===id);
+    if(known)state.hour=Math.min(endHour(),Math.max(0,known.bornAt));
+    storm=run.frames[Math.floor(state.hour)].storms.find(item=>item.id===id);
+  }
   if(!storm)return;
-  if(state.visibleStorms)state.visibleStorms.add(storm.sourceId);
   state.selected=id;sound.cue();refresh();
 }
 function selectedSourceId(){
@@ -135,19 +139,19 @@ function restoreSelectedSource(sourceId){
 function toggleHistory(id,active){
   const sourceId=selectedSourceId();
   if(active)state.activeHistory.add(id);else state.activeHistory.delete(id);
-  if(state.visibleStorms){if(active)state.visibleStorms.add(id);else state.visibleStorms.delete(id);}
+  if(!active)state.visibleStorms?.delete(id);
   applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
   const entry=state.history.find(item=>item.id===id);
-  toast(active?`已加入演示：+${entry.seed.bornAt}h 创建的系统。${map.frame.storms.length>1?'多个系统会同时演化。':''}`:'已移出演示，历史创建仍保留在本浏览器。');
+  toast(active?`已加入实验：+${entry.seed.bornAt}h 创建的系统。是否上屏请在「演示筛选」中单独选择。`:'已移出实验，历史创建仍保留在本浏览器。');
   return true;
 }
 function toggleOfficial(id,active){
   const storm=officialStorms.find(item=>item.id===id),sourceId=selectedSourceId();
   if(!storm)return false;
   if(active)state.activeOfficial.add(id);else state.activeOfficial.delete(id);
-  if(state.visibleStorms){if(active)state.visibleStorms.add('official:'+id);else state.visibleStorms.delete('official:'+id);}
+  if(!active)state.visibleStorms?.delete('official:'+id);
   applySeeds();restoreSelectedSource(sourceId);state.playing=false;rebuild();persist();
-  toast(active?'已加入官方台风「'+(storm.nameZh||storm.name)+' / '+storm.name+'」：按 '+storm.season+' 年'+(storm.source?.agency==='CMA'?'中央气象台':'IBTrACS')+'历史最佳路径重放。':'已移出官方台风；官方资料仍保留在台风库。');
+  toast(active?'已加入实验：官方台风「'+(storm.nameZh||storm.name)+' / '+storm.name+'」；是否上屏请在「演示筛选」中单独选择。':'已移出实验；官方资料仍保留在台风库。');
   return true;
 }
 function renameHistory(id,value){

@@ -1,16 +1,16 @@
-import {$} from './panels.js?v=6b87e2dea47f';
-import {describe,displayName} from './rules.js?v=6b87e2dea47f';
-import {cleanCustomName} from './naming.js?v=6b87e2dea47f';
+import {$} from './panels.js?v=3f01d7f9280e';
+import {describe,displayName} from './rules.js?v=3f01d7f9280e';
+import {cleanCustomName} from './naming.js?v=3f01d7f9280e';
 
 const stormLabel=storm=>displayName(storm);
 
 export function bindStormLibrary(callbacks){
   const dialog=$('stormLibraryDialog'),tabs=[
-    ['current',$('libraryCurrentTab'),$('libraryCurrentPanel')],
+    ['history',$('libraryHistoryTab'),$('libraryHistoryPanel')],
     ['official',$('libraryOfficialTab'),$('libraryOfficialPanel')],
-    ['history',$('libraryHistoryTab'),$('libraryHistoryPanel')]
+    ['current',$('libraryCurrentTab'),$('libraryCurrentPanel')]
   ];
-  const currentTab=tabs[0][1],currentList=$('libraryCurrentList'),historyList=$('libraryHistoryList'),search=$('librarySearch');
+  const currentTab=$('libraryCurrentTab'),currentList=$('libraryCurrentList'),historyList=$('libraryHistoryList'),search=$('librarySearch');
   const officialList=$('libraryOfficialList'),officialSearch=$('libraryOfficialSearch'),officialMore=$('libraryOfficialMore');
   let view=null,opener=null,tab='current',currentSignature='',historySignature='',officialSignature='',officialLimit=80;
 
@@ -37,7 +37,7 @@ export function bindStormLibrary(callbacks){
 
   function renderCurrent(force=false){
     if(!view)return;
-    const signature=view.storms.map(storm=>[storm.sourceId,stormLabel(storm),describe(storm).name,view.visibleIds.has(storm.sourceId)].join(':')).join('|')+'|'+view.selectedId;
+    const signature=view.storms.map(storm=>[storm.sourceId,stormLabel(storm),describe(storm).name,view.visibleIds.has(storm.sourceId),view.activeNowIds?.has(storm.sourceId)].join(':')).join('|')+'|'+view.selectedId;
     if(!force&&signature===currentSignature)return;
     currentSignature=signature;const scroll=currentList.scrollTop;currentList.replaceChildren();
     for(const storm of view.storms){
@@ -51,8 +51,11 @@ export function bindStormLibrary(callbacks){
       label.append(input,document.createElement('span'));
       const main=document.createElement('button');main.type='button';main.className='library-storm-main';
       addStormIdentity(main,storm,storm.official?'official':storm.custom?'mine':'experiment');
+      main.disabled=!input.checked;
       main.addEventListener('click',()=>{callbacks.onSelect(storm.id);dialog.close();});
-      const status=document.createElement('span');status.className='library-visibility-state';status.textContent=input.checked?'展示中':'已隐藏';
+      const status=document.createElement('span');status.className='library-visibility-state';
+      const activeNow=view.activeNowIds?.has(storm.sourceId);
+      status.textContent=input.checked?(activeNow?'展示中':'已选 · 等待出现'):'已隐藏 · 勾选后上屏';
       row.append(label,main,status);currentList.append(row);
     }
     currentList.scrollTop=scroll;$('libraryCurrentEmpty').hidden=view.storms.length>0;
@@ -164,12 +167,12 @@ export function bindStormLibrary(callbacks){
     view=next;const shown=next.visibleIds.size,total=next.storms.length,officialTotal=next.officialStorms.length;
     $('stormLibraryButtonCount').textContent=shown+'/'+total;
     $('historyButtonCount').textContent=next.activeHistory.size+'/'+next.history.length;
-    $('libraryCurrentCount').textContent=String(total);
-    $('libraryHistoryCount').textContent=String(next.history.length);
+    $('libraryCurrentCount').textContent=shown+'/'+total;
+    $('libraryHistoryCount').textContent=next.activeHistory.size+'/'+next.history.length;
     $('libraryOfficialCount').textContent=next.activeOfficial.size+'/'+officialTotal;
-    $('libraryVisibleSummary').textContent='地图展示 '+shown+' 个，共 '+total+' 个';
-    $('libraryHistorySummary').textContent=next.history.length+' 个已保存，'+next.activeHistory.size+' 个正在实验中';
-    $('libraryOfficialSummary').textContent='共 '+officialTotal+' 个官方台风（2000 年后优先中央气象台，早期为 IBTrACS），'+next.activeOfficial.size+' 个正在实验中';
+    $('libraryVisibleSummary').textContent='已勾选 '+shown+' 个，共 '+total+' 个实验系统';
+    $('libraryHistorySummary').textContent=next.history.length+' 个已保存，'+next.activeHistory.size+' 个已加入实验';
+    $('libraryOfficialSummary').textContent='共 '+officialTotal+' 个官方台风（2000 年后优先中央气象台，早期为 IBTrACS），'+next.activeOfficial.size+' 个已加入实验';
     $('libraryShowAll').disabled=shown===total;
     const current=next.storms.find(storm=>storm.id===next.selectedId);
     $('libraryShowCurrent').disabled=shown===1&&current&&next.visibleIds.has(current.sourceId);
@@ -214,6 +217,7 @@ export function bindStormLibrary(callbacks){
     }
   });
   $('libraryCreateButton').addEventListener('click',()=>{dialog.close();requestAnimationFrame(callbacks.onCreate);});
+  $('libraryHeaderCreate').addEventListener('click',()=>{dialog.close();requestAnimationFrame(callbacks.onCreate);});
   $('libraryEmptyCreate').addEventListener('click',()=>{dialog.close();requestAnimationFrame(callbacks.onCreate);});
   $('closeStormLibrary').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();opener=null;});

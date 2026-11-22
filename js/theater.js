@@ -1,6 +1,6 @@
-import {clamp,describe,displayName,radiusAt,windRings} from './rules.js?v=6b87e2dea47f';
-import {surfacePoint,geographicPoint,cloudProfile,cloudDetail,GLOBE_RADIUS} from './scene-math.js?v=6b87e2dea47f';
-import {PLACES} from './geo.js?v=6b87e2dea47f';
+import {clamp,describe,displayName,radiusAt,windRings} from './rules.js?v=3f01d7f9280e';
+import {surfacePoint,geographicPoint,cloudProfile,cloudDetail,GLOBE_RADIUS} from './scene-math.js?v=3f01d7f9280e';
+import {PLACES} from './geo.js?v=3f01d7f9280e';
 
 const TAU=Math.PI*2;
 const seeded=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
@@ -205,10 +205,10 @@ export class StormTheater{
   update(dt,playing,reduced){
     if(!this.active||this.failed||!this.map.frame)return;
     const T=this.T,s=this.map.frame.storms.find(s=>s.id===this.map.selected)||this.map.frame.storms[0];
-    const p=this.mode==='overview'?surfacePoint(137.5,27.5):surfacePoint(s.lon,s.lat,.45);
+    const p=this.mode==='overview'||!s?surfacePoint(137.5,27.5):surfacePoint(s.lon,s.lat,.45);
     this.desiredTarget.set(p.x,p.y,p.z);
     this.introAge+=dt;this.labelClock+=dt;
-    const intro=reduced?1:1+.16*Math.max(0,1-this.introAge/1.5),aspectFit=Math.max(1,1/this.camera.aspect),dist=(this.mode==='overview'?96:this.mode==='eye'?14*s.size:this.mode==='orbit'?30*s.size:29*s.size)*this.distance*Math.sqrt(aspectFit)*intro;
+    const intro=reduced?1:1+.16*Math.max(0,1-this.introAge/1.5),aspectFit=Math.max(1,1/this.camera.aspect),baseDist=this.mode==='overview'?82:s?(this.mode==='eye'?14*s.size:this.mode==='orbit'?30*s.size:29*s.size):82,dist=baseDist*this.distance*Math.sqrt(aspectFit)*intro;
     const orbit=this.mode==='orbit'&&!reduced,pitch=this.mode==='overview'?.18:orbit?.24+Math.sin(this.visualTime*.035)*.045:this.pitch,yaw=this.yaw+(orbit?Math.sin(this.visualTime*.045)*.62:0);
     const radial=vec(T,p).normalize(),side=new T.Vector3().crossVectors(new T.Vector3(0,1,0),radial);
     if(side.lengthSq()<1e-5)side.set(1,0,0);side.normalize();const north=new T.Vector3().crossVectors(radial,side).normalize();
@@ -268,5 +268,5 @@ export class StormTheater{
     this.canvas.addEventListener('wheel',e=>{e.preventDefault();this.zoom(e.deltaY>0?1.1:.91);},{passive:false});
     this.canvas.addEventListener('keydown',e=>{if(e.key==='Enter'&&this.map.creating){e.preventDefault();this.map.onCreate(145,15);}});
   }
-  get diagnostics(){return {active:this.active,failed:!!this.failed,mode:this.mode,quality:this.quality,ratio:this.ratio,systems:this.storms.size,frameCount:this.frameCount,drawCalls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,geometries:this.renderer.info.memory.geometries,cloudBuilds:this.cloudBuilds,overlayAllocations:this.overlayAllocations,labelPasses:this.labelPasses};}
+  get diagnostics(){return {active:this.active,failed:!!this.failed,mode:this.mode,quality:this.quality,ratio:this.ratio,cameraDistance:this.camera.position.distanceTo(this.target),globeRadius:GLOBE_RADIUS,systems:this.storms.size,frameCount:this.frameCount,drawCalls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,geometries:this.renderer.info.memory.geometries,cloudBuilds:this.cloudBuilds,overlayAllocations:this.overlayAllocations,labelPasses:this.labelPasses};}
 }

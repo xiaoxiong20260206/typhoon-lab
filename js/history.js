@@ -1,4 +1,4 @@
-import {cleanCustomName} from './naming.js?v=6b87e2dea47f';
+import {cleanCustomName} from './naming.js?v=3f01d7f9280e';
 
 export const SESSION_KEY='typhoon-lab-session-v1';
 export const BACKUP_KEY=`${SESSION_KEY}-backup`;

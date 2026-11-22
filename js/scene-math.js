@@ -1,4 +1,4 @@
-import {clamp} from './rules.js?v=6b87e2dea47f';
+import {clamp} from './rules.js?v=3f01d7f9280e';
 export const GLOBE_RADIUS=32;
 export const GLOBE_CENTER={lon:137.5,lat:27.5};
 const DEG=Math.PI/180;

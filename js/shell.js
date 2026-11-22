@@ -1,4 +1,4 @@
-import {describe,beaufort,displayName,summaryName} from './rules.js?v=6b87e2dea47f';
+import {describe,beaufort,displayName,summaryName} from './rules.js?v=3f01d7f9280e';
 
 // Reuse the original controls: one ID, one handler and one simulation frame.
 export function initShell({select}){
@@ -42,6 +42,15 @@ export function initShell({select}){
   $('stormSwitcher').addEventListener('change',e=>select(Number(e.target.value)));
   let listSignature='';
   return {close,update(frame,selected){
+    if(!frame.storms.length){
+      $('summaryCategory').textContent='展示筛选';
+      $('summaryName').textContent='当前时刻暂无展示系统';
+      $('summaryNumbers').textContent='时间轴前后移动可查看其他阶段';
+      $('summaryStatus').textContent='展示名单不会被自动改写';
+      $('stormSwitcher').replaceChildren();
+      listSignature='';
+      return;
+    }
     const s=frame.storms.find(s=>s.id===selected)||frame.storms[0],c=describe(s);
     $('summaryCategory').textContent=`${c.name} / ${s.number||s.invest}${s.retired?' · 已停编':''}`;
     $('summaryCategory').style.color=c.color;$('summaryName').textContent=summaryName(s);

@@ -6,23 +6,23 @@
   <meta name="theme-color" content="#122329">
   <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
   <title>风暴实验室 · 西北太平洋台风模拟器</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/base.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/layout.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/compact.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/forge.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/theater.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/immersive.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/library.css?v=6b87e2dea47f">
-  <link rel="stylesheet" href="styles/polish.css?v=6b87e2dea47f">
-  <script defer src="assets/vendor/three.min.js?v=6b87e2dea47f"></script>
-  <script type="module" src="js/app.js?v=6b87e2dea47f"></script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/base.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/layout.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/compact.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/forge.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/theater.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/immersive.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/library.css?v=3f01d7f9280e">
+  <link rel="stylesheet" href="styles/polish.css?v=3f01d7f9280e">
+  <script defer src="assets/vendor/three.min.js?v=3f01d7f9280e"></script>
+  <script type="module" src="js/app.js?v=3f01d7f9280e"></script>
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=6b87e2dea47f" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=3f01d7f9280e" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><span id="buildTag" class="build-tag">v2.8.2</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><span id="buildTag" class="build-tag">v2.9.0</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -122,40 +122,48 @@
   <dialog id="workspaceDrawer" aria-labelledby="drawerTitle"><div class="drawer-heading"><h2 id="drawerTitle">实验</h2><button id="drawerClose" aria-label="关闭面板">×</button></div><div id="drawerBody"></div></dialog>
   <dialog id="stormLibraryDialog" class="storm-library" aria-labelledby="libraryTitle">
     <header class="library-heading">
-      <div><span class="section-kicker">STORM LIBRARY</span><h2 id="libraryTitle">台风实验台</h2><p>把自建台风与真实官方台风放进同一场实验。</p></div>
-      <button id="closeStormLibrary" type="button" aria-label="关闭台风实验台">×</button>
+      <div><span class="section-kicker">STORM LIBRARY</span><h2 id="libraryTitle">台风实验台</h2><p>先选台风加入实验，再单独决定地图上展示哪些。</p></div>
+      <div class="library-heading-actions"><button id="libraryHeaderCreate" type="button">＋ 创建台风</button><button id="closeStormLibrary" class="library-close" type="button" aria-label="关闭台风实验台">×</button></div>
     </header>
-    <div class="library-tabs" role="tablist">
-      <button id="libraryCurrentTab" type="button" role="tab" aria-selected="true" aria-controls="libraryCurrentPanel">实验中的台风 <span id="libraryCurrentCount">1</span></button>
-      <button id="libraryOfficialTab" type="button" role="tab" aria-selected="false" aria-controls="libraryOfficialPanel" tabindex="-1">官方台风 <span id="libraryOfficialCount">0/0</span></button>
-      <button id="libraryHistoryTab" type="button" role="tab" aria-selected="false" aria-controls="libraryHistoryPanel" tabindex="-1">我的创建 <span id="libraryHistoryCount">0</span></button>
+    <div class="library-tabs library-workflow" role="tablist" aria-label="台风实验流程">
+      <div class="library-workflow-stage">
+        <span class="library-stage-label"><b>01</b><span>选台风加入实验<small>我的创建 · 官方台风</small></span></span>
+        <div class="library-stage-tabs">
+          <button id="libraryHistoryTab" type="button" role="tab" aria-selected="false" aria-controls="libraryHistoryPanel" tabindex="-1">我的台风库 <span id="libraryHistoryCount">0/0</span></button>
+          <button id="libraryOfficialTab" type="button" role="tab" aria-selected="false" aria-controls="libraryOfficialPanel" tabindex="-1">官方台风库 <span id="libraryOfficialCount">0/0</span></button>
+        </div>
+      </div>
+      <div class="library-workflow-stage library-workflow-display">
+        <span class="library-stage-label"><b>02</b><span>决定地图展示<small>只影响画面，不增删实验</small></span></span>
+        <button id="libraryCurrentTab" class="library-display-tab" type="button" role="tab" aria-selected="true" aria-controls="libraryCurrentPanel">演示筛选 <span id="libraryCurrentCount">1/1</span></button>
+      </div>
     </div>
     <div class="library-panels">
       <section id="libraryCurrentPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryCurrentTab">
         <div class="library-panel-heading">
-          <div><h3>正在实验中的系统</h3><p id="libraryVisibleSummary">地图展示 1 个，共 1 个</p></div>
+          <div><h3>地图展示哪些台风</h3><p id="libraryVisibleSummary">已勾选 1 个，共 1 个</p></div>
           <div class="library-bulk-actions"><button id="libraryShowAll" type="button">全部展示</button><button id="libraryShowCurrent" type="button">仅当前</button></div>
         </div>
-        <p class="library-help">取消勾选只会隐藏地图云系，系统仍继续演化、编号与命名。点击名称可切换观测对象。自建可删除；官方资料只读。</p>
+        <p class="library-help"><b>这里只控制地图和三维场景显示。</b> 勾选即上屏，取消勾选不会把台风移出实验；完整生命周期与时间轴始终保留。</p>
         <div id="libraryCurrentList" class="library-list" role="list"></div>
         <div id="libraryCurrentEmpty" class="library-empty" hidden><strong>当前没有可选择的系统</strong><p>先从「我的创建」加入一场风暴。</p></div>
       </section>
       <section id="libraryOfficialPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryOfficialTab" hidden>
         <div class="library-panel-heading">
-          <div><h3>真实历史官方台风</h3><p id="libraryOfficialSummary">共 0 个官方台风，0 个正在实验中</p></div>
+          <div><h3>官方台风库</h3><p id="libraryOfficialSummary">共 0 个官方台风，0 个已加入实验</p></div>
         </div>
         <label class="library-search" for="libraryOfficialSearch"><span>搜索</span><input id="libraryOfficialSearch" type="search" placeholder="中文名、英文名、编号、年份" autocomplete="off"><small>IBTrACS 最佳路径重放，不随环境参数重算</small></label>
-        <p class="library-help">官方台风来自 NOAA IBTrACS v04r01 西北太平洋数据；勾选即加入当前实验，取消勾选只移出演示，不可删除或改名。</p>
+        <p class="library-help">这里负责<strong>加入实验</strong>：勾选即加入，取消勾选即移出。官方资料只读，不改写名称或路径。</p>
         <div id="libraryOfficialList" class="library-list official-list" role="list"></div>
         <div id="libraryOfficialEmpty" class="library-empty" hidden><strong>没有匹配的官方台风</strong><p>试试中文名、英文名、编号或年份，例如 轩岚诺、Hinnamnor、2022、11W。</p></div>
         <button id="libraryOfficialMore" class="library-more-button" type="button" hidden>显示更多官方台风</button>
       </section>
       <section id="libraryHistoryPanel" class="library-panel" role="tabpanel" aria-labelledby="libraryHistoryTab" hidden>
         <div class="library-panel-heading">
-          <div><h3>我的创建</h3><p id="libraryHistorySummary">0 个已保存，0 个正在实验中</p></div>
+          <div><h3>我的台风库</h3><p id="libraryHistorySummary">0 个已保存，0 个已加入实验</p></div>
         </div>
         <label class="library-search" for="librarySearch"><span>搜索</span><input id="librarySearch" type="search" placeholder="名称、编号、经纬度" autocomplete="off"><small>名称可直接修改并自动保存</small></label>
-        <p class="library-help">勾选会把保存的生成参数重新加入本次实验；取消勾选只会暂时移出，历史记录仍保留。</p>
+        <p class="library-help">这里负责<strong>加入实验</strong>：勾选会重新生成该台风，取消勾选只移出本次实验。改名和删除也在这里，历史记录不会自行消失。</p>
         <div class="library-data-actions">
           <div><strong>本地数据保险</strong><small>固定地址升级会自动继承；导出备份可跨浏览器或旧版地址手动恢复。</small></div>
           <button id="libraryExportBackup" type="button">导出备份</button>
@@ -166,7 +174,7 @@
         <div id="libraryHistoryEmpty" class="library-empty"><strong>还没有自己的台风</strong><p id="libraryHistoryEmptyText">创建一个系统后，会保存在这里，并可随时重新加入或还原实验。</p><button id="libraryEmptyCreate" type="button">创建第一个台风</button></div>
       </section>
     </div>
-    <footer class="library-footer"><p id="libraryStorageHint">创建、改名和删除都会自动保存在当前浏览器。</p><button id="libraryCreateButton" type="button">＋ 创建我的台风</button></footer>
+    <footer class="library-footer"><p id="libraryStorageHint">创建、改名和删除都会自动保存在当前浏览器。</p><button id="libraryCreateButton" type="button">＋ 创建新台风</button></footer>
   </dialog>
   <dialog id="forgeDialog" aria-labelledby="forgeTitle">
     <div class="dialog-heading"><div><span class="section-kicker">STORM FORGE</span><h2 id="forgeTitle">创造你的风暴</h2></div><button id="closeForge" aria-label="关闭台风工坊">×</button></div>
