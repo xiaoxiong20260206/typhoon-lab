@@ -1,15 +1,15 @@
-import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=f105babb07bd';
-import {summaryName} from './rules.js?v=f105babb07bd';
-import {makeLandTest} from './geo.js?v=f105babb07bd';
-import {localizeNames} from './names.js?v=f105babb07bd';
-import {PacificMap} from './map.js?v=f105babb07bd';
-import {$,updatePanels,renderNames,toast} from './panels.js?v=f105babb07bd';
-import {bindForge} from './forge.js?v=f105babb07bd';
-import {bindStormLibrary} from './library.js?v=f105babb07bd';
-import {StormSound} from './sound.js?v=f105babb07bd';
-import {initShell} from './shell.js?v=f105babb07bd';
-import {loadSession,saveSession,storageAvailable} from './history.js?v=f105babb07bd';
-import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=f105babb07bd';
+import {simulate,DEFAULT_ENV,SCENARIOS} from './model.js?v=6b87e2dea47f';
+import {summaryName} from './rules.js?v=6b87e2dea47f';
+import {makeLandTest} from './geo.js?v=6b87e2dea47f';
+import {localizeNames} from './names.js?v=6b87e2dea47f';
+import {PacificMap} from './map.js?v=6b87e2dea47f';
+import {$,updatePanels,renderNames,toast} from './panels.js?v=6b87e2dea47f';
+import {bindForge} from './forge.js?v=6b87e2dea47f';
+import {bindStormLibrary} from './library.js?v=6b87e2dea47f';
+import {StormSound} from './sound.js?v=6b87e2dea47f';
+import {initShell} from './shell.js?v=6b87e2dea47f';
+import {loadSession,saveSession,storageAvailable,serializeSession,mergeSession} from './history.js?v=6b87e2dea47f';
+import {cleanCustomName,isCustomNameTaken,nextCustomName} from './naming.js?v=6b87e2dea47f';
 
 const savedSession=loadSession();
 let storageReady=storageAvailable();
@@ -30,8 +30,11 @@ function applySeeds(){
     if(!state.visibleStorms.size&&keys.size)state.visibleStorms.add(state.seeds[0].sourceId);
   }
 }
+function sessionSnapshot(){
+  return {version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory],activeOfficial:[...state.activeOfficial],visibleStorms:state.visibleStorms===null?null:[...state.visibleStorms]};
+}
 function persist(quiet=false){
-  const saved=saveSession({version:1,scenario:state.scenario,env:state.env,hour:Math.floor(state.hour),history:state.history,activeHistory:[...state.activeHistory],activeOfficial:[...state.activeOfficial],visibleStorms:state.visibleStorms===null?null:[...state.visibleStorms]});
+  const saved=saveSession(sessionSnapshot());
   storageReady=saved;
   if(!saved&&!quiet)toast('当前浏览器无法自动保存历史创建，模拟仍可继续使用。');
   return saved;
@@ -61,7 +64,7 @@ async function init(){
   Object.defineProperty(window,'typhoonLab',{value:{get state(){return structuredClone(state);},get frame(){return structuredClone(run.frames[Math.floor(state.hour)]);},get events(){return structuredClone(run.events);},get names(){return names.map(n=>({...n}));},get map(){return {width:map.width,height:map.height,zoom:map.zoom,layers:{...map.layers},visibleStorms:map.frame?.storms.length??0};},project3D(lon,lat){return theater?.screen(lon,lat);},get theater(){return theater?.diagnostics||{active:false};},get sound(){return sound.diagnostics;}}});
 }
 async function initTheater(polygons=map.polygons){
-  try{const {StormTheater}=await import('./theater.js?v=f105babb07bd');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
+  try{const {StormTheater}=await import('./theater.js?v=6b87e2dea47f');theater=new StormTheater($('sceneCanvas'),map,polygons,message=>{set3D(false);$('renderToggle').disabled=true;toast(message);});map.onDraw=()=>theater.sync();set3D(true);}
   catch(error){console.warn('3D unavailable:',error.message);set3D(false);$('renderToggle').disabled=true;$('renderToggle').textContent='二维 · 3D 不可用';toast('当前设备无法启用 3D，二维模拟器仍可完整使用。');}
 }
 function set3D(active){
@@ -169,6 +172,26 @@ function deleteHistory(id){
   toast(`已删除自建台风「${cleanCustomName(entry.seed.customName)||'未命名'}」。历史记录已同步移除。`);
   return true;
 }
+function exportHistoryBackup(){
+  persist(true);
+  const content=serializeSession(sessionSnapshot());
+  toast(`已导出 ${state.history.length} 个自建台风与当前实验选择的本地备份。`);
+  return {content,count:state.history.length};
+}
+function importHistoryBackup(content){
+  const merged=mergeSession(sessionSnapshot(),content);
+  if(!merged){
+    toast('无法识别这个备份文件；现有记录没有改变。');
+    return false;
+  }
+  const officialIds=new Set(officialStorms.map(storm=>storm.id));
+  state.history=merged.session.history;
+  state.activeHistory=new Set(merged.session.activeHistory);
+  state.activeOfficial=new Set(merged.session.activeOfficial.filter(id=>officialIds.has(id)));
+  applySeeds();restoreSelectedSource(selectedSourceId());state.playing=false;rebuild();persist(true);
+  toast(`备份已恢复：读取 ${merged.imported} 个自建台风，新增 ${merged.added} 个；原有记录未被删除。`);
+  return true;
+}
 function showAllStorms(){
   const frame=run.frames[Math.floor(state.hour)];
   state.visibleStorms=new Set(frame.storms.map(storm=>storm.sourceId));refresh();persist();
@@ -235,6 +258,8 @@ function bind(){
     onOfficial:toggleOfficial,
     onRename:renameHistory,
     onDelete:deleteHistory,
+    onExport:exportHistoryBackup,
+    onImport:importHistoryBackup,
     onShowAll:showAllStorms,
     onShowCurrent:showCurrentStorm,
     onCreate:()=>$('forgeButton').click(),

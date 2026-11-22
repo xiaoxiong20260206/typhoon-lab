@@ -71,6 +71,13 @@
 .library-search input{min-width:0;height:38px;padding:7px 10px;border:1px solid #3e5962;border-radius:6px;color:#eef2ed;background:#102a33;font:inherit;font-size:.8rem}
 .library-search input:focus{outline:none;border-color:#efb57f;box-shadow:0 0 0 3px #edb17d2e}
 .library-search small{color:#8fa6ab;font-size:.62rem}
+.library-data-actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;flex:none;margin-top:9px;padding:9px 10px;border:1px solid #304b55;border-radius:9px;background:#0a2029}
+.library-data-actions>div{display:flex;min-width:0;flex-direction:column;gap:2px}
+.library-data-actions strong{color:#dce8e6;font-size:.72rem;font-weight:500}
+.library-data-actions small{overflow:hidden;color:#8fa6ab;font-size:.62rem;line-height:1.45;text-overflow:ellipsis;white-space:nowrap}
+.library-data-actions button{min-height:38px;padding:6px 11px;border:1px solid #56717a;border-radius:7px;color:#e8efeb;background:#17343d;font-size:.7rem}
+.library-data-actions button:hover{border-color:#e1ad7b;color:#fff4e6;background:#263c40}
+.library-data-actions button:focus-visible{outline:2px solid #edb17d;outline-offset:2px}
 .library-history-row{grid-template-columns:34px minmax(0,1fr) auto;padding:10px 10px 10px 8px}
 .library-history-body{display:flex;min-width:0;flex-direction:column;gap:3px}
 .library-name-input{width:min(100%,280px);height:34px;padding:5px 8px;border:1px solid transparent;border-radius:6px;color:#f2f2e9;background:#0c232c;font:inherit;font-size:.86rem;font-weight:500}
@@ -121,6 +128,10 @@ body.immersive #stormLibraryButton:hover{border-color:#49636c;color:#fff}
   .library-search{grid-template-columns:auto minmax(0,1fr);margin-top:10px}
   .library-search input{height:44px;font-size:16px}
   .library-search small{grid-column:1/-1;padding-left:2px}
+  .library-data-actions{grid-template-columns:minmax(0,1fr) auto}
+  .library-data-actions>div{grid-column:1/-1}
+  .library-data-actions small{white-space:normal}
+  .library-data-actions button{min-height:44px}
   .library-footer{padding:10px 12px;flex-wrap:wrap}
   .library-footer p{flex-basis:100%;font-size:.64rem}
   .library-footer>button{width:100%;min-height:46px}

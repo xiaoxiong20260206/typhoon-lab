@@ -1,6 +1,6 @@
-import {$} from './panels.js?v=f105babb07bd';
-import {describe,displayName} from './rules.js?v=f105babb07bd';
-import {cleanCustomName} from './naming.js?v=f105babb07bd';
+import {$} from './panels.js?v=6b87e2dea47f';
+import {describe,displayName} from './rules.js?v=6b87e2dea47f';
+import {cleanCustomName} from './naming.js?v=6b87e2dea47f';
 
 const stormLabel=storm=>displayName(storm);
 
@@ -195,6 +195,24 @@ export function bindStormLibrary(callbacks){
   officialMore.addEventListener('click',()=>{officialLimit+=80;renderOfficial(true);});
   $('libraryShowAll').addEventListener('click',callbacks.onShowAll);
   $('libraryShowCurrent').addEventListener('click',callbacks.onShowCurrent);
+  $('libraryExportBackup').addEventListener('click',()=>{
+    const backup=callbacks.onExport?.();
+    if(!backup?.content)return;
+    const blob=new Blob([backup.content],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,19).replaceAll(':','-').replace('T','-');
+    link.href=url;link.download=`typhoon-lab-backup-${stamp}.json`;link.hidden=true;document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
+  $('libraryImportBackup').addEventListener('click',()=>$('libraryImportFile').click());
+  $('libraryImportFile').addEventListener('change',async event=>{
+    const file=event.currentTarget.files?.[0];event.currentTarget.value='';
+    if(!file)return;
+    try{
+      await callbacks.onImport?.(await file.text());
+    }catch(error){
+      console.error(error);
+    }
+  });
   $('libraryCreateButton').addEventListener('click',()=>{dialog.close();requestAnimationFrame(callbacks.onCreate);});
   $('libraryEmptyCreate').addEventListener('click',()=>{dialog.close();requestAnimationFrame(callbacks.onCreate);});
   $('closeStormLibrary').addEventListener('click',()=>dialog.close());

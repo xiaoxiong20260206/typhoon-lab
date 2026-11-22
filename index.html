@@ -6,23 +6,23 @@
   <meta name="theme-color" content="#122329">
   <meta name="description" content="在西北太平洋创造一场风暴，探索从热带扰动到台风、登陆或温带变性的完整生命周期。科普模拟，非天气预报。">
   <title>风暴实验室 · 西北太平洋台风模拟器</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/base.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/layout.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/compact.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/forge.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/theater.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/immersive.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/library.css?v=f105babb07bd">
-  <link rel="stylesheet" href="styles/polish.css?v=f105babb07bd">
-  <script defer src="assets/vendor/three.min.js?v=f105babb07bd"></script>
-  <script type="module" src="js/app.js?v=f105babb07bd"></script>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/base.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/layout.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/compact.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/forge.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/theater.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/immersive.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/library.css?v=6b87e2dea47f">
+  <link rel="stylesheet" href="styles/polish.css?v=6b87e2dea47f">
+  <script defer src="assets/vendor/three.min.js?v=6b87e2dea47f"></script>
+  <script type="module" src="js/app.js?v=6b87e2dea47f"></script>
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=f105babb07bd" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
+    <a class="brand" href="./" aria-label="风暴实验室首页"><img src="favicon.svg?v=6b87e2dea47f" alt="" width="38" height="38"><div><h1>风暴实验室<span>TYPHOON LAB</span></h1><p>每一场风暴，都有它的轨迹。</p></div></a>
     <div class="region-tag"><span class="live-dot"></span>西北太平洋<span class="divider">/</span>WESTERN NORTH PACIFIC</div>
-    <nav><span id="buildTag" class="build-tag">v2.8.1</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
+    <nav><span id="buildTag" class="build-tag">v2.8.2</span><button id="experimentButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">实验</button><button id="displayButton" class="immersive-only" aria-controls="workspaceDrawer" aria-expanded="false">显示</button><a href="guide.html">说明 ↗</a><button id="namesButton" class="text-button">命名表 <span>140</span></button></nav>
   </header>
 
   <main class="workspace">
@@ -156,6 +156,12 @@
         </div>
         <label class="library-search" for="librarySearch"><span>搜索</span><input id="librarySearch" type="search" placeholder="名称、编号、经纬度" autocomplete="off"><small>名称可直接修改并自动保存</small></label>
         <p class="library-help">勾选会把保存的生成参数重新加入本次实验；取消勾选只会暂时移出，历史记录仍保留。</p>
+        <div class="library-data-actions">
+          <div><strong>本地数据保险</strong><small>固定地址升级会自动继承；导出备份可跨浏览器或旧版地址手动恢复。</small></div>
+          <button id="libraryExportBackup" type="button">导出备份</button>
+          <button id="libraryImportBackup" type="button">导入备份</button>
+          <input id="libraryImportFile" type="file" accept="application/json,.json" hidden>
+        </div>
         <div id="libraryHistoryList" class="library-list history-list" role="list"></div>
         <div id="libraryHistoryEmpty" class="library-empty"><strong>还没有自己的台风</strong><p id="libraryHistoryEmptyText">创建一个系统后，会保存在这里，并可随时重新加入或还原实验。</p><button id="libraryEmptyCreate" type="button">创建第一个台风</button></div>
       </section>

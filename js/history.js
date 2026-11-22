@@ -1,7 +1,9 @@
-import {cleanCustomName} from './naming.js?v=f105babb07bd';
+import {cleanCustomName} from './naming.js?v=6b87e2dea47f';
 
 export const SESSION_KEY='typhoon-lab-session-v1';
 export const BACKUP_KEY=`${SESSION_KEY}-backup`;
+export const ARCHIVE_KEY=`${SESSION_KEY}-archive`;
+export const BACKUP_FORMAT='typhoon-lab-backup';
 
 function defaultStorage(){
   try{return globalThis.localStorage;}catch{return null;}
@@ -24,6 +26,11 @@ function normalizeHistory(value){
   }
   return entries;
 }
+function looksLikeSession(data){
+  return !!data&&typeof data==='object'&&!Array.isArray(data)&&
+    (Array.isArray(data.history)||Array.isArray(data.activeHistory)||Array.isArray(data.activeOfficial)||
+      Array.isArray(data.visibleStorms)||typeof data.scenario==='string'||Number.isFinite(Number(data.hour)));
+}
 function normalizeEnv(value){
   const source=value&&typeof value==='object'?value:{},env={sst:29.5,shear:9,cold:65,size:1.2};
   for(const key of Object.keys(env)){const n=Number(source[key]);if(finite(n,0,100))env[key]=n;}
@@ -35,7 +42,7 @@ function parseSession(raw){
   if(!raw)return null;
   try{
     const data=JSON.parse(raw);
-    if(!data||typeof data!=='object'||Array.isArray(data)||!['history','scenario','hour'].some(key=>key in data))return null;
+    if(!looksLikeSession(data))return null;
     const history=normalizeHistory(data.history);
     const scenario=['recurve','landfall','ocean'].includes(data?.scenario)?data.scenario:'recurve';
     const active=new Set((Array.isArray(data?.activeHistory)?data.activeHistory:[]).filter(id=>history.some(entry=>entry.id===id)));
@@ -45,17 +52,52 @@ function parseSession(raw){
     return {version:1,scenario,env:normalizeEnv(data?.env),history,activeHistory:[...active],activeOfficial,visibleStorms,hour:finite(Number(data?.hour),0,2500)?Number(data.hour):48};
   }catch{return null;}
 }
+function parseBackup(raw){
+  if(!raw)return null;
+  try{
+    const data=typeof raw==='string'?JSON.parse(raw):raw;
+    if(data?.format!==BACKUP_FORMAT||!Number.isInteger(data?.version)||data.version<1)return parseSession(JSON.stringify(data));
+    return parseSession(JSON.stringify(data.session));
+  }catch{return null;}
+}
+function readKeys(storage){
+  const keys=[];
+  try{
+    for(let index=0;index<storage.length;index++){
+      const key=storage.key(index);
+      if(typeof key==='string'&&key.startsWith('typhoon-lab-session-'))keys.push(key);
+    }
+  }catch{}
+  return keys;
+}
 export function loadSession(storage=defaultStorage()){
   if(!storage)return null;
-  const keys=[SESSION_KEY,BACKUP_KEY];
+  const keys=[SESSION_KEY,BACKUP_KEY,ARCHIVE_KEY];
   for(const [index,key] of keys.entries()){
     let raw;
     try{raw=storage.getItem(key);}catch{return null;}
     const session=parseSession(raw);
     if(session){
-      if(index&&raw)try{storage.setItem(SESSION_KEY,raw);}catch{}
+      if(index&&raw){
+        try{storage.setItem(SESSION_KEY,raw);storage.setItem(BACKUP_KEY,raw);}catch{}
+      }
       return session;
     }
+  }
+  // Recover a valid session from older builds or experimental forks that used
+  // another version suffix. Existing keys remain untouched.
+  let recovered=null,recoveredRaw='';
+  for(const key of readKeys(storage).filter(key=>!keys.includes(key))){
+    let raw;
+    try{raw=storage.getItem(key);}catch{continue;}
+    const session=parseSession(raw);
+    if(session&&(!recovered||session.history.length>recovered.history.length)){
+      recovered=session;recoveredRaw=raw;
+    }
+  }
+  if(recovered&&recoveredRaw){
+    try{storage.setItem(SESSION_KEY,recoveredRaw);storage.setItem(BACKUP_KEY,recoveredRaw);storage.setItem(ARCHIVE_KEY,recoveredRaw);}catch{}
+    return recovered;
   }
   return null;
 }
@@ -64,10 +106,30 @@ export function saveSession(session,storage=defaultStorage()){
   let raw;
   try{raw=JSON.stringify(session);}catch{return false;}
   let saved=false;
-  for(const key of [SESSION_KEY,BACKUP_KEY]){
+  for(const key of [SESSION_KEY,BACKUP_KEY,ARCHIVE_KEY]){
     try{storage.setItem(key,raw);saved=true;}catch{}
   }
   return saved;
+}
+export function serializeSession(session,{now=Date.now()}={}){
+  return JSON.stringify({format:BACKUP_FORMAT,version:1,exportedAt:new Date(now).toISOString(),session},null,2);
+}
+export function mergeSession(current,incoming){
+  const base=parseSession(JSON.stringify(current||{}))||{version:1,scenario:'recurve',env:normalizeEnv(),history:[],activeHistory:[],activeOfficial:[],visibleStorms:null,hour:48};
+  const restored=parseBackup(incoming);
+  if(!restored)return null;
+  const history=[...base.history],seen=new Set(history.map(entry=>entry.id));
+  let added=0;
+  for(const entry of restored.history){
+    if(seen.has(entry.id))continue;
+    seen.add(entry.id);history.push(entry);added++;
+  }
+  const activeHistory=[...new Set([...base.activeHistory,...restored.activeHistory])].filter(id=>seen.has(id));
+  const activeOfficial=[...new Set([...base.activeOfficial,...restored.activeOfficial])];
+  return {
+    session:{version:1,scenario:base.scenario,env:base.env,hour:base.hour,history,activeHistory,activeOfficial,visibleStorms:base.visibleStorms},
+    added,imported:restored.history.length
+  };
 }
 export function storageAvailable(storage=defaultStorage()){
   if(!storage)return false;
